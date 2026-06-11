@@ -51,6 +51,6 @@ class ClassesSeeder extends Seeder
             Classe::create($classe);
         }
         
-        $this->command->info('✅ Created ' . count($classes) . ' classes');
+        $this->command->info(count($classes) . ' classes seeded.');
     }
 }

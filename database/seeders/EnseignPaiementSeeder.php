@@ -54,7 +54,6 @@ class EnseignPaiementSeeder extends Seeder
         $statuses = ['paye', 'non_paye', 'partiel'];
         $statusWeights = [0.75, 0.17, 0.08]; // Most teacher payments are paid
 
-        $this->command->info('Creating teacher payment records...');
         
         foreach ($teachers as $teacher) {
             // Generate monthly salary payments for last 6 months
@@ -103,61 +102,21 @@ class EnseignPaiementSeeder extends Seeder
             }
         }
 
-        $totalPayments = EnseignPaiement::count();
-        $this->command->info("Created {$totalPayments} teacher payment records.");
-        
-        // Display summary
-        $this->displayPaymentSummary();
+        $this->command->info(EnseignPaiement::count() . ' teacher payment records seeded.');
     }
 
     private function selectWeightedStatus(array $statuses, array $weights): string
     {
         $rand = mt_rand() / mt_getrandmax();
         $cumulative = 0;
-        
+
         foreach ($weights as $index => $weight) {
             $cumulative += $weight;
             if ($rand < $cumulative) {
                 return $statuses[$index];
             }
         }
-        
-        return $statuses[0]; // Fallback
-    }
 
-    private function displayPaymentSummary(): void
-    {
-        $this->command->info("\n=== Teacher Payment Summary ===");
-        
-        $summaryByType = EnseignPaiement::selectRaw('typepaiement, COUNT(*) as count, SUM(montant) as total')
-            ->groupBy('typepaiement')
-            ->orderBy('count', 'desc')
-            ->get();
-
-        foreach ($summaryByType as $summary) {
-            $this->command->line(sprintf(
-                "%-15s: %3d payments, $%8.2f total",
-                ucfirst($summary->typepaiement),
-                $summary->count,
-                $summary->total
-            ));
-        }
-
-        $summaryByStatus = EnseignPaiement::selectRaw('statut, COUNT(*) as count')
-            ->groupBy('statut')
-            ->orderBy('count', 'desc')
-            ->get();
-
-        $this->command->info("\n=== Payment Status Summary ===");
-        foreach ($summaryByStatus as $summary) {
-            $this->command->line(sprintf(
-                "%-10s: %3d payments",
-                ucfirst($summary->statut),
-                $summary->count
-            ));
-        }
-
-        $grandTotal = EnseignPaiement::sum('montant');
-        $this->command->info("\nTeacher Payments Grand Total: $" . number_format($grandTotal, 2));
+        return $statuses[0];
     }
 }

@@ -37,7 +37,6 @@ class CoursSeeder extends Seeder
             return;
         }
 
-        $this->command->info("Creating courses from {$assignments->count()} teacher assignments...");
 
         foreach ($assignments as $assignment) {
             // Create multiple course sessions per week for each assignment
@@ -57,7 +56,7 @@ class CoursSeeder extends Seeder
         }
 
         $coursCount = Cours::count();
-        $this->command->info("✅ Created {$coursCount} course sessions.");
+        $this->command->info("{$coursCount} course sessions seeded.");
     }
 
     private function getWeeklySchedule(string $matiere): array

@@ -56,7 +56,6 @@ class EtudePaiementSeeder extends Seeder
         $statuses = ['paye', 'non_paye', 'partiel'];
         $statusWeights = [0.6, 0.25, 0.15]; // Most payments are paid
 
-        $this->command->info('Creating student payment records...');
         
         foreach ($etudiants as $etudiant) {
             // Generate 1-4 payment records per student
@@ -91,24 +90,19 @@ class EtudePaiementSeeder extends Seeder
             }
         }
 
-        $totalPayments = EtudePaiement::count();
-        $this->command->info("Created {$totalPayments} student payment records.");
-        
-        // Display summary by type
-        $this->displayPaymentSummary();
+        $this->command->info(EtudePaiement::count() . ' student payment records seeded.');
     }
 
     private function selectWeightedPaymentType(array $paymentTypes): string
     {
         $rand = mt_rand() / mt_getrandmax();
-        
+
         foreach ($paymentTypes as $type => $config) {
             if ($rand < $config['frequency']) {
                 return $type;
             }
         }
-        
-        // Fallback to scolarite if no type selected
+
         return 'scolarite';
     }
 
@@ -116,50 +110,14 @@ class EtudePaiementSeeder extends Seeder
     {
         $rand = mt_rand() / mt_getrandmax();
         $cumulative = 0;
-        
+
         foreach ($weights as $index => $weight) {
             $cumulative += $weight;
             if ($rand < $cumulative) {
                 return $statuses[$index];
             }
         }
-        
-        return $statuses[0]; // Fallback
-    }
 
-    private function displayPaymentSummary(): void
-    {
-        $this->command->info("\n=== Student Payment Summary ===");
-        
-        $summaryByType = EtudePaiement::selectRaw('typepaye, COUNT(*) as count, SUM(montant) as total')
-            ->groupBy('typepaye')
-            ->orderBy('count', 'desc')
-            ->get();
-
-        foreach ($summaryByType as $summary) {
-            $this->command->line(sprintf(
-                "%-12s: %3d payments, $%8.2f total",
-                ucfirst($summary->typepaye),
-                $summary->count,
-                $summary->total
-            ));
-        }
-
-        $summaryByStatus = EtudePaiement::selectRaw('statut, COUNT(*) as count')
-            ->groupBy('statut')
-            ->orderBy('count', 'desc')
-            ->get();
-
-        $this->command->info("\n=== Payment Status Summary ===");
-        foreach ($summaryByStatus as $summary) {
-            $this->command->line(sprintf(
-                "%-10s: %3d payments",
-                ucfirst($summary->statut),
-                $summary->count
-            ));
-        }
-
-        $grandTotal = EtudePaiement::sum('montant');
-        $this->command->info("\nGrand Total: $" . number_format($grandTotal, 2));
+        return $statuses[0];
     }
 }

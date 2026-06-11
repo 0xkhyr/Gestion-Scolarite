@@ -101,12 +101,11 @@ class EnseignantMatiereClasseSeeder extends Seeder
                         'updated_at' => now(),
                     ]);
 
-                    $this->command->info("Assigned {$teacher->name} to teach {$matiere->nom_matiere} in {$classe->nom_classe}");
                 }  
             }
         }
 
         $totalAssignments = DB::table('enseignant_matiere_classe')->count();
-        $this->command->info("✅ All {$teachers->count()} teachers assigned! Total assignments: {$totalAssignments}");
+        $this->command->info("{$teachers->count()} teachers assigned, {$totalAssignments} total assignments.");
     }
 }

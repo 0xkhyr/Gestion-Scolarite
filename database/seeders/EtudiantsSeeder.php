@@ -29,7 +29,7 @@ class EtudiantsSeeder extends Seeder
         // Generate additional random students for each class
         $this->generateRandomStudents($classes);
         
-        $this->command->info('✅ Created ' . Etudiant::count() . ' students with matricules');
+        $this->command->info(Etudiant::count() . ' students seeded.');
     }
     
     private function createSampleStudents($classes): void
@@ -141,7 +141,6 @@ class EtudiantsSeeder extends Seeder
 
             if ($existingEtudiant) {
                 $etudiant = $existingEtudiant;
-                $this->command->info('Skipping existing student: ' . $studentData['prenom'] . ' ' . $studentData['nom']);
             } else {
                 // Create student
                 $etudiant = Etudiant::create([
@@ -171,7 +170,6 @@ class EtudiantsSeeder extends Seeder
                     
                     $user->assignRole('student');
                 } else {
-                    $this->command->info('Skipping existing student user: ' . $studentData['email']);
                 }
             }
         }
@@ -194,7 +192,6 @@ class EtudiantsSeeder extends Seeder
                 
                 // Avoid creating duplicate student entries by name + class
                 if (Etudiant::where('nom', $nom)->where('prenom', $prenom)->where('id_classe', $classe->id_classe)->exists()) {
-                    $this->command->info('Skipping duplicate generated student: ' . $prenom . ' ' . $nom . ' (' . $classe->nom_classe . ')');
                     continue;
                 }
 

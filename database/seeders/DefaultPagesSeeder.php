@@ -137,7 +137,7 @@ class DefaultPagesSeeder extends Seeder
             ],
         ];
 
-        DB::table('pages')->insert($pages);
+        DB::table('pages')->insertOrIgnore($pages);
 
         // Insert default site settings
         $settings = [
@@ -157,6 +157,6 @@ class DefaultPagesSeeder extends Seeder
             $setting['updated_at'] = now();
         }
 
-        DB::table('site_settings')->insert($settings);
+        DB::table('site_settings')->insertOrIgnore($settings);
     }
 }

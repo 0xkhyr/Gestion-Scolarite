@@ -223,16 +223,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'course.view', // Their class courses
         ]);
 
-        $this->command->info('✅ Enhanced role-based permission system created!');
-        $this->command->info('📊 Roles: ' . Role::count());
-        $this->command->info('🔐 Permissions: ' . Permission::count());
-        
-        // Display role summary
-        $this->command->line('');
-        $this->command->info('👥 ROLE SUMMARY:');
-        foreach (Role::with('permissions')->get() as $role) {
-            $this->command->info("   {$role->name}: {$role->permissions->count()} permissions");
-        }
+        $this->command->info(Role::count() . ' roles, ' . Permission::count() . ' permissions seeded.');
     }
 }
 

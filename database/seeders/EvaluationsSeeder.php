@@ -36,7 +36,6 @@ class EvaluationsSeeder extends Seeder
             return;
         }
 
-        $this->command->info("Creating evaluations for {$assignments->count()} subject-class combinations...");
 
         // Create evaluations for each subject-class combination
         foreach ($assignments as $assignment) {
@@ -47,7 +46,7 @@ class EvaluationsSeeder extends Seeder
         }
 
         $evaluationCount = Evaluation::count();
-        $this->command->info("✅ Created {$evaluationCount} evaluations.");
+        $this->command->info("{$evaluationCount} evaluations seeded.");
     }
     
     private function createTrimesterEvaluations($assignment, int $trimester): void

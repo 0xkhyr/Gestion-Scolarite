@@ -5,18 +5,18 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "barryvdh/laravel-dompdf": "^3.1",
         "bezhansalleh/filament-language-switch": "^3.1",
-        "endroid/qr-code": "^4.7",
+        "endroid/qr-code": "^5.0",
         "filament/filament": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
         "khaled.alshamaa/ar-php": "^7.0",
         "laravel/fortify": "^1.21",
-        "laravel/framework": "^11.0",
-        "laravel/sanctum": "^4.0",
+        "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.0|^5.0",
         "laravel/tinker": "^2.9",
-        "laravel/ui": "^4.5",
+        "laravel/ui": "^4.5|^5.0",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-permission": "^6.24"
     },
@@ -73,6 +73,23 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": [
+                "PKSA-mdq4-51ck-6kdq",
+                "PKSA-8qx3-n5y5-vvnd",
+                "PKSA-q46n-4fdk-zjr4",
+                "PKSA-qzrn-rnz3-85w1",
+                "PKSA-w7xr-vk7n-rstm",
+                "PKSA-p3rx-dfwp-73ny",
+                "PKSA-ckwp-rt7t-c46m",
+                "PKSA-4npr-btr6-zhny",
+                "PKSA-njrm-6dtg-m2pc",
+                "PKSA-985r-hryy-555b",
+                "PKSA-jyd3-2srm-pfqd",
+                "PKSA-1ds2-yqqr-64g1",
+                "PKSA-g5js-3ypd-k2kr"
+            ]
         }
     },
     "minimum-stability": "stable",

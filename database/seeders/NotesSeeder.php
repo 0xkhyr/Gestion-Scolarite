@@ -22,7 +22,6 @@ class NotesSeeder extends Seeder
         $maxNotesTotal = (int) (env('SEED_MAX_NOTES') ?? 0); // 0 = no limit
         $batchSize = (int) (env('SEED_BATCH_SIZE', 500));
 
-        $this->command->info("Preparing to create notes (profile: {$seedProfile})...");
 
         $totalInserted = 0;
         $batch = [];
@@ -104,7 +103,7 @@ class NotesSeeder extends Seeder
         }
 
         $notesCount = Note::count();
-        $this->command->info("✅ Created {$notesCount} student grades (inserted {$totalInserted} in this run).");
+        $this->command->info("{$notesCount} grades seeded ({$totalInserted} inserted this run).");
     }
 
     private function generateRealisticNote(int $noteMax, string $evaluationType): float
