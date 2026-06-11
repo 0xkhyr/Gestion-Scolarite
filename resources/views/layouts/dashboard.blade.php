@@ -13,13 +13,11 @@
     <!-- Preconnect to external domains for better performance -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://kit.fontawesome.com" crossorigin>
-    
+
     <!-- DNS Prefetch for faster loading -->
     <link rel="dns-prefetch" href="https://fonts.bunny.net">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
     <!-- Bootstrap CSS - Essential for layout -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -30,10 +28,8 @@
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/mobile-header.css') }}">
     
-    <!-- Font Awesome - Defer non-critical icons -->
+    <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/663a36fa19.js" crossorigin="anonymous"></script>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     
     <!-- Flag Icons - Defer non-critical -->
     <link rel="preload" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">

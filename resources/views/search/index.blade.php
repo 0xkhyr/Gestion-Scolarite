@@ -1,9 +1,8 @@
-<!-- resources/views/search/results.blade.php -->
-@extends('layouts.layout')
+@extends('layouts.dashboard')
 
-@section('title', 'Relevé de Notes')
+@section('title', 'Recherche')
 
-@section('content2')
+@section('content')
 <style>
     strong {
     background-color: yellow;
