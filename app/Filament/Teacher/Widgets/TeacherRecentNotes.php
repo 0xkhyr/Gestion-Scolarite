@@ -20,7 +20,7 @@ class TeacherRecentNotes extends BaseWidget
 
     public function getTableHeading(): string
     {
-        return __('app.mes_notes_recentes');
+        return __('app.my_recent_grades');
     }
 
     public function table(Table $table): Table
@@ -71,7 +71,7 @@ class TeacherRecentNotes extends BaseWidget
                     }),
                     
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('app.saisie_le'))
+                    ->label(__('app.entered_on'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])

@@ -86,19 +86,45 @@ class MatiereResource extends Resource
                             
                         Forms\Components\TextInput::make('coefficient')
                             ->label(__('app.coefficient'))
+                            ->helperText(__('app.coefficient_global_helper'))
                             ->required()
                             ->numeric()
                             ->default(1)
                             ->minValue(1)
                             ->maxValue(10),
-                            
+
+                        Forms\Components\TextInput::make('note_max')
+                            ->label(__('app.note_max'))
+                            ->helperText(__('app.note_max_helper'))
+                            ->required()
+                            ->numeric()
+                            ->default(20)
+                            ->minValue(1)
+                            ->maxValue(100),
+
                         Forms\Components\Toggle::make('active')
                             ->label(__('app.actif'))
                             ->default(true)
                             ->required(),
                     ])
                     ->columns(2),
-                    
+
+                Forms\Components\Section::make(__('app.serie_coefficients_section'))
+                    ->description(__('app.serie_coefficients_desc'))
+                    ->collapsible()
+                    ->schema(
+                        collect(\App\Support\Academic::serieOptions())
+                            ->map(fn ($label, $code) => Forms\Components\TextInput::make('serie_coefficients.' . $code)
+                                ->label($label)
+                                ->numeric()
+                                ->minValue(1)
+                                ->maxValue(20)
+                                ->placeholder(__('app.serie_coefficient_fallback')))
+                            ->values()
+                            ->all()
+                    )
+                    ->columns(2),
+
                 Forms\Components\Section::make(__('app.description'))
                     ->schema([
                         Forms\Components\Textarea::make('description')
@@ -136,11 +162,19 @@ class MatiereResource extends Resource
                     
                 Tables\Columns\TextColumn::make('coefficient')
                     ->label(__('app.coefficient'))
-                    
+
                     ->sortable()
                     ->badge()
                     ->color('warning'),
-                    
+
+                Tables\Columns\TextColumn::make('note_max')
+                    ->label(__('app.note_max'))
+                    ->formatStateUsing(fn ($state) => '/' . rtrim(rtrim(number_format((float) $state, 2, '.', ''), '0'), '.'))
+                    ->sortable()
+                    ->badge()
+                    ->color('gray')
+                    ->toggleable(),
+
                 Tables\Columns\IconColumn::make('active')
                     ->label(__('app.actif'))
                     ->boolean()
@@ -164,7 +198,7 @@ class MatiereResource extends Resource
             ->filters([
                 Tables\Filters\TernaryFilter::make('active')
                     ->label(__('app.actif'))
-                    ->placeholder('All subjects')
+                    ->placeholder(__('app.all_subjects'))
                     ->trueLabel('Active only')
                     ->falseLabel('Inactive only'),
             ])
@@ -177,13 +211,13 @@ class MatiereResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('activate')
-                        ->label('Activate')
+                        ->label(__('app.activate'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->action(fn ($records) => $records->each->update(['active' => true]))
                         ->deselectRecordsAfterCompletion(),
                     Tables\Actions\BulkAction::make('deactivate')
-                        ->label('Deactivate')
+                        ->label(__('app.deactivate'))
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->action(fn ($records) => $records->each->update(['active' => false]))

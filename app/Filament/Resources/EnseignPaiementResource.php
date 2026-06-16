@@ -69,7 +69,7 @@ class EnseignPaiementResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Payment Information')
+                Forms\Components\Section::make(__('app.payment_information'))
                     ->schema([
                         Forms\Components\Select::make('user_id')
                             ->label(__('app.enseignant'))
@@ -82,14 +82,14 @@ class EnseignPaiementResource extends Resource
                             ->label(__('app.type_paiement'))
                             ->required()
                             ->options([
-                                'salaire' => __('app.salaire'),
-                                'prime' => __('app.prime'),
-                                'avance' => __('app.avance'),
-                                'autre' => __('app.autre'),
+                                'salaire' => __('app.salary'),
+                                'prime' => __('app.bonus'),
+                                'avance' => __('app.advance'),
+                                'autre' => __('app.other'),
                             ]),
                             
                         Forms\Components\TextInput::make('montant')
-                            ->label(__('app.montant'))
+                            ->label(__('app.amount'))
                             ->required()
                             ->numeric()
                             ->prefix(config('app.currency', 'MRU') . ' ')
@@ -98,20 +98,20 @@ class EnseignPaiementResource extends Resource
                     ])
                     ->columns(3),
                     
-                Forms\Components\Section::make('Payment Status')
+                Forms\Components\Section::make(__('app.payment_status'))
                     ->schema([
                         Forms\Components\Select::make('statut')
-                            ->label(__('app.statut'))
+                            ->label(__('app.status'))
                             ->required()
                             ->options([
-                                'non_paye' => __('app.en_attente'),
+                                'non_paye' => __('app.pending'),
                                 'paye' => __('app.paye'), 
                                 'partiel' => __('app.partiel'),
                             ])
                             ->default('non_paye'),
                             
                         Forms\Components\DatePicker::make('date_paiement')
-                            ->label(__('app.date_paiement'))
+                            ->label(__('app.payment_date'))
                             ->displayFormat('d/m/Y')
                             ->default(now()),
                     ])
@@ -139,7 +139,7 @@ class EnseignPaiementResource extends Resource
                     }),
                     
                 Tables\Columns\TextColumn::make('montant')
-                    ->label(__('app.montant'))
+                    ->label(__('app.amount'))
                     ->money(config('app.currency', 'MRU'),locale: 'en')
                     ->sortable()
                     ->summarize([
@@ -149,7 +149,7 @@ class EnseignPaiementResource extends Resource
                     ]),
                     
                 Tables\Columns\TextColumn::make('statut')
-                    ->label(__('app.statut'))
+                    ->label(__('app.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'paye' => 'success',
@@ -159,7 +159,7 @@ class EnseignPaiementResource extends Resource
                     }),
                     
                 Tables\Columns\TextColumn::make('date_paiement')
-                    ->label(__('app.date_paiement'))
+                    ->label(__('app.payment_date'))
                     ->date('d/m/Y')
                     ->sortable(),
                     
@@ -171,9 +171,9 @@ class EnseignPaiementResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('statut')
-                    ->label(__('app.statut'))
+                    ->label(__('app.status'))
                     ->options([
-                        'non_paye' => __('app.en_attente'),
+                        'non_paye' => __('app.pending'),
                         'paye' => __('app.paye'),
                         'partiel' => __('app.partiel'),
                     ]),
@@ -181,10 +181,10 @@ class EnseignPaiementResource extends Resource
                 Tables\Filters\SelectFilter::make('typepaiement')
                     ->label(__('app.type_paiement'))
                     ->options([
-                        'salaire' => __('app.salaire'),
-                        'prime' => __('app.prime'),
-                        'avance' => __('app.avance'),
-                        'autre' => __('app.autre'),
+                        'salaire' => __('app.salary'),
+                        'prime' => __('app.bonus'),
+                        'avance' => __('app.advance'),
+                        'autre' => __('app.other'),
                     ]),
                     
                 Tables\Filters\Filter::make('date_paiement')
@@ -230,7 +230,7 @@ class EnseignPaiementResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('markAsPaid')
-                        ->label(__('app.marquer_comme_paye'))
+                        ->label(__('app.mark_as_paid'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->action(fn ($records) => $records->each->update(['statut' => 'paye']))

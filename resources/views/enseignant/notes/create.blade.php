@@ -331,7 +331,7 @@
             <div class="alert alert-info text-center py-5">
                 <i class="fas fa-info-circle fa-3x mb-3 text-muted"></i>
                 <h4>{{ __('app.selectionner_classe') }}</h4>
-                <p class="mb-0">{{ __('app.veuillez_selectionner_une_classe') }}</p>
+                <p class="mb-0">{{ __('app.please_select_class') }}</p>
             </div>
         @endif
     @else
@@ -467,7 +467,7 @@ function calculatePercentage() {
 function loadRecentNotes(studentId) {
     // Show the recent notes card
     document.getElementById('recentNotesCard').style.display = 'block';
-    document.getElementById('recentNotesContent').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> {{ __("app.chargement") }}...</div>';
+    document.getElementById('recentNotesContent').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> {{ __("app.loading") }}...</div>';
     
     // You can implement AJAX call here to load recent notes
     // For now, we'll show a placeholder
@@ -507,13 +507,13 @@ document.getElementById('gradeForm').addEventListener('submit', function(e) {
     
     if (noteObtenue > noteTotale) {
         e.preventDefault();
-        alert('{{ __("app.note_obtenue_superieure_totale") }}');
+        alert('{{ __("app.grade_exceeds_total") }}');
         return false;
     }
     
     if (!selectedStudentId) {
         e.preventDefault();
-        alert('{{ __("app.veuillez_selectionner_etudiant") }}');
+        alert('{{ __("app.please_select_student") }}');
         return false;
     }
 });

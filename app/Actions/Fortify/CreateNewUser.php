@@ -31,10 +31,19 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
+
+        // Assign the admin-configured default role to self-registered users.
+        // Guarded so a missing/renamed role never breaks registration.
+        $defaultRole = setting('app.default_user_role', 'student');
+        if ($defaultRole && \Spatie\Permission\Models\Role::where('name', $defaultRole)->exists()) {
+            $user->assignRole($defaultRole);
+        }
+
+        return $user;
     }
 }

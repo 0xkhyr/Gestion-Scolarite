@@ -13,7 +13,7 @@ class MaxFileSize implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Get max file size from settings (in MB)
-        $maxSizeMB = setting('file_upload_max_size', 10);
+        $maxSizeMB = setting('app.file_upload_max_size', 10);
         
         // Convert to bytes
         $maxSizeBytes = $maxSizeMB * 1024 * 1024;

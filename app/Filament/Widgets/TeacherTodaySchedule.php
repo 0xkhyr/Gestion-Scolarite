@@ -31,7 +31,7 @@ class TeacherTodaySchedule extends BaseWidget
         ];
         
         $todayKey = $dayMap[Carbon::now()->format('l')];
-        return __('app.mes_cours_aujourdhui') . ' - ' . __("app.$todayKey") . ' (' . Carbon::now()->format('d/m/Y') . ')';
+        return __('app.my_courses_today') . ' - ' . __("app.$todayKey") . ' (' . Carbon::now()->format('d/m/Y') . ')';
     }
 
     public function table(Table $table): Table
@@ -90,7 +90,7 @@ class TeacherTodaySchedule extends BaseWidget
             ])
             ->defaultSort('date_debut', 'asc')
             ->paginated(false)
-            ->emptyStateHeading(__('app.aucun_cours_aujourdhui'))
-            ->emptyStateDescription(__('app.aucun_cours_programme_aujourdhui'));
+            ->emptyStateHeading(__('app.no_courses_today'))
+            ->emptyStateDescription(__('app.no_courses_scheduled_today'));
     }
 }

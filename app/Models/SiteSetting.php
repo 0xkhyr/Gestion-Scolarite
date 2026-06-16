@@ -147,12 +147,12 @@ class SiteSetting extends Model
 
     public static function primaryColor(): string
     {
-        return self::get('primary_color', '#3B82F6');
+        return self::get('primary_color', '#4F6BED');
     }
 
     public static function secondaryColor(): string
     {
-        return self::get('secondary_color', '#1E40AF');
+        return self::get('secondary_color', '#3D55C8');
     }
 
     public static function logoUrl(): string

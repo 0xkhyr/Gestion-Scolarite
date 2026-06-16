@@ -98,8 +98,8 @@ class Login extends BaseLogin
             // Show clear error to user
             Notification::make()
                 ->danger()
-                ->title('Account Locked')
-                ->body("Your account has been temporarily locked due to multiple failed login attempts. Please try again in {$remainingMinutes} minute(s).")
+                ->title(__('app.account_locked'))
+                ->body(__('app.account_locked_temporarily', ['minutes' => $remainingMinutes]))
                 ->persistent()
                 ->send();
             
@@ -199,8 +199,8 @@ class Login extends BaseLogin
                     // Update error message to show lockout
                     Notification::make()
                         ->danger()
-                        ->title('Account Locked')
-                        ->body("Too many failed login attempts. Your account has been locked for {$lockoutDuration} minutes for security.")
+                        ->title(__('app.account_locked'))
+                        ->body(__('app.account_locked_too_many', ['minutes' => $lockoutDuration]))
                         ->persistent()
                         ->send();
                 }

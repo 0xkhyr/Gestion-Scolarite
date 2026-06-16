@@ -85,16 +85,31 @@ class ClasseResource extends Resource
                             ->maxLength(191)
                             ->placeholder(__('app.placeholder_nom_classe')),
                         
-                        Forms\Components\TextInput::make('niveau')
+                        Forms\Components\Select::make('niveau')
                             ->label(__('app.niveau'))
                             ->required()
-                            ->maxLength(191)
-                            ->placeholder(__('app.placeholder_niveau')),
+                            ->options(\App\Support\Academic::levelOptionsGrouped())
+                            ->searchable()
+                            ->live()
+                            // Clear the série whenever the level no longer supports one.
+                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                if (! \App\Support\Academic::levelHasSeries($state)) {
+                                    $set('serie', null);
+                                }
+                            }),
+
+                        Forms\Components\Select::make('serie')
+                            ->label(__('app.serie'))
+                            ->options(\App\Support\Academic::serieOptions())
+                            ->placeholder(__('app.serie_placeholder'))
+                            // Séries exist only at lycée (5AS–7AS).
+                            ->visible(fn (Forms\Get $get) => \App\Support\Academic::levelHasSeries($get('niveau')))
+                            ->required(fn (Forms\Get $get) => \App\Support\Academic::levelHasSeries($get('niveau'))),
                     ])
                     ->columns(2),
                     
                 // Read-only class view for users with view-only permissions
-                Forms\Components\Section::make(__('app.consultation_classe'))
+                Forms\Components\Section::make(__('app.class_consultation'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('class.view') && !auth()->user()->hasPermissionTo('class.create') && !auth()->user()->hasPermissionTo('class.edit'))
                     ->schema([
                         Forms\Components\Placeholder::make('nom_classe_display')
@@ -103,7 +118,12 @@ class ClasseResource extends Resource
                             
                         Forms\Components\Placeholder::make('niveau_display')
                             ->label(__('app.niveau'))
-                            ->content(fn ($record) => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-700/10">📚 ' . $record->niveau . '</span>')),
+                            ->content(fn ($record) => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-700/10">📚 ' . e(\App\Support\Academic::levelLabel($record->niveau)) . '</span>')),
+
+                        Forms\Components\Placeholder::make('serie_display')
+                            ->label(__('app.serie'))
+                            ->visible(fn ($record) => filled($record?->serie))
+                            ->content(fn ($record) => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-700/10">' . e($record->serie) . '</span>')),
                     ])
                     ->columns(2),
             ]);
@@ -120,11 +140,19 @@ class ClasseResource extends Resource
                     
                 Tables\Columns\TextColumn::make('niveau')
                     ->label(__('app.niveau'))
+                    ->formatStateUsing(fn ($state) => \App\Support\Academic::levelLabel($state))
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('info'),
-                    
+
+                Tables\Columns\TextColumn::make('serie')
+                    ->label(__('app.serie'))
+                    ->placeholder('—')
+                    ->badge()
+                    ->color('warning')
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('etudiants_count')
                     ->label(__('app.etudiants'))
                     ->sortable()
@@ -153,10 +181,12 @@ class ClasseResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('niveau')
-                    ->label('Level')
-                    ->options(function () {
-                        return Classe::distinct()->pluck('niveau', 'niveau')->toArray();
-                    }),                    
+                    ->label(__('app.level'))
+                    ->options(\App\Support\Academic::levelOptionsGrouped()),
+
+                Tables\Filters\SelectFilter::make('serie')
+                    ->label(__('app.serie'))
+                    ->options(\App\Support\Academic::serieOptions()),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

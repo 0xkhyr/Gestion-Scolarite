@@ -76,7 +76,7 @@ class ActivityLogResource extends Resource
             Forms\Components\Section::make(__('app.log_details') ?? 'Log Details')
                 ->schema([
                     Forms\Components\Placeholder::make('log_name')
-                        ->label('Log')
+                        ->label(__('app.log'))
                         ->content(fn ($record) => $record?->log_name
                             ? new HtmlString('<span class="text-sm text-gray-600">' . e($record->log_name) . '</span>')
                             : null
@@ -102,7 +102,7 @@ class ActivityLogResource extends Resource
                         ->columnSpanFull(),
 
                     Forms\Components\Placeholder::make('causer')
-                        ->label('Causer')
+                        ->label(__('app.causer'))
                         ->content(function ($record) {
                             if (! $record?->causer_id) {
                                 return null;
@@ -116,7 +116,7 @@ class ActivityLogResource extends Resource
                         ->columnSpan(1),
 
                     Forms\Components\Placeholder::make('subject')
-                        ->label('Subject')
+                        ->label(__('app.subject'))
                         ->content(fn ($record) => $record?->subject_id
                             ? new HtmlString('<div class="text-sm">' . e(class_basename($record->subject_type) . " #{$record->subject_id}") . '</div>')
                             : null
@@ -140,7 +140,7 @@ class ActivityLogResource extends Resource
                         ->columnSpan(1),
 
                     Forms\Components\Placeholder::make('user_agent')
-                        ->label('User Agent')
+                        ->label(__('app.user_agent'))
                         ->content(fn ($record) => $record->properties['user_agent'] ?? null)
                         ->columnSpan(1),
                 ])

@@ -62,17 +62,11 @@ class SettingsService
     public function getAcademicSettings(): array
     {
         return Setting::getGroup('academic') + [
-            'academic.grading_system' => env('GRADING_SYSTEM', 'percentage'),
-            'academic.passing_grade' => (int) env('PASSING_GRADE', 60),
-            'academic.max_grade' => (int) env('MAX_GRADE', 100),
-            'academic.grade_scale' => [
-                'A' => ['min' => 90, 'max' => 100],
-                'B' => ['min' => 80, 'max' => 89],
-                'C' => ['min' => 70, 'max' => 79],
-                'D' => ['min' => 60, 'max' => 69],
-                'F' => ['min' => 0, 'max' => 59],
-            ],
-            'academic.terms_per_year' => (int) env('TERMS_PER_YEAR', 2),
+            // Mauritanian defaults: grading is /20, pass at 10, 3 trimesters.
+            'academic.grading_system' => env('GRADING_SYSTEM', 'sur_20'),
+            'academic.passing_grade' => (int) env('PASSING_GRADE', 10),
+            'academic.max_grade' => (int) env('MAX_GRADE', 20),
+            'academic.terms_per_year' => (int) env('TERMS_PER_YEAR', 3),
             'academic.attendance_required' => env('ATTENDANCE_REQUIRED', true),
             'academic.min_attendance_percentage' => (int) env('MIN_ATTENDANCE_PERCENTAGE', 75),
             'academic.late_submission_penalty' => (int) env('LATE_SUBMISSION_PENALTY', 10),
@@ -95,6 +89,7 @@ class SettingsService
             'security.max_login_attempts' => (int) env('MAX_LOGIN_ATTEMPTS', 5),
             'security.lockout_duration' => (int) env('LOCKOUT_DURATION', 15),
             'security.two_factor_required' => env('TWO_FACTOR_REQUIRED', false),
+            'security.password_expiry_enabled' => env('PASSWORD_EXPIRY_ENABLED', false),
             'security.password_expiry_days' => (int) env('PASSWORD_EXPIRY_DAYS', 90),
             'security.force_https' => env('FORCE_HTTPS', true),
         ];
@@ -171,6 +166,27 @@ class SettingsService
         foreach ($data as $key => $value) {
             $type = $this->getDataType($value);
             Setting::set($key, $value, $type, 'application');
+        }
+    }
+
+    /**
+     * Optional module flags - default OFF (opt-in). Gated via the feature() helper.
+     */
+    public function getModuleSettings(): array
+    {
+        return Setting::getGroup('features') + [
+            'features.attendance' => env('FEATURE_ATTENDANCE', false),
+            'features.submissions' => env('FEATURE_SUBMISSIONS', false),
+        ];
+    }
+
+    /**
+     * Update module flags.
+     */
+    public function updateModuleSettings(array $data): void
+    {
+        foreach ($data as $key => $value) {
+            Setting::set($key, (bool) $value, 'boolean', 'features');
         }
     }
 

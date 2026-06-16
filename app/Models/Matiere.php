@@ -17,13 +17,34 @@ class Matiere extends Model
         'code_matiere',
         'description',
         'coefficient',
+        'note_max',
+        'serie_coefficients',
         'active'
     ];
-    
+
     protected $casts = [
         'active' => 'boolean',
         'coefficient' => 'integer',
+        'note_max' => 'decimal:2',
+        'serie_coefficients' => 'array',
     ];
+
+    /**
+     * Effective coefficient for this subject in a given série.
+     * Lycée subjects can override per-série via `serie_coefficients`
+     * ({"C":9,"D":7,...}); otherwise the global `coefficient` is used.
+     */
+    public function coefficientForSerie(?string $serie): float
+    {
+        if ($serie && is_array($this->serie_coefficients)
+            && isset($this->serie_coefficients[$serie])
+            && $this->serie_coefficients[$serie] !== null
+            && $this->serie_coefficients[$serie] !== '') {
+            return (float) $this->serie_coefficients[$serie];
+        }
+
+        return (float) ($this->coefficient ?: 1);
+    }
     
     // Relationships
     public function evaluations()

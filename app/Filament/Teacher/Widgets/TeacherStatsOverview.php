@@ -46,21 +46,21 @@ class TeacherStatsOverview extends BaseWidget
         
         return [
             Stat::make(__('app.etudiants_hommes'), $maleStudents)
-                ->description(__('app.etudiants_masculins'))
+                ->description(__('app.male_students'))
                 ->descriptionIcon('heroicon-m-user')
                 ->color('blue'),
                 
             Stat::make(__('app.etudiantes_femmes'), $femaleStudents)
-                ->description(__('app.etudiantes_feminines'))
+                ->description(__('app.female_students'))
                 ->descriptionIcon('heroicon-m-user')
                 ->color('pink'),
                 
-            Stat::make(__('app.etudiants_actifs'), $activeStudents)
-                ->description(__('app.avec_notes'))
+            Stat::make(__('app.active_students'), $activeStudents)
+                ->description(__('app.with_grades'))
                 ->descriptionIcon('heroicon-m-academic-cap')
                 ->color('success'),
                 
-            Stat::make(__('app.mes_evaluations'), $totalEvaluations)
+            Stat::make(__('app.my_evaluations'), $totalEvaluations)
                 ->description(__('app.evaluations_creees'))
                 ->descriptionIcon('heroicon-m-clipboard-document-check')
                 ->color('warning'),

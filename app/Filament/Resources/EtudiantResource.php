@@ -147,11 +147,11 @@ class EtudiantResource extends Resource
                     
                 Forms\Components\Section::make(__('app.informations_compte'))
                     ->visible(fn () => !auth()->user()->hasPermissionTo('user.manage'))
-                    ->description(__('app.informations_compte_lecture_seule'))
+                    ->description(__('app.account_info_readonly'))
                     ->schema([
                         Forms\Components\Placeholder::make('contact_readonly')
                             ->label(__('app.telephone'))
-                            ->content(fn ($record) => $record->telephone ?? __('app.non_renseigne'))
+                            ->content(fn ($record) => $record->telephone ?? __('app.not_provided'))
                             ->visibleOn(['edit', 'view']),
                             
                         Forms\Components\Placeholder::make('email_readonly')
@@ -215,7 +215,7 @@ class EtudiantResource extends Resource
                             ->hiddenOn('view'),
                             
                         Forms\Components\Placeholder::make('compte_status')
-                            ->label(__('app.statut'))
+                            ->label(__('app.status'))
                             ->content(fn ($record) => $record->user?->is_active 
                                 ? new \Illuminate\Support\HtmlString('<span class="text-success-600 font-semibold">' . __('app.actif') . '</span>')
                                 : new \Illuminate\Support\HtmlString('<span class="text-danger-600 font-semibold">' . __('app.inactif') . '</span>'))
@@ -306,7 +306,7 @@ class EtudiantResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable()
-                    ->placeholder(__('app.jamais'))
+                    ->placeholder(__('app.never'))
                     ->visible(fn () => auth()->user()->hasRole('super_admin') || auth()->user()->can('student.manage_accounts')),
                     
                 Tables\Columns\TextColumn::make('notes_count')
@@ -361,7 +361,7 @@ class EtudiantResource extends Resource
                 ]),
             ])
             ->defaultSort('nom', 'asc')
-            ->defaultPaginationPageOption(setting('items_per_page', 25));
+            ->defaultPaginationPageOption(setting('system.items_per_page', 25));
     }
 
     public static function getRelations(): array

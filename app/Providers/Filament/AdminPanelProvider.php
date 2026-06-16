@@ -54,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
             MenuItem::make()
-                ->label(__('app.mon_compte'))
+                ->label(__('app.my_account'))
                 ->url(fn (): string => \App\Filament\Pages\Account\Profile::getUrl())
                 ->icon('heroicon-o-user-circle'),
             // ...
@@ -94,11 +94,14 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                // \App\Http\Middleware\EnsureTwoFactorIsVerified::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
                 \App\Http\Middleware\EnsureAdminRole::class,
+                // No-op unless security.two_factor_required is enabled in settings.
+                \App\Http\Middleware\EnsureTwoFactorIsVerified::class,
+                // No-op unless security.password_expiry_enabled is on.
+                \App\Http\Middleware\ForcePasswordChange::class,
             ])
             ->spa()
             ->font('Poppins')

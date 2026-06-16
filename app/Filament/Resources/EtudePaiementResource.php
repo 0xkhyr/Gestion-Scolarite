@@ -69,7 +69,7 @@ class EtudePaiementResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Payment Information')
+                Forms\Components\Section::make(__('app.payment_information'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('payment.create') || auth()->user()->hasPermissionTo('payment.edit'))
                     ->schema([
                         Forms\Components\Select::make('id_etudiant')
@@ -84,17 +84,17 @@ class EtudePaiementResource extends Resource
                             ->label(__('app.type_paiement'))
                             ->required()
                             ->options([
-                                'scolarite' => __('app.scolarite'),
-                                'inscription' => __('app.inscription'),
+                                'scolarite' => __('app.tuition'),
+                                'inscription' => __('app.enrollment'),
                                 'examen' => __('app.examen'),
-                                'uniforme' => __('app.uniforme'),
+                                'uniforme' => __('app.uniform'),
                                 'transport' => __('app.transport'),
-                                'cantine' => __('app.cantine'),
-                                'autre' => __('app.autre'),
+                                'cantine' => __('app.cafeteria'),
+                                'autre' => __('app.other'),
                             ]),
                             
                         Forms\Components\TextInput::make('montant')
-                            ->label(__('app.montant'))
+                            ->label(__('app.amount'))
                             ->required()
                             ->numeric()
                             ->prefix(config('app.currency', 'MRU'))
@@ -103,22 +103,22 @@ class EtudePaiementResource extends Resource
                     ])
                     ->columns(3),
                     
-                Forms\Components\Section::make('Payment Status')
+                Forms\Components\Section::make(__('app.payment_status'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('payment.create') || auth()->user()->hasPermissionTo('payment.edit'))
                     ->schema([
                         Forms\Components\Select::make('statut')
-                            ->label(__('app.statut'))
+                            ->label(__('app.status'))
                             ->required()
                             ->options([
-                                'pending' => __('app.en_attente'),
+                                'pending' => __('app.pending'),
                                 'paid' => __('app.paye'),
                                 'partial' => __('app.partiel'),
-                                'cancelled' => __('app.annule'),
+                                'cancelled' => __('app.cancelled'),
                             ])
                             ->default('pending'),
                             
                         Forms\Components\DatePicker::make('date_paiement')
-                            ->label(__('app.date_paiement'))
+                            ->label(__('app.payment_date'))
                             ->displayFormat('d/m/Y')
                             ->default(now()),
                     ])
@@ -139,21 +139,21 @@ class EtudePaiementResource extends Resource
                             ->content(fn ($record) => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10">' . ucfirst($record->typepaye) . '</span>')),
                             
                         Forms\Components\Placeholder::make('montant_display')
-                            ->label(__('app.montant'))
+                            ->label(__('app.amount'))
                             ->content(fn ($record) => new \Illuminate\Support\HtmlString('<span class="text-lg font-semibold text-green-600">' . config('app.currency', 'MRU') . ' ' . number_format($record->montant, 2) . '</span>')),
                             
                         Forms\Components\Placeholder::make('statut_display')
-                            ->label(__('app.statut'))
+                            ->label(__('app.status'))
                             ->content(fn ($record) => match($record->statut) {
                                 'paid' => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-700/10">✅ ' . __('app.paye') . '</span>'),
                                 'partial' => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-700/10">⚠️ ' . __('app.partiel') . '</span>'),
-                                'pending' => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10">⏳ ' . __('app.en_attente') . '</span>'),
-                                'cancelled' => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-50 text-red-700 ring-1 ring-inset ring-red-700/10">❌ ' . __('app.annule') . '</span>'),
+                                'pending' => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10">⏳ ' . __('app.pending') . '</span>'),
+                                'cancelled' => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-50 text-red-700 ring-1 ring-inset ring-red-700/10">❌ ' . __('app.cancelled') . '</span>'),
                                 default => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-700/10">' . __('app.unknown') . '</span>'),
                             }),
                             
                         Forms\Components\Placeholder::make('date_paiement_display')
-                            ->label(__('app.date_paiement'))
+                            ->label(__('app.payment_date'))
                             ->content(fn ($record) => $record->date_paiement ? $record->date_paiement->format('d/m/Y') : '-'),
                     ])
                     ->columns(2),
@@ -192,7 +192,7 @@ class EtudePaiementResource extends Resource
                     }),
                     
                 Tables\Columns\TextColumn::make('montant')
-                    ->label(__('app.montant'))
+                    ->label(__('app.amount'))
                     ->money(config('app.currency', 'MRU'),locale: 'en')
                     ->sortable()
                     ->summarize([
@@ -202,7 +202,7 @@ class EtudePaiementResource extends Resource
                     ]),
                     
                 Tables\Columns\TextColumn::make('statut')
-                    ->label(__('app.statut'))
+                    ->label(__('app.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'paid' => 'success',
@@ -213,7 +213,7 @@ class EtudePaiementResource extends Resource
                     }),
                     
                 Tables\Columns\TextColumn::make('date_paiement')
-                    ->label(__('app.date_paiement'))
+                    ->label(__('app.payment_date'))
                     ->date('d/m/Y')
                     ->sortable(),
                     
@@ -232,7 +232,7 @@ class EtudePaiementResource extends Resource
                     ->preload(),
                     
                 Tables\Filters\SelectFilter::make('statut')
-                    ->label(__('app.statut'))
+                    ->label(__('app.status'))
                     ->options([
                         'pending' => __('app.pending'),
                         'paid' => __('app.paid'),
@@ -243,13 +243,13 @@ class EtudePaiementResource extends Resource
                 Tables\Filters\SelectFilter::make('typepaye')
                     ->label(__('app.type_paiement'))
                     ->options([
-                        'scolarite' => __('app.scolarite'),
-                        'inscription' => __('app.inscription'),
+                        'scolarite' => __('app.tuition'),
+                        'inscription' => __('app.enrollment'),
                         'examen' => __('app.examen'),
-                        'uniforme' => __('app.uniforme'),
+                        'uniforme' => __('app.uniform'),
                         'transport' => __('app.transport'),
-                        'cantine' => __('app.cantine'),
-                        'autre' => __('app.autre'),
+                        'cantine' => __('app.cafeteria'),
+                        'autre' => __('app.other'),
                     ]),
                     
                 Tables\Filters\Filter::make('date_paiement')
@@ -295,7 +295,7 @@ class EtudePaiementResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('markAsPaid')
-                        ->label('Mark as Paid')
+                        ->label(__('app.mark_as_paid'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->action(fn ($records) => $records->each->update(['statut' => 'paid']))

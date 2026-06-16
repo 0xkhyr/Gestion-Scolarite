@@ -10,8 +10,16 @@ class Settings extends Page
 
     protected static string $view = 'filament.pages.settings';
 
-    protected static ?string $title = 'Settings';
-    
+    public function getTitle(): string
+    {
+        return __('app.settings');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.settings');
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('app.systeme');

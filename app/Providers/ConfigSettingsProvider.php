@@ -53,8 +53,15 @@ class ConfigSettingsProvider extends ServiceProvider
             Config::set('session.lifetime', (int) $sessionTimeout);
         }
         
+        // Enforce 2FA based on the admin setting (drives EnsureTwoFactorIsVerified).
+        // Falls back to the existing config value, so nothing changes until opt-in.
+        Config::set('security.require_2fa', (bool) setting(
+            'security.two_factor_required',
+            config('security.require_2fa', false)
+        ));
+
         // Update Livewire file upload configuration
-        $maxFileSize = setting('file_upload_max_size');
+        $maxFileSize = setting('app.file_upload_max_size');
         if ($maxFileSize) {
             $maxSizeKB = (int) $maxFileSize * 1024;
             Config::set('livewire.temporary_file_upload.rules', function() use ($maxSizeKB) {

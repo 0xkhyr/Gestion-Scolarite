@@ -58,18 +58,18 @@ class StatsOverview extends BaseWidget
             
             return [
                 Stat::make(__('app.mes_etudiants'), $myStudentsCount)
-                    ->description(__('app.etudiants_dans_mes_classes'))
+                    ->description(__('app.students_in_my_classes'))
                     ->descriptionIcon('heroicon-m-academic-cap')
                     ->color('success'),
                 Stat::make(__('app.mes_classes'), $myClassesCount)
-                    ->description(__('app.classes_enseignees'))
+                    ->description(__('app.classes_taught'))
                     ->descriptionIcon('heroicon-m-home-modern')
                     ->color('info'),
                 Stat::make(__('app.mes_cours'), $myCoursCount)
-                    ->description(__('app.cours_programmes'))
+                    ->description(__('app.scheduled_courses'))
                     ->descriptionIcon('heroicon-m-calendar-days')
                     ->color('warning'),
-                Stat::make(__('app.mes_matieres'), $enseignant->matieres()->count())
+                Stat::make(__('app.my_subjects'), $enseignant->matieres()->count())
                     ->description(__('app.matieres_enseignees'))
                     ->descriptionIcon('heroicon-m-book-open')
                     ->color('primary'),

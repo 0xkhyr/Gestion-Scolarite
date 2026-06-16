@@ -101,7 +101,7 @@ class EnseignantResource extends Resource
                     
                 Forms\Components\Section::make(__('app.informations_compte'))
                     ->visible(fn () => !auth()->user()->hasPermissionTo('user.manage'))
-                    ->description(__('app.informations_compte_lecture_seule'))
+                    ->description(__('app.account_info_readonly'))
                     ->schema([
                         Forms\Components\Placeholder::make('email_readonly')
                             ->label(__('app.email'))
@@ -149,7 +149,7 @@ class EnseignantResource extends Resource
                             ->hiddenOn('view'),
                             
                         Forms\Components\Placeholder::make('compte_status')
-                            ->label(__('app.statut'))
+                            ->label(__('app.status'))
                             ->content(fn ($record) => $record->user?->is_active 
                                 ? new \Illuminate\Support\HtmlString('<span class="text-success-600 font-semibold">' . __('app.actif') . '</span>')
                                 : new \Illuminate\Support\HtmlString('<span class="text-danger-600 font-semibold">' . __('app.inactif') . '</span>'))
@@ -157,13 +157,13 @@ class EnseignantResource extends Resource
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make(__('app.affectations'))
+                Forms\Components\Section::make(__('app.assignments'))
                     ->schema([
                         Forms\Components\Placeholder::make('matieres_list')
                             ->label(__('app.matieres'))
                             ->content(fn (callable $get) => filled($get('matieres_list'))
                                 ? new HtmlString($get('matieres_list'))
-                                : __('app.aucune_matiere'))
+                                : __('app.no_subject'))
                             ->extraAttributes(['class' => 'gap-2 flex flex-wrap']),
                         
                         Forms\Components\Placeholder::make('classes_list')
@@ -207,7 +207,7 @@ class EnseignantResource extends Resource
 
                 Tables\Columns\TextColumn::make('matieres')
                     ->label(__('app.matieres'))
-                    ->formatStateUsing(fn ($record) => $record->matieres->pluck('nom_matiere')->join(', ') ?: __('app.aucune_matiere'))
+                    ->formatStateUsing(fn ($record) => $record->matieres->pluck('nom_matiere')->join(', ') ?: __('app.no_subject'))
                     ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
 
@@ -218,7 +218,7 @@ class EnseignantResource extends Resource
                     ->color('info'),
                     
                 Tables\Columns\IconColumn::make('user.is_active')
-                    ->label(__('app.statut'))
+                    ->label(__('app.status'))
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
@@ -231,7 +231,7 @@ class EnseignantResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable()
-                    ->placeholder(__('app.jamais')),
+                    ->placeholder(__('app.never')),
                     
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('app.date_creation'))
@@ -241,7 +241,7 @@ class EnseignantResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('user.is_active')
-                    ->label(__('app.statut'))
+                    ->label(__('app.status'))
                     ->placeholder(__('app.voir_tout'))
                     ->trueLabel(__('app.oui'))
                     ->falseLabel(__('app.non')),

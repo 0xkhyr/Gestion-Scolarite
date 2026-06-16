@@ -173,11 +173,13 @@ class PublicController extends Controller
             'school_phone' => setting('school.phone', ''),
             'school_email' => setting('school.email', ''),
             'school_website' => setting('school.website', ''),
-            
+            'school_location' => setting('school.location', ''),
+
             // Contact settings (maintain backward compatibility)
             'contact_address' => setting('school.address', ''),
             'contact_email' => setting('school.email', ''),
             'contact_phone' => setting('school.phone', ''),
+            'contact_location' => setting('school.location', ''),
             'contact_latitude' => setting('school.latitude', ''),
             'contact_longitude' => setting('school.longitude', ''),
             

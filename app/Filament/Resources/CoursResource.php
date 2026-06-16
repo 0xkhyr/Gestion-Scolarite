@@ -75,7 +75,7 @@ class CoursResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make(__('app.details_cours'))
+                Forms\Components\Section::make(__('app.course_details'))
                     ->schema([
                         Forms\Components\Select::make('id_matiere')
                             ->label(__('app.matiere'))

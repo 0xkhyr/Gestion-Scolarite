@@ -15,7 +15,11 @@ class NotificationSettings extends Page
     
     protected static string $view = 'filament.pages.settings.notification-settings';
     
-    protected static ?string $title = 'Notification Settings';
+
+    public function getTitle(): string
+    {
+        return __('app.notification_settings');
+    }
     
     protected static ?string $slug = 'settings/notifications';
     
@@ -56,51 +60,51 @@ class NotificationSettings extends Page
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Academic Notifications')
-                    ->description('Control notifications for grades and evaluations')
+                Forms\Components\Section::make(__('app.academic_notifications'))
+                    ->description(__('app.academic_notifications_desc'))
                     ->schema([
                         Forms\Components\Toggle::make('enable_grade_published')
-                            ->label('Grade Published Notifications')
-                            ->helperText('Send notifications when grades are published to students')
+                            ->label(__('app.grade_published_notifications'))
+                            ->helperText(__('app.grade_published_notifications_help'))
                             ->inline(false),
-                            
+
                         Forms\Components\Toggle::make('enable_evaluation_created')
-                            ->label('Evaluation Created Notifications')
-                            ->helperText('Send notifications when new evaluations are created')
+                            ->label(__('app.evaluation_created_notifications'))
+                            ->helperText(__('app.evaluation_created_notifications_help'))
                             ->inline(false),
                     ]),
-                
-                Forms\Components\Section::make('Financial Notifications')
-                    ->description('Control payment-related notifications')
+
+                Forms\Components\Section::make(__('app.financial_notifications'))
+                    ->description(__('app.financial_notifications_desc'))
                     ->schema([
                         Forms\Components\Toggle::make('enable_teacher_payment')
-                            ->label('Teacher Payment Notifications')
-                            ->helperText('Send notifications when teacher payments are processed')
+                            ->label(__('app.teacher_payment_notifications'))
+                            ->helperText(__('app.teacher_payment_notifications_help'))
                             ->inline(false),
-                            
+
                         Forms\Components\Toggle::make('enable_student_payment')
-                            ->label('Student Payment Notifications')
-                            ->helperText('Send notifications when student payments are received')
+                            ->label(__('app.student_payment_notifications'))
+                            ->helperText(__('app.student_payment_notifications_help'))
                             ->inline(false),
                     ]),
-                
-                Forms\Components\Section::make('Security Notifications')
-                    ->description('Control security-related notifications')
+
+                Forms\Components\Section::make(__('app.security_notifications'))
+                    ->description(__('app.security_notifications_desc'))
                     ->schema([
                         Forms\Components\Toggle::make('enable_lockout')
-                            ->label('Account Lockout Notifications')
-                            ->helperText('Send notifications when accounts are locked due to failed login attempts')
+                            ->label(__('app.account_lockout_notifications'))
+                            ->helperText(__('app.account_lockout_notifications_help'))
                             ->inline(false),
-                            
+
                         Forms\Components\Toggle::make('enable_security_alert')
-                            ->label('Security Alert Notifications')
-                            ->helperText('Send notifications for critical security events')
+                            ->label(__('app.security_alert_notifications'))
+                            ->helperText(__('app.security_alert_notifications_help'))
                             ->inline(false),
                     ]),
-                
+
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('save')
-                        ->label('Save Notification Settings')
+                        ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')
                         ->action(function () {
@@ -129,7 +133,7 @@ class NotificationSettings extends Page
         $this->settingsService->set('notifications.security_alert.enabled', $data['enable_security_alert']);
         
         Notification::make()
-            ->title('Notification settings updated successfully')
+            ->title(__('app.notification_settings_saved'))
             ->success()
             ->send();
     }

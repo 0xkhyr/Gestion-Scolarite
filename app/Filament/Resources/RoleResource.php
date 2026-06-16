@@ -66,16 +66,16 @@ class RoleResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Role Information')
+                Forms\Components\Section::make(__('app.role_information'))
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('Role Name')
+                            ->label(__('app.role_name'))
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                             
                         Forms\Components\Select::make('permissions')
-                            ->label('Permissions')
+                            ->label(__('app.permissions'))
                             ->multiple()
                             ->relationship('permissions', 'name')
                             ->preload()
@@ -89,26 +89,26 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Role Name')
+                    ->label(__('app.role_name'))
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('primary'),
                     
                 Tables\Columns\TextColumn::make('permissions_count')
-                    ->label('Permissions')
+                    ->label(__('app.permissions'))
                     ->counts('permissions')
                     ->badge()
                     ->color('success'),
                     
                 Tables\Columns\TextColumn::make('users_count')
-                    ->label('Users')
+                    ->label(__('app.users'))
                     ->counts('users')
                     ->badge()
                     ->color('info'),
                     
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('app.created'))
                     ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

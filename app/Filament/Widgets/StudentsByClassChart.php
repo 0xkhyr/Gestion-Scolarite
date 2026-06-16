@@ -18,7 +18,7 @@ class StudentsByClassChart extends ChartWidget
     {
         $user = auth()->user();
         if ($user->hasRole('teacher')) {
-            return __('app.mes_etudiants_par_classe');
+            return __('app.my_students_by_class');
         }
         return __('app.etudiants_par_classe');
     }

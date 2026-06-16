@@ -86,7 +86,7 @@ class ManageGrades extends Page implements HasTable
 
     public function getTitle(): string
     {
-        return __('app.saisie_notes') . ' - ' . ($this->record->titre ?? __('app.evaluation'));
+        return __('app.grade_entry') . ' - ' . ($this->record->titre ?? __('app.evaluation'));
     }
 
     public function getHeading(): string
@@ -157,7 +157,7 @@ class ManageGrades extends Page implements HasTable
                     }),
 
                 Tables\Columns\IconColumn::make('status')
-                    ->label(__('app.statut'))
+                    ->label(__('app.status'))
                     ->state(function (Etudiant $record): bool {
                         return Note::where('id_etudiant', $record->id_etudiant)
                             ->where('id_evaluation', $this->record->id_evaluation)

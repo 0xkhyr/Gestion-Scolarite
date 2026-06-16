@@ -29,11 +29,13 @@ class EnsureTwoFactorIsVerified
             return $next($request);
         }
 
-        // If 2FA is required by config and user hasn't confirmed it yet
+        // If 2FA is required by config and user hasn't confirmed it yet,
+        // send them to their account Security page to enrol (no dedicated
+        // setup route exists; enrolment lives on the Security page).
         if (config('security.require_2fa', false)) {
             if (!$this->twoFactorService->isConfirmed($user)) {
 
-                return redirect()->route('filament.admin.pages.two-factor-setup');
+                return redirect()->route('filament.admin.pages.account.security');
             }
         }
 
@@ -55,9 +57,9 @@ class EnsureTwoFactorIsVerified
     protected function isExemptRoute(Request $request): bool
     {
         $exemptRoutes = [
-            'filament.admin.pages.two-factor-setup',
+            // Enrolment page (where users turn 2FA on) must stay reachable.
+            'filament.admin.pages.account.security',
             'filament.admin.pages.two-factor-challenge',
-            'filament.admin.pages.two-factor-recovery-codes',
             'filament.admin.auth.logout',
             'logout',
         ];
@@ -67,8 +69,9 @@ class EnsureTwoFactorIsVerified
             return true;
         }
 
-        // Also allow direct path matches for the admin 2FA endpoints (avoids reliance on named routes)
-        if (str_starts_with($request->path(), 'filament.admin.pages.two-factor-setup')) {
+        // Also allow direct path matches (avoids reliance on named routes).
+        if (str_starts_with($request->path(), 'admin/account/security')
+            || str_starts_with($request->path(), 'admin/two-factor-challenge')) {
             return true;
         }
 

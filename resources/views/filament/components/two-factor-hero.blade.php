@@ -27,7 +27,7 @@
         <div class="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm">
             <div class="flex items-center gap-2">
                 <div class="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
-                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('app.statut') }}</span>
+                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('app.status') }}</span>
             </div>
             <div class="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
             <span class="text-sm font-medium text-amber-600 dark:text-amber-400">{{ $status }}</span>

@@ -49,7 +49,7 @@ class StaffPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
             MenuItem::make()
-                ->label(__('app.mon_compte'))
+                ->label(__('app.my_account'))
                 ->url(fn (): string => \App\Filament\Pages\Account\Profile::getUrl())
                 ->icon('heroicon-o-user-circle'),
             // ...

@@ -26,7 +26,7 @@ class StudentChart extends ChartWidget
     {
         $user = auth()->user();
         if ($user->hasRole('teacher')) {
-            return __('app.repartition_mes_etudiants');
+            return __('app.my_students_distribution');
         }
         return __('app.repartition_etudiants');
     }

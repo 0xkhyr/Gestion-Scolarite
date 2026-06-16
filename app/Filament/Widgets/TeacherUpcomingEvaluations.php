@@ -20,7 +20,7 @@ class TeacherUpcomingEvaluations extends BaseWidget
 
     public function getTableHeading(): string
     {
-        return __('app.mes_evaluations_a_venir');
+        return __('app.my_upcoming_evaluations');
     }
 
     public function table(Table $table): Table
@@ -78,6 +78,6 @@ class TeacherUpcomingEvaluations extends BaseWidget
             ->defaultSort('date', 'asc')
             ->paginated(false)
             ->emptyStateHeading(__('app.aucune_evaluation_a_venir'))
-            ->emptyStateDescription(__('app.aucune_evaluation_programmee'));
+            ->emptyStateDescription(__('app.no_evaluation_scheduled'));
     }
 }

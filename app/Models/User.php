@@ -61,7 +61,45 @@ class User extends Authenticatable
         'last_login_at' => 'datetime',
         'locked_until' => 'datetime',
         'last_failed_login_at' => 'datetime',
+        'password_changed_at' => 'datetime',
     ];
+
+    /**
+     * Stamp password_changed_at whenever the password changes (covers create,
+     * profile change, Fortify update, and password reset in one place).
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (User $user) {
+            if ($user->isDirty('password')) {
+                $user->password_changed_at = now();
+            }
+        });
+    }
+
+    /**
+     * Has this user's password expired under the optional expiry policy?
+     * Returns false unless the policy is enabled and a positive day count is set.
+     */
+    public function passwordExpired(): bool
+    {
+        if (! setting('security.password_expiry_enabled', false)) {
+            return false;
+        }
+
+        $days = (int) setting('security.password_expiry_days', 0);
+        if ($days <= 0) {
+            return false;
+        }
+
+        // Fall back to created_at for users who predate password tracking.
+        $changedAt = $this->password_changed_at ?? $this->created_at;
+        if (! $changedAt) {
+            return false;
+        }
+
+        return $changedAt->copy()->addDays($days)->isPast();
+    }
 
     /**
      * Get the profile associated with the user.

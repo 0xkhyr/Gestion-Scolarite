@@ -85,16 +85,16 @@ class EvaluationResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Evaluation Details')
+                Forms\Components\Section::make(__('app.evaluation_details'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('evaluation.create') || auth()->user()->hasPermissionTo('evaluation.edit'))
                     ->schema([
                         Forms\Components\TextInput::make('titre')
-                            ->label('Title')
+                            ->label(__('app.title'))
                             ->maxLength(191)
-                            ->placeholder('e.g., Midterm Exam, Quiz 1'),
+                            ->placeholder(__('app.eval_title_placeholder')),
                             
                         Forms\Components\Select::make('type')
-                            ->label('Type')
+                            ->label(__('app.type'))
                             ->required()
                             ->options([
                                 'devoir' => 'Homework',
@@ -105,7 +105,7 @@ class EvaluationResource extends Resource
                             ]),
                         
                         Forms\Components\Select::make('id_classe')
-                            ->label('Class')
+                            ->label(__('app.class'))
                             ->relationship('classe', 'nom_classe', function (Builder $query) {
                                 return static::applyRoleBasedRelationScope($query, [
                                     'classColumn' => 'id_classe'
@@ -121,7 +121,7 @@ class EvaluationResource extends Resource
                             }),
                             
                         Forms\Components\Select::make('id_matiere')
-                            ->label('Subject')
+                            ->label(__('app.subject'))
                             ->options(function (callable $get) {
                                 $classeId = $get('id_classe');
                                 
@@ -158,7 +158,7 @@ class EvaluationResource extends Resource
                     ])
                     ->columns(2),
                     
-                Forms\Components\Section::make('Grading')
+                Forms\Components\Section::make(__('app.grading'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('evaluation.create') || auth()->user()->hasPermissionTo('evaluation.edit'))
                     ->schema([
                         Forms\Components\TextInput::make('note_max')
@@ -178,7 +178,7 @@ class EvaluationResource extends Resource
                     ->columns(2),
                     
                 // Read-only evaluation view for users with view-only permissions
-                Forms\Components\Section::make(__('app.consultation_evaluation'))
+                Forms\Components\Section::make(__('app.evaluation_consultation'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('evaluation.view') && !auth()->user()->hasPermissionTo('evaluation.create') && !auth()->user()->hasPermissionTo('evaluation.edit'))
                     ->schema([
                         Forms\Components\Placeholder::make('titre_display')
@@ -222,10 +222,10 @@ class EvaluationResource extends Resource
                     ->badge()
                     ->formatStateUsing(fn (?string $state) => match ($state) {
                         'devoir' => __('app.devoir'),
-                        'interrogation' => __('app.interrogation'),
+                        'interrogation' => __('app.quiz'),
                         'examen' => __('app.examen'),
                         'controle' => __('app.controle'),
-                        'projet' => __('app.projet'),
+                        'projet' => __('app.project'),
                             default => $state ?? __('app.type'),
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -268,7 +268,7 @@ class EvaluationResource extends Resource
                     ->color('success'),
                 
                 Tables\Columns\IconColumn::make('status')
-                    ->label(__('app.statut'))
+                    ->label(__('app.status'))
                     ->state(fn ($record) => $record->isLocked())
                     ->boolean()
                     ->trueIcon('heroicon-o-lock-closed')

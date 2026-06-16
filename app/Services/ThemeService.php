@@ -156,8 +156,8 @@ class ThemeService
     public function getDefaultTheme(): array
     {
         return [
-            'primary_color' => '#3B82F6',
-            'secondary_color' => '#1E40AF',
+            'primary_color' => '#4F6BED',
+            'secondary_color' => '#3D55C8',
             'font_family' => 'Inter, system-ui, sans-serif',
             'logo_url' => '',
         ];

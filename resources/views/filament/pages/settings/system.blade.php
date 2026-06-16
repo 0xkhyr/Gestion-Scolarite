@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     <div class="border-b border-gray-200 pb-4">
-        <p class="mt-1 text-sm text-gray-600">Configure organization details, regional settings, and system preferences.</p>
+        <p class="mt-1 text-sm text-gray-600">{{ __('app.system_page_subtitle') }}</p>
     </div>
     @include('filament.components.settings-navigation')
     

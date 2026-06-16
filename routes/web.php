@@ -44,6 +44,11 @@ Route::get('/search', [PublicController::class, 'search'])->name('search');
 // Contact form submission
 Route::post('/contact', [PublicController::class, 'handleContactForm'])->name('contact.submit');
 
+// Secure backup download (super_admin only) — signed + auth, validated in controller.
+Route::get('/admin/backup-download', [\App\Http\Controllers\BackupDownloadController::class, 'download'])
+    ->middleware(['auth', 'signed'])
+    ->name('admin.backups.download');
+
 // Homepage - special handling
 Route::get('/', [PublicController::class, 'homepage'])->name('homepage');
 

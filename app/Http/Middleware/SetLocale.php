@@ -22,6 +22,7 @@ class SetLocale
         $available = array_keys(config('locales', ['fr' => [], 'ar' => [], 'en' => []]));
         if (in_array($locale, $available, true)) {
             app()->setLocale($locale);
+            \Carbon\Carbon::setLocale($locale);
         }
         
         return $next($request);

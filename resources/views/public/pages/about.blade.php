@@ -1,142 +1,112 @@
 @extends('public.layouts.app')
 
-@section('title', $page->title . ' - ' . ($themeVars['site_name'] ?? 'School'))
-@section('description', 'Learn about our school, mission, vision, and values')
+@section('title', $page->meta_title ?: ($page->title . ' - ' . ($themeVars['site_name'] ?? 'School')))
+@section('description', $page->meta_description ?: $page->title)
+
+@php
+    $highlights = $page->getSetting('highlights', []);
+    $team = $page->getSetting('team', []);
+@endphp
 
 @section('content')
-<!-- Hero Section -->
-<section class="bg-gradient-to-br from-primary-50 via-surface-50 to-primary-100 py-12 sm:py-16 lg:py-20">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-            <div class="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-white/80 backdrop-blur border border-primary-200 text-primary-700 text-xs sm:text-sm font-medium mb-6 sm:mb-8">
-                <span class="material-icons-round text-sm mr-2">school</span>
-                About Us
+    <!-- Page Header -->
+    <section class="bg-white border-b border-zinc-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+            <div class="max-w-3xl">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900 mb-4">
+                    {{ $page->getSetting('header_title', $page->title) }}
+                </h1>
+                @if($page->getSetting('header_subtitle'))
+                    <p class="text-lg text-zinc-600 leading-relaxed">
+                        {{ $page->getSetting('header_subtitle') }}
+                    </p>
+                @endif
             </div>
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-on-surface mb-4 sm:mb-6">{{ $page->title }}</h1>
-            <p class="text-base sm:text-lg lg:text-xl text-surface-600 max-w-2xl lg:max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
-                Discover our story, mission, and commitment to educational excellence
-            </p>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Main Content -->
-<section class="py-16 sm:py-20 bg-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Page Content -->
-        <div class="prose prose-sm sm:prose prose-lg lg:prose-xl max-w-none prose-primary">
-            <div class="text-surface-600 leading-relaxed">
-                {!! $page->getContent() !!}
-            </div>
-        </div>
-        
-        <!-- Mission & Vision Cards -->
-        <div class="mt-16 sm:mt-20 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-            <!-- Our History -->
-            <div class="material-card rounded-material-xl p-6 sm:p-8 bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200/50">
-                <div class="inline-flex items-center justify-center w-12 sm:w-16 h-12 sm:h-16 rounded-material bg-primary-600 text-white mb-4 sm:mb-6">
-                    <span class="material-icons-round text-xl sm:text-2xl">history</span>
+    <!-- Main Content -->
+    <section class="bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+            @if(trim(strip_tags($page->getContent())))
+                <div class="prose prose-zinc max-w-3xl">
+                    {!! $page->getContent() !!}
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold text-on-surface mb-3 sm:mb-4">Our History</h2>
-                <p class="text-sm sm:text-base text-surface-600 leading-relaxed">
-                    Founded with a vision to provide quality education, our school has been serving the community for years. 
-                    We have evolved and grown while maintaining our core values of excellence, integrity, and innovation.
+            @endif
+
+            <!-- Highlights (admin-defined cards: icon, title, description) -->
+            @if(count($highlights))
+                <div class="grid sm:grid-cols-2 gap-5 {{ trim(strip_tags($page->getContent())) ? 'mt-14' : '' }}">
+                    @foreach($highlights as $highlight)
+                        <div class="bg-white border border-zinc-200 rounded-xl p-6 hover:border-zinc-300 hover:shadow-sm transition-all duration-150">
+                            <div class="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
+                                <span class="material-icons-round text-primary-700">{{ $highlight['icon'] ?? 'check_circle' }}</span>
+                            </div>
+                            <h2 class="text-base font-semibold text-zinc-900 mb-1.5">{{ $highlight['title'] ?? '' }}</h2>
+                            <p class="text-sm text-zinc-600 leading-relaxed">{{ $highlight['description'] ?? '' }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </section>
+
+    <!-- Team (only rendered when the school has added members in the admin) -->
+    @if(count($team))
+        <section class="bg-zinc-50 border-t border-zinc-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+                <div class="max-w-2xl mb-12">
+                    <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-900 mb-3">
+                        {{ $page->getSetting('team_heading', __('Our team')) }}
+                    </h2>
+                    @if($page->getSetting('team_subheading'))
+                        <p class="text-base text-zinc-600 leading-relaxed">
+                            {{ $page->getSetting('team_subheading') }}
+                        </p>
+                    @endif
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    @foreach($team as $member)
+                        <div class="bg-white border border-zinc-200 rounded-xl p-6">
+                            @if(!empty($member['photo']))
+                                <img src="{{ Storage::url($member['photo']) }}"
+                                     alt="{{ $member['name'] ?? '' }}"
+                                     class="w-14 h-14 rounded-full object-cover mb-4">
+                            @else
+                                <div class="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center mb-4">
+                                    <span class="material-icons-round text-primary-700">person</span>
+                                </div>
+                            @endif
+                            <h3 class="text-base font-semibold text-zinc-900">{{ $member['name'] ?? '' }}</h3>
+                            @if(!empty($member['role']))
+                                <p class="text-sm text-zinc-500 mb-2">{{ $member['role'] }}</p>
+                            @endif
+                            @if(!empty($member['bio']))
+                                <p class="text-sm text-zinc-600 leading-relaxed">{{ $member['bio'] }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    <!-- Call to Action -->
+    <section class="bg-white border-t border-zinc-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+            <div class="max-w-2xl">
+                <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-900 mb-3">
+                    {{ $page->getSetting('cta_heading', __('Want to know more?')) }}
+                </h2>
+                <p class="text-base text-zinc-600 leading-relaxed mb-6">
+                    {{ $page->getSetting('cta_text', __('Get in touch and we will answer your questions.')) }}
                 </p>
-            </div>
-
-            <!-- Our Achievements -->
-            <div class="material-card rounded-material-xl p-6 sm:p-8 bg-gradient-to-br from-green-50 to-green-100 border border-green-200/50">
-                <div class="inline-flex items-center justify-center w-12 sm:w-16 h-12 sm:h-16 rounded-material bg-green-600 text-white mb-4 sm:mb-6">
-                    <span class="material-icons-round text-xl sm:text-2xl">emoji_events</span>
-                </div>
-                <h2 class="text-xl sm:text-2xl font-bold text-on-surface mb-3 sm:mb-4">Our Achievements</h2>
-                <ul class="space-y-2 sm:space-y-3 text-sm sm:text-base text-surface-600">
-                    <li class="flex items-center">
-                        <span class="material-icons-round text-green-500 mr-2 sm:mr-3">check_circle</span>
-                        Excellence in Academic Performance
-                    </li>
-                    <li class="flex items-center">
-                        <span class="material-icons-round text-green-500 mr-3">check_circle</span>
-                        Award-winning Sports Programs
-                    </li>
-                    <li class="flex items-center">
-                        <span class="material-icons-round text-green-500 mr-3">check_circle</span>
-                        Outstanding Alumni Network
-                    </li>
-                    <li class="flex items-center">
-                        <span class="material-icons-round text-green-500 mr-3">check_circle</span>
-                        Modern Educational Technology
-                    </li>
-                </ul>
+                <a href="{{ route('page.show', 'contact') }}"
+                   class="inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
+                    {{ $page->getSetting('cta_label', __('Contact us')) }}
+                </a>
             </div>
         </div>
-    </div>
-</section>
-
-<!-- Leadership Team -->
-<section class="py-20 bg-gradient-to-b from-white to-surface-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <div class="inline-flex items-center px-4 py-2 rounded-full bg-primary-50 border border-primary-200 text-primary-700 text-sm font-medium mb-6">
-                <span class="material-icons-round text-sm mr-2">groups</span>
-                Leadership
-            </div>
-            <h2 class="text-4xl font-bold text-on-surface mb-4">Our Leadership Team</h2>
-            <p class="text-xl text-surface-600">Meet the dedicated professionals leading our institution</p>
-        </div>
-        
-        <div class="grid md:grid-cols-3 gap-8">
-            <!-- Principal -->
-            <div class="group material-card rounded-material-xl p-8 text-center hover:shadow-material-4 transition-all duration-300">
-                <div class="relative mb-6">
-                    <div class="w-32 h-32 bg-gradient-to-br from-primary-200 to-primary-300 rounded-full mx-auto flex items-center justify-center">
-                        <span class="material-icons-round text-primary-600 text-4xl">person</span>
-                    </div>
-                </div>
-                <h3 class="text-xl font-semibold text-on-surface mb-2">Principal Name</h3>
-                <p class="text-primary-600 font-medium mb-3">Principal</p>
-                <p class="text-surface-600 leading-relaxed">Leading educational excellence and student success with vision and dedication.</p>
-            </div>
-            
-            <!-- Vice Principal -->
-            <div class="group material-card rounded-material-xl p-8 text-center hover:shadow-material-4 transition-all duration-300">
-                <div class="relative mb-6">
-                    <div class="w-32 h-32 bg-gradient-to-br from-green-200 to-green-300 rounded-full mx-auto flex items-center justify-center">
-                        <span class="material-icons-round text-green-600 text-4xl">person</span>
-                    </div>
-                </div>
-                <h3 class="text-xl font-semibold text-on-surface mb-2">Vice Principal Name</h3>
-                <p class="text-green-600 font-medium mb-3">Vice Principal</p>
-                <p class="text-surface-600 leading-relaxed">Supporting academic programs and fostering student development across all levels.</p>
-            </div>
-            
-            <!-- Academic Coordinator -->
-            <div class="group material-card rounded-material-xl p-8 text-center hover:shadow-material-4 transition-all duration-300">
-                <div class="relative mb-6">
-                    <div class="w-32 h-32 bg-gradient-to-br from-orange-200 to-orange-300 rounded-full mx-auto flex items-center justify-center">
-                        <span class="material-icons-round text-orange-600 text-4xl">person</span>
-                    </div>
-                </div>
-                <h3 class="text-xl font-semibold text-on-surface mb-2">Academic Coordinator</h3>
-                <p class="text-orange-600 font-medium mb-3">Academic Coordinator</p>
-                <p class="text-surface-600 leading-relaxed">Coordinating curriculum excellence and maintaining educational standards.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Call to Action -->
-<section class="py-20 bg-gradient-to-br from-primary-600 to-primary-700">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-4xl font-bold text-white mb-6">Ready to Join Our School Community?</h2>
-        <p class="text-xl text-primary-100 mb-10 leading-relaxed">
-            Discover how we can help your child reach their full potential in a nurturing, excellence-driven environment.
-        </p>
-        <a href="{{ route('page.show', 'contact') }}" 
-           class="inline-flex items-center px-8 py-4 bg-white text-primary-600 hover:bg-surface-50 rounded-material-lg font-semibold transition-all duration-200 hover:shadow-material-3 hover:-translate-y-0.5">
-            <span class="material-icons-round mr-2">contact_mail</span>
-            Contact Us Today
-        </a>
-    </div>
-</section>
+    </section>
 @endsection

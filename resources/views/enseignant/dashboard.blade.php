@@ -177,7 +177,7 @@
                         @endif
                     @else
                         <div class="text-center py-4">
-                            <p class="text-muted">{{ __('app.aucun_etudiant_assigné') }}</p>
+                            <p class="text-muted">{{ __('app.no_student_assigned') }}</p>
                         </div>
                     @endif
                 </div>
@@ -204,7 +204,7 @@
                                         <th class="border-0">{{ __('app.type') }}</th>
                                         <th class="border-0">{{ __('app.cours') }}</th>
                                         <th class="border-0">{{ __('app.date') }}</th>
-                                        <th class="border-0">{{ __('app.statut') }}</th>
+                                        <th class="border-0">{{ __('app.status') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>

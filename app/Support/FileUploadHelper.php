@@ -32,7 +32,7 @@ class FileUploadHelper
      */
     public static function getMaxSizeKB(): int
     {
-        return setting('file_upload_max_size', 10) * 1024;
+        return setting('app.file_upload_max_size', 10) * 1024;
     }
     
     /**

@@ -147,7 +147,8 @@ class NoteResource extends Resource
                                             ->where('id_evaluation', $value);
 
                                         if ($record) {
-                                            $exists->where('id', '!=', $record->getKey());
+                                            // Note's primary key is id_note, not id.
+                                            $exists->where($record->getKeyName(), '!=', $record->getKey());
                                         }
 
                                         if ($exists->exists()) {
@@ -198,7 +199,7 @@ class NoteResource extends Resource
                     ->columns(1),
                     
                 // Read-only grade view for teachers with view-only permissions
-                Forms\Components\Section::make(__('app.consultation_note'))
+                Forms\Components\Section::make(__('app.grade_consultation'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('grade.view') && !auth()->user()->hasPermissionTo('grade.create') && !auth()->user()->hasPermissionTo('grade.edit'))
                     ->schema([
                         Forms\Components\Placeholder::make('etudiant_info')
@@ -225,7 +226,7 @@ class NoteResource extends Resource
                     ])
                     ->columns(2),
                     
-                Forms\Components\Section::make('Auto-filled')
+                Forms\Components\Section::make(__('app.auto_filled'))
                     ->schema([
                         Forms\Components\Hidden::make('id_matiere'),
                         Forms\Components\Hidden::make('id_classe'),
@@ -285,10 +286,10 @@ class NoteResource extends Resource
                     ->badge()
                     ->formatStateUsing(fn (?string $state) => match ($state) {
                         'devoir' => __('app.devoir'),
-                        'interrogation' => __('app.interrogation'),
+                        'interrogation' => __('app.quiz'),
                         'examen' => __('app.examen'),
                         'controle' => __('app.controle'),
-                        'projet' => __('app.projet'),
+                        'projet' => __('app.project'),
                             default => $state ?? __('app.type'),
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -335,10 +336,10 @@ class NoteResource extends Resource
                     ->label(__('app.type'))
                     ->options([
                         'devoir' => __('app.devoir'),
-                        'interrogation' => __('app.interrogation'),
+                        'interrogation' => __('app.quiz'),
                         'examen' => __('app.examen'),
                         'controle' => __('app.controle'),
-                        'projet' => __('app.projet'),
+                        'projet' => __('app.project'),
                     ]),
             ])
             ->actions([

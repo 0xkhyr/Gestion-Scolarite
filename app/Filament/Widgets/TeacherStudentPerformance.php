@@ -19,7 +19,7 @@ class TeacherStudentPerformance extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('app.performance_mes_etudiants');
+        return __('app.my_students_performance');
     }
 
     protected function getData(): array
@@ -82,8 +82,8 @@ class TeacherStudentPerformance extends ChartWidget
             'labels' => [
                 __('app.excellent') . ' (≥80%)',
                 __('app.bien') . ' (≥60%)',
-                __('app.moyen') . ' (≥50%)',
-                __('app.faible') . ' (<50%)',
+                __('app.medium') . ' (≥50%)',
+                __('app.low') . ' (<50%)',
             ],
         ];
     }

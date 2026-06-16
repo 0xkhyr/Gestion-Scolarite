@@ -276,11 +276,11 @@ class Sidebar extends Component
                     'active' => request()->routeIs(['etudiant.dashboard'])
                 ],
                 [
-                    'title' => __('app.mon_parcours'),
+                    'title' => __('app.my_journey'),
                     'icon' => 'fas fa-user-graduate',
                     'children' => [
                         [
-                            'title' => __('app.mes_notes'),
+                            'title' => __('app.my_grades'),
                             'route' => 'etudiant.mes-notes',
                             'active' => request()->routeIs('etudiant.mes-notes')
                         ],
@@ -292,7 +292,7 @@ class Sidebar extends Component
                     ]
                 ],
                 [
-                    'title' => __('app.recherche_publique'),
+                    'title' => __('app.public_search'),
                     'icon' => 'fas fa-search',
                     'route' => 'rechercher-notes',
                     'active' => request()->routeIs('rechercher-notes')

@@ -234,7 +234,7 @@
                             <span class="badge bg-success">{{ __('app.enseignant') }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">{{ __('app.statut') }}:</span>
+                            <span class="text-muted">{{ __('app.status') }}:</span>
                             <span class="badge bg-success">{{ __('app.actif') }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">

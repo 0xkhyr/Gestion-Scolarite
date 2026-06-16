@@ -14,9 +14,12 @@ class Preferences extends Page
     
     protected static string $view = 'filament.pages.account.preferences';
     
-    protected static ?string $title = 'Preferences';
-    
     protected static ?string $slug = 'account/preferences';
+
+    public function getTitle(): string
+    {
+        return __('app.preferences');
+    }
     
     protected static bool $shouldRegisterNavigation = false;
 
@@ -37,11 +40,11 @@ class Preferences extends Page
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Language & Region')
-                    ->description('Set your language and regional preferences')
+                Forms\Components\Section::make(__('app.language_region'))
+                    ->description(__('app.language_region_desc'))
                     ->schema([
                         Forms\Components\Select::make('preferred_language')
-                            ->label('Preferred Language')
+                            ->label(__('app.preferred_language'))
                             ->options([
                                 'fr' => 'Français',
                                 'ar' => 'العربية',
@@ -49,7 +52,7 @@ class Preferences extends Page
                             ])
                             ->default('fr'),
                         Forms\Components\Select::make('date_format')
-                            ->label('Date Format')
+                            ->label(__('app.date_format'))
                             ->options([
                                 'Y-m-d' => '2026-02-03',
                                 'd/m/Y' => '03/02/2026',
@@ -58,38 +61,38 @@ class Preferences extends Page
                             ])
                             ->default('Y-m-d'),
                         Forms\Components\Select::make('time_format')
-                            ->label('Time Format')
+                            ->label(__('app.time_format'))
                             ->options([
-                                '24' => '24-hour (14:30)',
-                                '12' => '12-hour (2:30 PM)',
+                                '24' => __('app.time_format_24'),
+                                '12' => __('app.time_format_12'),
                             ])
                             ->default('24'),
                     ])->columns(2),
                 
-                Forms\Components\Section::make('Interface Preferences')
-                    ->description('Customize your interface experience')
+                Forms\Components\Section::make(__('app.interface_preferences'))
+                    ->description(__('app.interface_preferences_desc'))
                     ->schema([
                         Forms\Components\Select::make('theme')
-                            ->label('Theme')
+                            ->label(__('app.theme'))
                             ->options([
-                                'system' => 'System Default',
-                                'light' => 'Light',
-                                'dark' => 'Dark',
+                                'system' => __('app.theme_system'),
+                                'light' => __('app.theme_light'),
+                                'dark' => __('app.theme_dark'),
                             ])
                             ->default('system'),
                         Forms\Components\Select::make('sidebar_collapsed')
-                            ->label('Sidebar Behavior')
+                            ->label(__('app.sidebar_behavior'))
                             ->options([
-                                'expanded' => 'Always Expanded',
-                                'collapsed' => 'Always Collapsed',
-                                'auto' => 'Auto (based on screen size)',
+                                'expanded' => __('app.sidebar_expanded'),
+                                'collapsed' => __('app.sidebar_collapsed'),
+                                'auto' => __('app.sidebar_auto'),
                             ])
                             ->default('auto'),
                     ])->columns(2),
 
                     Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('save')
-                        ->label('Save Changes')
+                        ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')
                         ->action(function () {
@@ -115,7 +118,7 @@ class Preferences extends Page
         }
 
         Notification::make()
-            ->title('Preferences updated successfully')
+            ->title(__('app.preferences_saved'))
             ->success()
             ->send();
     }

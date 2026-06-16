@@ -111,7 +111,7 @@
                             @if($classes->count() > 1)
                                 {{ __('app.dans') }} {{ $classes->count() }} {{ __('app.classes') }}
                             @else
-                                {{ __('app.dans_votre_classe') }}
+                                {{ __('app.in_your_class') }}
                             @endif
                         </div>
                     </div>

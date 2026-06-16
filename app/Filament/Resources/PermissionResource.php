@@ -66,7 +66,7 @@ class PermissionResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Permission Information')
+                Forms\Components\Section::make(__('app.permission_information'))
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->required()

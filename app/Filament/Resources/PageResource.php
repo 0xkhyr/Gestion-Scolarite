@@ -176,7 +176,222 @@ class PageResource extends Resource
                         Forms\Components\TextInput::make('meta_keywords')
                             ->label(__('app.meta_keywords'))
                             ->helperText(__('app.meta_keywords_helper'))
-                            ->placeholder('keyword1, keyword2, keyword3'),
+                            ->placeholder(__('app.keywords_placeholder')),
+                    ])
+                    ->columns(1)
+                    ->collapsed(),
+
+                Forms\Components\Section::make(__('Homepage Sections'))
+                    ->description(__('Content shown on the homepage. Leave a field empty to use the default text.'))
+                    ->visible(fn (Forms\Get $get) => $get('slug') === 'homepage')
+                    ->schema([
+                        Forms\Components\TextInput::make('settings.hero_title')
+                            ->label(__('Hero title'))
+                            ->maxLength(255),
+
+                        Forms\Components\Textarea::make('settings.hero_subtitle')
+                            ->label(__('Hero subtitle'))
+                            ->rows(2)
+                            ->maxLength(500),
+
+                        Forms\Components\FileUpload::make('settings.hero_image')
+                            ->label(__('Hero image'))
+                            ->helperText(__('Shown next to the hero text. A neutral placeholder is used when empty.'))
+                            ->image()
+                            ->directory('pages')
+                            ->disk('public'),
+
+                        Forms\Components\Fieldset::make(__('Primary button'))
+                            ->schema([
+                                Forms\Components\TextInput::make('settings.cta_primary_label')
+                                    ->label(__('Label'))
+                                    ->maxLength(50),
+                                Forms\Components\TextInput::make('settings.cta_primary_url')
+                                    ->label(__('URL'))
+                                    ->maxLength(255),
+                            ]),
+
+                        Forms\Components\Fieldset::make(__('Secondary button'))
+                            ->schema([
+                                Forms\Components\TextInput::make('settings.cta_secondary_label')
+                                    ->label(__('Label'))
+                                    ->maxLength(50),
+                                Forms\Components\TextInput::make('settings.cta_secondary_url')
+                                    ->label(__('URL'))
+                                    ->maxLength(255),
+                            ]),
+
+                        Forms\Components\TextInput::make('settings.features_heading')
+                            ->label(__('Features heading'))
+                            ->maxLength(255),
+
+                        Forms\Components\Textarea::make('settings.features_subheading')
+                            ->label(__('Features subheading'))
+                            ->rows(2)
+                            ->maxLength(500),
+
+                        Forms\Components\Repeater::make('settings.features')
+                            ->label(__('Features'))
+                            ->schema([
+                                Forms\Components\TextInput::make('icon')
+                                    ->label(__('Icon'))
+                                    ->helperText(__('Material icon name, e.g. school, menu_book, insights'))
+                                    ->maxLength(50),
+                                Forms\Components\TextInput::make('title')
+                                    ->label(__('app.title'))
+                                    ->required()
+                                    ->maxLength(100),
+                                Forms\Components\Textarea::make('description')
+                                    ->label(__('Description'))
+                                    ->rows(2)
+                                    ->maxLength(300),
+                            ])
+                            ->columns(1)
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                            ->defaultItems(0)
+                            ->columnSpanFull(),
+
+                        Forms\Components\Toggle::make('settings.show_portals')
+                            ->label(__('Show portals section'))
+                            ->default(true),
+
+                        Forms\Components\TextInput::make('settings.portals_heading')
+                            ->label(__('Portals heading'))
+                            ->maxLength(255)
+                            ->visible(fn (Forms\Get $get) => $get('settings.show_portals')),
+
+                        Forms\Components\Textarea::make('settings.portals_subheading')
+                            ->label(__('Portals subheading'))
+                            ->rows(2)
+                            ->maxLength(500)
+                            ->visible(fn (Forms\Get $get) => $get('settings.show_portals')),
+                    ])
+                    ->columns(1)
+                    ->collapsed(),
+
+                Forms\Components\Section::make(__('About Page Sections'))
+                    ->description(__('Optional content blocks for the about page. Empty blocks are hidden on the site.'))
+                    ->visible(fn (Forms\Get $get) => $get('slug') === 'about')
+                    ->schema([
+                        Forms\Components\TextInput::make('settings.header_title')
+                            ->label(__('Header title'))
+                            ->maxLength(255),
+
+                        Forms\Components\Textarea::make('settings.header_subtitle')
+                            ->label(__('Header subtitle'))
+                            ->rows(2)
+                            ->maxLength(500),
+
+                        Forms\Components\Repeater::make('settings.highlights')
+                            ->label(__('Highlight cards'))
+                            ->schema([
+                                Forms\Components\TextInput::make('icon')
+                                    ->label(__('Icon'))
+                                    ->helperText(__('Material icon name, e.g. history, emoji_events'))
+                                    ->maxLength(50),
+                                Forms\Components\TextInput::make('title')
+                                    ->label(__('app.title'))
+                                    ->required()
+                                    ->maxLength(100),
+                                Forms\Components\Textarea::make('description')
+                                    ->label(__('Description'))
+                                    ->rows(2)
+                                    ->maxLength(500),
+                            ])
+                            ->columns(1)
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                            ->defaultItems(0)
+                            ->columnSpanFull(),
+
+                        Forms\Components\TextInput::make('settings.team_heading')
+                            ->label(__('Team heading'))
+                            ->maxLength(255),
+
+                        Forms\Components\Textarea::make('settings.team_subheading')
+                            ->label(__('Team subheading'))
+                            ->rows(2)
+                            ->maxLength(500),
+
+                        Forms\Components\Repeater::make('settings.team')
+                            ->label(__('Team members'))
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label(__('app.name'))
+                                    ->required()
+                                    ->maxLength(100),
+                                Forms\Components\TextInput::make('role')
+                                    ->label(__('Role'))
+                                    ->maxLength(100),
+                                Forms\Components\Textarea::make('bio')
+                                    ->label(__('Bio'))
+                                    ->rows(2)
+                                    ->maxLength(300),
+                                Forms\Components\FileUpload::make('photo')
+                                    ->label(__('Photo'))
+                                    ->image()
+                                    ->directory('team')
+                                    ->disk('public'),
+                            ])
+                            ->columns(1)
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                            ->defaultItems(0)
+                            ->columnSpanFull(),
+
+                        Forms\Components\Fieldset::make(__('Call to action'))
+                            ->schema([
+                                Forms\Components\TextInput::make('settings.cta_heading')
+                                    ->label(__('Heading'))
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('settings.cta_label')
+                                    ->label(__('Button label'))
+                                    ->maxLength(50),
+                                Forms\Components\Textarea::make('settings.cta_text')
+                                    ->label(__('Text'))
+                                    ->rows(2)
+                                    ->maxLength(500)
+                                    ->columnSpanFull(),
+                            ]),
+                    ])
+                    ->columns(1)
+                    ->collapsed(),
+
+                Forms\Components\Section::make(__('Contact Page Sections'))
+                    ->visible(fn (Forms\Get $get) => $get('slug') === 'contact')
+                    ->schema([
+                        Forms\Components\TextInput::make('settings.header_title')
+                            ->label(__('Header title'))
+                            ->maxLength(255),
+
+                        Forms\Components\Textarea::make('settings.header_subtitle')
+                            ->label(__('Header subtitle'))
+                            ->rows(2)
+                            ->maxLength(500),
+
+                        Forms\Components\Textarea::make('settings.form_intro')
+                            ->label(__('Form introduction'))
+                            ->rows(2)
+                            ->maxLength(500),
+
+                        Forms\Components\Repeater::make('settings.office_hours')
+                            ->label(__('Office hours'))
+                            ->schema([
+                                Forms\Components\TextInput::make('label')
+                                    ->label(__('Days'))
+                                    ->placeholder(__('Monday - Friday'))
+                                    ->required()
+                                    ->maxLength(100),
+                                Forms\Components\TextInput::make('value')
+                                    ->label(__('Hours'))
+                                    ->placeholder('8:00 - 16:00')
+                                    ->required()
+                                    ->maxLength(100),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(0)
+                            ->columnSpanFull(),
                     ])
                     ->columns(1)
                     ->collapsed(),

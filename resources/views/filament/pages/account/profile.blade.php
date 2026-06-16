@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     <div class="space-y-6">
         <div class="border-b border-gray-200 pb-4">
-            <p class="mt-1 text-sm text-gray-600">Manage your personal account information.</p>
+            <p class="mt-1 text-sm text-gray-600">{{ __('app.account_page_subtitle') }}</p>
         </div>
         
         @include('filament.components.account-navigation')

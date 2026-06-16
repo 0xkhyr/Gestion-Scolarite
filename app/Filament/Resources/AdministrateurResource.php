@@ -140,7 +140,7 @@ class AdministrateurResource extends Resource
                             ->hiddenOn('view'),
                             
                         Forms\Components\Placeholder::make('compte_status')
-                            ->label(__('app.statut'))
+                            ->label(__('app.status'))
                             ->content(fn ($record) => $record->user?->is_active 
                                 ? new \Illuminate\Support\HtmlString('<span class="text-success-600 font-semibold">' . __('app.actif') . '</span>')
                                 : new \Illuminate\Support\HtmlString('<span class="text-danger-600 font-semibold">' . __('app.inactif') . '</span>'))
@@ -150,7 +150,7 @@ class AdministrateurResource extends Resource
                     
                 // Read-only account information for users without manage users permission
                 Forms\Components\Section::make(__('app.compte_utilisateur'))
-                    ->description(__('app.informations_compte_readonly'))
+                    ->description(__('app.account_info_readonly_note'))
                     ->visible(fn () => !auth()->user()->hasPermissionTo('user.manage'))
                     ->schema([
                         Forms\Components\TextInput::make('user.email')
@@ -195,7 +195,7 @@ class AdministrateurResource extends Resource
                             ->visibleOn('view'),
                             
                         Forms\Components\Textarea::make('two_factor_recovery_codes')
-                            ->label(__('app.codes_recuperation'))
+                            ->label(__('app.recovery_codes'))
                             ->helperText(__('app.codes_recuperation_helper'))
                             ->disabled()
                             ->dehydrated(false)
@@ -252,7 +252,7 @@ class AdministrateurResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable()
-                    ->placeholder(__('app.jamais')),
+                    ->placeholder(__('app.never')),
                     
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('app.date_creation'))
@@ -262,7 +262,7 @@ class AdministrateurResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('user.is_active')
-                    ->label(__('app.statut')),
+                    ->label(__('app.status')),
                 Tables\Filters\TernaryFilter::make('user.two_factor_enabled')
                     ->label(__('app.two_factor'))
                     ->placeholder(__('app.voir_tout'))

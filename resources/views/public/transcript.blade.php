@@ -663,7 +663,7 @@
                 <!-- Footer -->
                 <div class="text-center mt-4 pt-4 border-top">
                     <small class="text-muted">
-                        {{ __('app.document_genere_le') }} {{ date('d/m/Y à H:i') }}
+                        {{ __('app.document_generated_on') }} {{ date('d/m/Y à H:i') }}
                     </small>
                 </div>
             </div>

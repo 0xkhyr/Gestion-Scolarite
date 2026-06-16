@@ -9,12 +9,18 @@ use App\Traits\Translatable;
 class Classe extends Model
 {
     protected $primaryKey = 'id_classe';
-    protected $fillable = ['nom_classe', 'niveau', 'nom_classe_translations', 'niveau_translations'];
-    
+    protected $fillable = ['nom_classe', 'niveau', 'serie', 'nom_classe_translations', 'niveau_translations'];
+
     protected $casts = [
         'nom_classe_translations' => 'array',
         'niveau_translations' => 'array',
     ];
+
+    // Cycle this class belongs to (fondamental|college|lycee), via config/academic.
+    public function getCycleAttribute(): ?string
+    {
+        return \App\Support\Academic::cycleForLevel($this->niveau);
+    }
     
     public function etudiants()
     {

@@ -50,7 +50,7 @@
     <header class="mobile-header">
         <div class="mobile-header-container">
             <!-- Menu Toggle -->
-            <button class="mobile-menu-btn" type="button" aria-label="{{ __('app.ouvrir_menu') }}">
+            <button class="mobile-menu-btn" type="button" aria-label="{{ __('app.open_menu') }}">
                 <svg class="mobile-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 12h18M3 6h18M3 18h18"/>
                 </svg>
@@ -96,7 +96,7 @@
                     }
                 @endphp
                 <div class="mobile-action-dropdown">
-                    <button class="mobile-action-btn" type="button" data-bs-toggle="dropdown" aria-label="{{ __('app.changer_langue') }}">
+                    <button class="mobile-action-btn" type="button" data-bs-toggle="dropdown" aria-label="{{ __('app.change_language') }}">
                         @if(app()->getLocale() === 'fr')
                             <span class="flag-icon fi fi-fr"></span>
                         @elseif(app()->getLocale() === 'ar')
@@ -127,16 +127,9 @@
                     </ul>
                 </div>
 
-                <!-- notifications -->
-                <div class="mobile-action-dropdown">
-                    <x-dashboard.notifications />
-                </div>
-
-
-
                 <!-- User Menu -->
                 <div class="mobile-action-dropdown">
-                    <button class="mobile-action-btn mobile-user-btn" type="button" data-bs-toggle="dropdown" aria-label="{{ __('app.menu_utilisateur') }}">
+                    <button class="mobile-action-btn mobile-user-btn" type="button" data-bs-toggle="dropdown" aria-label="{{ __('app.user_menu') }}">
                         @php
                             $currentUser = auth()->user();
                             $userName = $currentUser->name ?? 'User';
@@ -217,11 +210,6 @@
                                 @yield('header-actions')
                             </div>
                         @endif
-
-                        <!-- Notifications -->
-                        <div class="dropdown d-none d-lg-block">
-                            <x-dashboard.notifications />
-                        </div>
 
                         <!-- Desktop Language Switcher -->
                         <div class="lang-switcher dropdown d-none d-lg-block">
