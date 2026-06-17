@@ -38,3 +38,6 @@ yarn-error.log
 /.docs
 /tmp
 /legacy
+
+# Claude Code local settings
+.claude/settings.local.json
