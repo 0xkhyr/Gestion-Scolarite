@@ -9,7 +9,7 @@
                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5' }}">
                 <x-filament::icon 
                     icon="{{ $tab['icon'] }}" 
-                    class="w-4 h-4 mr-2 {{ $tab['active'] ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}" />
+                    class="w-4 h-4 me-2 {{ $tab['active'] ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}" />
                 {{ $tab['name'] }}
             </a>
         @endforeach

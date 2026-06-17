@@ -59,9 +59,11 @@ class ViewClasseTimetable extends ViewRecord
         return $query->get();
     }
 
-    protected function getActions(): array
+    protected function getHeaderActions(): array
     {
         return [
+            \Filament\Actions\EditAction::make()
+                ->url(fn () => ClasseResource::getUrl('edit', ['record' => $this->record])),
             Action::make('exportPdf')
                 ->label(__('app.export_pdf'))
                 ->icon('heroicon-o-arrow-down-tray')

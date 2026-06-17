@@ -27,6 +27,19 @@ class ReleveNotes extends Page implements HasForms
     }
     protected static string $view = 'filament.pages.releve-notes';
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            \Filament\Actions\Action::make('print')
+                ->label(__('app.imprimer_releve'))
+                ->icon('heroicon-o-printer')
+                ->color('success')
+                ->visible(fn () => $this->id_etudiant
+                    && (auth()->user()?->hasRole('super_admin') || auth()->user()?->can('transcript.export')))
+                ->action(fn () => $this->printReleve()),
+        ];
+    }
+
     public ?int $id_classe = null;
     public ?int $id_etudiant = null;
     public ?string $classCode = null;
@@ -84,9 +97,20 @@ class ReleveNotes extends Page implements HasForms
         return __('app.releve_notes');
     }
 
-    public static function canViewAny(): bool
+    /**
+     * Filament Pages gate access via canAccess() (not canViewAny()). This also
+     * drives whether the page is reachable by URL.
+     */
+    public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('super_admin') || auth()->user()->can('report.view');
+        $user = auth()->user();
+
+        return $user && ($user->hasRole('super_admin') || $user->can('transcript.view'));
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
     }
 
     public function form(Form $form): Form
@@ -351,6 +375,12 @@ class ReleveNotes extends Page implements HasForms
 
     public function printReleve()
     {
+        // PDF export requires the transcript.export permission (super_admin exempt).
+        abort_unless(
+            auth()->user()?->hasRole('super_admin') || auth()->user()?->can('transcript.export'),
+            403
+        );
+
         $etudiant = $this->etudiant;
         if (!$etudiant) return;
 

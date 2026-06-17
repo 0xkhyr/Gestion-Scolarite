@@ -52,6 +52,7 @@ class Modules extends Page
         return $form
             ->schema([
                 Forms\Components\Section::make(__('app.optional_modules'))
+                    ->icon('heroicon-o-puzzle-piece')
                     ->description(__('app.optional_modules_desc'))
                     ->schema([
                         Forms\Components\Toggle::make('attendance')

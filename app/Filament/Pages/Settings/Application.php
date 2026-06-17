@@ -61,6 +61,7 @@ class Application extends Page
             ->schema([
                 Forms\Components\Section::make(__('app.application_information'))
                     ->description(__('app.application_information_desc'))
+                    ->icon('heroicon-o-information-circle')
                     ->schema([
                         Forms\Components\TextInput::make('app_name')
                             ->label(__('app.application_name'))
@@ -79,6 +80,7 @@ class Application extends Page
 
                 Forms\Components\Section::make(__('app.user_registration_access'))
                     ->description(__('app.user_registration_access_desc'))
+                    ->icon('heroicon-o-user-plus')
                     ->schema([
                         Forms\Components\Toggle::make('registration_enabled')
                             ->label(__('app.allow_user_registration'))
@@ -93,6 +95,7 @@ class Application extends Page
 
                 Forms\Components\Section::make(__('app.file_management'))
                     ->description(__('app.file_management_desc'))
+                    ->icon('heroicon-o-document-arrow-up')
                     ->schema([
                         Forms\Components\TextInput::make('file_upload_max_size')
                             ->label(__('app.max_file_upload_size'))
@@ -104,6 +107,7 @@ class Application extends Page
 
                 Forms\Components\Section::make(__('app.system_backup'))
                     ->description(__('app.system_backup_desc'))
+                    ->icon('heroicon-o-circle-stack')
                     ->schema([
                         Forms\Components\Toggle::make('auto_backup_enabled')
                             ->label(__('app.enable_auto_backups'))

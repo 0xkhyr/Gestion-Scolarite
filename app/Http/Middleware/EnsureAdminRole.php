@@ -15,7 +15,9 @@ class EnsureAdminRole
     {
         $user = auth()->user();
         
-        if (!$user || !$user->hasAnyRole(['super_admin', 'director', 'academic_coordinator'])) {
+        // Back-office panel: admins + operational staff. Resource visibility is
+        // controlled per-resource by permissions, so staff only see what they may.
+        if (!$user || !$user->hasAnyRole(['super_admin', 'admin', 'director', 'academic_coordinator', 'secretary', 'accountant'])) {
             abort(403, 'Access denied. Administrator access required.');
         }
 

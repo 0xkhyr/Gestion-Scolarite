@@ -63,6 +63,7 @@ class Security extends Page
         return $form
             ->schema([
                 Forms\Components\Section::make(__('app.authentication_policies'))
+                    ->icon('heroicon-o-finger-print')
                     ->description(__('app.authentication_policies_desc'))
                     ->schema([
                         Forms\Components\Toggle::make('two_factor_required')
@@ -85,6 +86,7 @@ class Security extends Page
                     ])->columns(2),
                 
                 Forms\Components\Section::make(__('app.password_policies'))
+                    ->icon('heroicon-o-key')
                     ->description(__('app.password_policies_desc'))
                     ->schema([
                         Forms\Components\TextInput::make('password_min_length')
@@ -121,6 +123,7 @@ class Security extends Page
                     ])->columns(2),
                 
                 Forms\Components\Section::make(__('app.account_security'))
+                    ->icon('heroicon-o-lock-closed')
                     ->description(__('app.account_security_desc'))
                     ->schema([
                         Forms\Components\TextInput::make('max_login_attempts')

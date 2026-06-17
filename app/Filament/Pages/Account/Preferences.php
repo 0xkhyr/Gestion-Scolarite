@@ -42,6 +42,7 @@ class Preferences extends Page
             ->schema([
                 Forms\Components\Section::make(__('app.language_region'))
                     ->description(__('app.language_region_desc'))
+                    ->icon('heroicon-o-globe-alt')
                     ->schema([
                         Forms\Components\Select::make('preferred_language')
                             ->label(__('app.preferred_language'))
@@ -71,6 +72,7 @@ class Preferences extends Page
                 
                 Forms\Components\Section::make(__('app.interface_preferences'))
                     ->description(__('app.interface_preferences_desc'))
+                    ->icon('heroicon-o-paint-brush')
                     ->schema([
                         Forms\Components\Select::make('theme')
                             ->label(__('app.theme'))

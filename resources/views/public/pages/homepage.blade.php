@@ -5,11 +5,12 @@
 
 @php
     $features = $page->getSetting('features', [
-        ['icon' => 'school', 'title' => 'Qualified Teachers', 'description' => 'Experienced educators committed to every student\'s progress.'],
-        ['icon' => 'menu_book', 'title' => 'Complete Curriculum', 'description' => 'A structured program covering all core subjects and levels.'],
-        ['icon' => 'insights', 'title' => 'Progress Tracking', 'description' => 'Parents and students follow grades and attendance in real time.'],
+        ['icon' => 'school', 'title' => __('app.home_feature_teachers_title'), 'description' => __('app.home_feature_teachers_desc')],
+        ['icon' => 'menu_book', 'title' => __('app.home_feature_curriculum_title'), 'description' => __('app.home_feature_curriculum_desc')],
+        ['icon' => 'insights', 'title' => __('app.home_feature_tracking_title'), 'description' => __('app.home_feature_tracking_desc')],
     ]);
     $showPortals = $page->getSetting('show_portals', true);
+    $loginUrl = route('filament.admin.auth.login');
 @endphp
 
 @section('content')
@@ -19,19 +20,19 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                 <div>
                     <h1 class="text-4xl sm:text-5xl font-semibold tracking-tight text-zinc-900 leading-tight mb-5">
-                        {{ $page->getSetting('hero_title', __('Welcome to') . ' ' . ($themeVars['site_name'] ?? __('our school'))) }}
+                        {{ $page->getSetting('hero_title', __('app.home_welcome_to') . ' ' . ($themeVars['site_name'] ?? __('app.home_our_school'))) }}
                     </h1>
                     <p class="text-lg text-zinc-600 leading-relaxed mb-8">
-                        {{ $page->getSetting('hero_subtitle', 'A school management platform connecting students, parents and teachers in one place.') }}
+                        {{ $page->getSetting('hero_subtitle', __('app.home_hero_subtitle')) }}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-3">
                         <a href="{{ $page->getSetting('cta_primary_url', route('page.show', 'about')) }}"
                            class="inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
-                            {{ $page->getSetting('cta_primary_label', __('Learn more')) }}
+                            {{ $page->getSetting('cta_primary_label', __('app.home_learn_more')) }}
                         </a>
                         <a href="{{ $page->getSetting('cta_secondary_url', route('page.show', 'contact')) }}"
                            class="inline-flex items-center justify-center border border-zinc-300 hover:border-zinc-400 text-zinc-700 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
-                            {{ $page->getSetting('cta_secondary_label', __('Contact us')) }}
+                            {{ $page->getSetting('cta_secondary_label', __('app.home_contact_us')) }}
                         </a>
                     </div>
                 </div>
@@ -47,7 +48,7 @@
                             <div class="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center">
                                 <span class="material-icons-round !text-3xl text-primary-700">school</span>
                             </div>
-                            <p class="text-sm text-zinc-400">{{ $themeVars['site_name'] ?? __('Our school') }}</p>
+                            <p class="text-sm text-zinc-400">{{ $themeVars['site_name'] ?? __('app.home_our_school') }}</p>
                         </div>
                     @endif
                 </div>
@@ -60,10 +61,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
             <div class="max-w-2xl mb-12">
                 <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-900 mb-3">
-                    {{ $page->getSetting('features_heading', __('What we offer')) }}
+                    {{ $page->getSetting('features_heading', __('app.home_features_heading')) }}
                 </h2>
                 <p class="text-base text-zinc-600 leading-relaxed">
-                    {{ $page->getSetting('features_subheading', __('Everything a school needs to support its students.')) }}
+                    {{ $page->getSetting('features_subheading', __('app.home_features_subheading')) }}
                 </p>
             </div>
 
@@ -93,10 +94,10 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
                 <div class="max-w-2xl mb-12">
                     <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-900 mb-3">
-                        {{ $page->getSetting('portals_heading', __('Access your portal')) }}
+                        {{ $page->getSetting('portals_heading', __('app.home_portals_heading')) }}
                     </h2>
                     <p class="text-base text-zinc-600 leading-relaxed">
-                        {{ $page->getSetting('portals_subheading', __('Sign in to view grades, schedules and school services.')) }}
+                        {{ $page->getSetting('portals_subheading', __('app.home_portals_subheading')) }}
                     </p>
                 </div>
 
@@ -105,10 +106,10 @@
                         <div class="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
                             <span class="material-icons-round text-primary-700">school</span>
                         </div>
-                        <h3 class="text-base font-semibold text-zinc-900 mb-1.5">{{ __('Students') }}</h3>
-                        <p class="text-sm text-zinc-600 leading-relaxed mb-4">{{ __('Grades, assignments, schedules and school updates.') }}</p>
-                        <a href="/login?role=student" class="text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors duration-150">
-                            {{ __('Student sign in') }}
+                        <h3 class="text-base font-semibold text-zinc-900 mb-1.5">{{ __('app.home_portal_students') }}</h3>
+                        <p class="text-sm text-zinc-600 leading-relaxed mb-4">{{ __('app.home_portal_students_desc') }}</p>
+                        <a href="{{ $loginUrl }}" class="text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors duration-150">
+                            {{ __('app.home_portal_students_cta') }}
                         </a>
                     </div>
 
@@ -116,10 +117,10 @@
                         <div class="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
                             <span class="material-icons-round text-primary-700">family_restroom</span>
                         </div>
-                        <h3 class="text-base font-semibold text-zinc-900 mb-1.5">{{ __('Parents') }}</h3>
-                        <p class="text-sm text-zinc-600 leading-relaxed mb-4">{{ __('Follow your child\'s progress and contact teachers.') }}</p>
-                        <a href="/login?role=parent" class="text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors duration-150">
-                            {{ __('Parent sign in') }}
+                        <h3 class="text-base font-semibold text-zinc-900 mb-1.5">{{ __('app.home_portal_parents') }}</h3>
+                        <p class="text-sm text-zinc-600 leading-relaxed mb-4">{{ __('app.home_portal_parents_desc') }}</p>
+                        <a href="{{ $loginUrl }}" class="text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors duration-150">
+                            {{ __('app.home_portal_parents_cta') }}
                         </a>
                     </div>
 
@@ -127,10 +128,10 @@
                         <div class="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
                             <span class="material-icons-round text-primary-700">badge</span>
                         </div>
-                        <h3 class="text-base font-semibold text-zinc-900 mb-1.5">{{ __('Staff') }}</h3>
-                        <p class="text-sm text-zinc-600 leading-relaxed mb-4">{{ __('Administrative tools, grade entry and resources.') }}</p>
-                        <a href="/login" class="text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors duration-150">
-                            {{ __('Staff sign in') }}
+                        <h3 class="text-base font-semibold text-zinc-900 mb-1.5">{{ __('app.home_portal_staff') }}</h3>
+                        <p class="text-sm text-zinc-600 leading-relaxed mb-4">{{ __('app.home_portal_staff_desc') }}</p>
+                        <a href="{{ $loginUrl }}" class="text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors duration-150">
+                            {{ __('app.home_portal_staff_cta') }}
                         </a>
                     </div>
                 </div>

@@ -72,6 +72,7 @@ class Notifications extends Page
             ->schema([
                 Forms\Components\Section::make(__('app.security_notifications'))
                     ->description(__('app.account_security_notifications_desc'))
+                    ->icon('heroicon-o-shield-check')
                     ->schema([
                         Forms\Components\Grid::make(3)
                             ->schema([
@@ -97,6 +98,7 @@ class Notifications extends Page
 
                 Forms\Components\Section::make(__('app.system_notifications'))
                     ->description(__('app.system_notifications_account_desc'))
+                    ->icon('heroicon-o-cog-6-tooth')
                     ->schema([
                         Forms\Components\Grid::make(3)
                             ->schema([
@@ -112,6 +114,7 @@ class Notifications extends Page
 
                 Forms\Components\Section::make(__('app.academic_notifications'))
                     ->description(__('app.academic_notifications_account_desc'))
+                    ->icon('heroicon-o-academic-cap')
                     ->schema([
                         Forms\Components\Grid::make(3)
                             ->schema([

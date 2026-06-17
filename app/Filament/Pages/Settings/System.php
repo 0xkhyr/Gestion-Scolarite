@@ -71,6 +71,7 @@ class System extends Page
             ->schema([
                 Forms\Components\Section::make(__('app.organization_information'))
                     ->description(__('app.organization_information_desc'))
+                    ->icon('heroicon-o-building-office-2')
                     ->schema([
                         Forms\Components\TextInput::make('school_name')
                             ->label(__('app.school_name'))
@@ -99,6 +100,7 @@ class System extends Page
 
                 Forms\Components\Section::make(__('app.map_coordinates'))
                     ->description(__('app.map_coordinates_desc'))
+                    ->icon('heroicon-o-map-pin')
                     ->schema([
                         Forms\Components\TextInput::make('school_latitude')
                             ->label(__('app.latitude'))
@@ -188,16 +190,16 @@ JS;
 
                                 $html = <<<HTML
 <div x-data="{$xdataAttr}">
-<div class="text-sm text-gray-600 mb-4">
+<div class="text-sm text-gray-600 mb-4 dark:text-gray-400">
 <p class="mb-2"><strong>{$quickSetup}:</strong></p>
 <button type="button" @click="getCurrentLocation()" :disabled="loading" class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50">
-<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+<svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
 <span x-show="!loading">{$getLocation}</span>
 <span x-show="loading">{$gettingLocation}</span>
 </button>
-<span x-text="status" :class="statusClass" class="ml-3 text-sm"></span>
+<span x-text="status" :class="statusClass" class="ms-3 text-sm"></span>
 </div>
-<div class="text-sm text-gray-600 mt-4 pt-4 border-t">
+<div class="text-sm text-gray-600 mt-4 pt-4 border-t border-gray-200 dark:text-gray-400 dark:border-white/10">
 <p class="mb-2"><strong>{$manualCoords}:</strong></p>
 <ol class="list-decimal list-inside space-y-1">
 <li>{$stepGoto} <a href="https://www.google.com/maps" target="_blank" class="text-primary-600 hover:underline">Google Maps</a></li>
@@ -215,6 +217,7 @@ HTML;
                 
                 Forms\Components\Section::make(__('app.academic_year'))
                     ->description(__('app.academic_year_desc'))
+                    ->icon('heroicon-o-calendar-days')
                     ->schema([
                         Forms\Components\TextInput::make('academic_year_start')
                             ->label(__('app.academic_year_start'))
@@ -230,6 +233,7 @@ HTML;
 
                 Forms\Components\Section::make(__('app.regional_settings'))
                     ->description(__('app.regional_settings_desc'))
+                    ->icon('heroicon-o-globe-alt')
                     ->schema([
                         Forms\Components\Select::make('timezone')
                             ->label(__('app.default_timezone'))
@@ -276,6 +280,7 @@ HTML;
                 
                 Forms\Components\Section::make(__('app.system_preferences'))
                     ->description(__('app.system_preferences_desc'))
+                    ->icon('heroicon-o-cog-6-tooth')
                     ->schema([
                         Forms\Components\Select::make('items_per_page')
                             ->label(__('app.items_per_page'))

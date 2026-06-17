@@ -78,7 +78,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.teacher' => \App\Http\Middleware\TeacherMiddleware::class,
             'ensure.teacher' => \App\Http\Middleware\EnsureTeacherRole::class,
             'ensure.admin' => \App\Http\Middleware\EnsureAdminRole::class,
-            'ensure.staff' => \App\Http\Middleware\EnsureStaffRole::class,
             // 'require.2fa' => \App\Http\Middleware\Legacy\RequireTwoFactor::class,
             // 'require.2fa.challenge' => \App\Http\Middleware\Legacy\Require2FAChallenge::class,
             // 'require.super_admin' => \App\Http\Middleware\Legacy\RequireSuperAdmin::class,

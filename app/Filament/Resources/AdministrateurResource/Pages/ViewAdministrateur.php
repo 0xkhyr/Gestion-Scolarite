@@ -3,11 +3,19 @@
 namespace App\Filament\Resources\AdministrateurResource\Pages;
 
 use App\Filament\Resources\AdministrateurResource;
+use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewAdministrateur extends ViewRecord
 {
     protected static string $resource = AdministrateurResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\EditAction::make(),
+        ];
+    }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {

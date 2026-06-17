@@ -86,12 +86,12 @@ class SendLockoutNotification
             return route('filament.teacher.pages.account.security');
         }
 
-        // Staff roles (Secretary, Accountant, etc.)
+        // Staff (Secretary, Accountant) now use the admin panel.
         if ($user->hasAnyRole(['secretary', 'accountant'])) {
-            return route('filament.staff.pages.account.security');
+            return route('filament.admin.pages.account.security');
         }
 
         // Fallback for users without a specific panel (e.g., students)
-        return url('/'); 
+        return url('/');
     }
 }

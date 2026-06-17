@@ -62,6 +62,7 @@ class NotificationSettings extends Page
             ->schema([
                 Forms\Components\Section::make(__('app.academic_notifications'))
                     ->description(__('app.academic_notifications_desc'))
+                    ->icon('heroicon-o-academic-cap')
                     ->schema([
                         Forms\Components\Toggle::make('enable_grade_published')
                             ->label(__('app.grade_published_notifications'))
@@ -76,6 +77,7 @@ class NotificationSettings extends Page
 
                 Forms\Components\Section::make(__('app.financial_notifications'))
                     ->description(__('app.financial_notifications_desc'))
+                    ->icon('heroicon-o-banknotes')
                     ->schema([
                         Forms\Components\Toggle::make('enable_teacher_payment')
                             ->label(__('app.teacher_payment_notifications'))
@@ -90,6 +92,7 @@ class NotificationSettings extends Page
 
                 Forms\Components\Section::make(__('app.security_notifications'))
                     ->description(__('app.security_notifications_desc'))
+                    ->icon('heroicon-o-shield-check')
                     ->schema([
                         Forms\Components\Toggle::make('enable_lockout')
                             ->label(__('app.account_lockout_notifications'))

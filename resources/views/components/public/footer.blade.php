@@ -34,13 +34,13 @@
 
             <!-- Quick Links -->
             <div>
-                <h4 class="text-sm font-semibold text-zinc-900 mb-4">{{ __('Pages') }}</h4>
+                <h4 class="text-sm font-semibold text-zinc-900 mb-4">{{ __('app.pages') }}</h4>
                 <nav aria-label="Footer navigation">
                     <ul class="space-y-2.5">
                         <li>
                             <a href="{{ route('homepage') }}"
                                class="text-sm text-zinc-600 hover:text-zinc-900 transition-colors duration-150">
-                                {{ __('Home') }}
+                                {{ __('app.home') }}
                             </a>
                         </li>
                         @foreach($footerPages as $page)
@@ -59,7 +59,7 @@
 
             <!-- Contact Information -->
             <div>
-                <h4 class="text-sm font-semibold text-zinc-900 mb-4">{{ __('Contact') }}</h4>
+                <h4 class="text-sm font-semibold text-zinc-900 mb-4">{{ __('app.contact') }}</h4>
                 <ul class="space-y-2.5">
                     @if(isset($themeVars['contact_email']) && $themeVars['contact_email'])
                         <li>
@@ -80,7 +80,7 @@
                     <li class="pt-1">
                         <a href="{{ route('page.show', 'contact') }}"
                            class="text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors duration-150">
-                            {{ __('Send us a message') }}
+                            {{ __('app.send_us_a_message') }}
                         </a>
                     </li>
                 </ul>
@@ -90,7 +90,7 @@
         <!-- Bottom Section -->
         <div class="border-t border-zinc-200 mt-10 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <p class="text-sm text-zinc-500">
-                &copy; {{ date('Y') }} {{ $themeVars['site_name'] ?? 'School Management System' }}. {{ __('All rights reserved.') }}
+                &copy; {{ date('Y') }} {{ $themeVars['site_name'] ?? 'School Management System' }}. {{ __('app.all_rights_reserved') }}
             </p>
 
             <!-- Language Switcher -->

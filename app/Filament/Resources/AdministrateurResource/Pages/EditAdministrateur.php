@@ -6,7 +6,6 @@ use App\Filament\Resources\AdministrateurResource;
 use App\Models\User;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Validation\Rule;
 
 class EditAdministrateur extends EditRecord
 {
@@ -15,29 +14,19 @@ class EditAdministrateur extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('resetPassword')
+                ->label(__('app.reset_password'))
+                ->icon('heroicon-o-key')
+                ->color('warning')
+                ->visible(fn () => auth()->user()->hasPermissionTo('user.manage'))
+                ->modalHeading(__('app.reset_password'))
+                ->modalSubmitActionLabel(__('app.reset_password'))
+                ->form(AdministrateurResource::passwordResetFormSchema())
+                ->action(fn (array $data) => AdministrateurResource::applyPasswordReset($this->record, $data)),
             Actions\DeleteAction::make(),
         ];
     }
-    
-    public function getRules(): array
-    {
-        $rules = parent::getRules();
-        
-        // Add custom unique validation for email
-        if (isset($rules['email'])) {
-            $currentUserId = $this->record->user?->id;
-            
-            $rules['email'] = array_merge(
-                is_array($rules['email']) ? $rules['email'] : [$rules['email']],
-                [
-                    Rule::unique('users', 'email')->ignore($currentUserId),
-                ]
-            );
-        }
-        
-        return $rules;
-    }
-    
+
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Load user account data if exists

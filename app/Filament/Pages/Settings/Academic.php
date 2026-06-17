@@ -61,6 +61,7 @@ class Academic extends Page
             ->schema([
                 Forms\Components\Section::make(__('app.grading_system'))
                     ->description(__('app.grading_system_desc'))
+                    ->icon('heroicon-o-calculator')
                     ->schema([
                         Forms\Components\Select::make('grading_system')
                             ->label(__('app.grading_system'))
@@ -93,6 +94,7 @@ class Academic extends Page
                 
                 Forms\Components\Section::make(__('app.academic_structure'))
                     ->description(__('app.academic_structure_desc'))
+                    ->icon('heroicon-o-building-library')
                     ->schema([
                         Forms\Components\Select::make('terms_per_year')
                             ->label(__('app.terms_per_year'))
@@ -107,6 +109,7 @@ class Academic extends Page
                 
                 Forms\Components\Section::make(__('app.attendance_policies'))
                     ->description(__('app.attendance_policies_desc'))
+                    ->icon('heroicon-o-clipboard-document-check')
                     // Policy settings are children of the module flag (opt-in).
                     ->visible(fn () => feature('attendance'))
                     ->schema([
@@ -130,6 +133,7 @@ class Academic extends Page
                 
                 Forms\Components\Section::make(__('app.assignment_policies'))
                     ->description(__('app.assignment_policies_desc'))
+                    ->icon('heroicon-o-document-text')
                     // Policy settings are children of the module flag (opt-in).
                     ->visible(fn () => feature('submissions'))
                     ->schema([
