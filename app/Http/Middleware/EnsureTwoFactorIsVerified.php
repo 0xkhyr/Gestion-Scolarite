@@ -29,10 +29,11 @@ class EnsureTwoFactorIsVerified
             return $next($request);
         }
 
-        // If 2FA is required by config and user hasn't confirmed it yet,
-        // send them to their account Security page to enrol (no dedicated
-        // setup route exists; enrolment lives on the Security page).
-        if (config('security.require_2fa', false)) {
+        // If 2FA is required — either globally (config) or for this specific
+        // account (two_factor_required flag set by an admin) — and the user
+        // hasn't confirmed it yet, send them to their account Security page to
+        // enrol (no dedicated setup route exists; enrolment lives there).
+        if (config('security.require_2fa', false) || $user->two_factor_required) {
             if (!$this->twoFactorService->isConfirmed($user)) {
 
                 return redirect()->route('filament.admin.pages.account.security');
