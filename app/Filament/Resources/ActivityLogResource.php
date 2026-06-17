@@ -70,6 +70,63 @@ class ActivityLogResource extends Resource
         return false; // Activity logs should not be deleted for audit integrity
     }
 
+    /**
+     * Build a link to the causer's user record, addressed directly by user id
+     * (causer_id). Returns null — so the name falls back to plain text — when the
+     * causer is missing/deleted, isn't a User, or the viewer can't open it.
+     */
+    protected static function causerUrl($record): ?string
+    {
+        if (! $record?->causer_id || ! $record->causer instanceof \App\Models\User) {
+            return null;
+        }
+
+        if (! UserResource::canViewAny()) {
+            return null;
+        }
+
+        return UserResource::getUrl('view', ['record' => $record->causer_id]);
+    }
+
+    /** Map an event (or fall back to description keywords) to a Filament badge color. */
+    protected static function eventColor(?string $event, ?string $description = null): string
+    {
+        $haystack = strtolower(($event ?? '') . ' ' . ($description ?? ''));
+
+        return match (true) {
+            $event === 'created' => 'success',
+            $event === 'updated' => 'warning',
+            $event === 'deleted' => 'danger',
+            str_contains($haystack, 'brute force')
+                || str_contains($haystack, 'blocked')
+                || str_contains($haystack, 'failed')
+                || str_contains($haystack, 'unauthorized')
+                || str_contains($haystack, 'denied') => 'danger',
+            str_contains($haystack, 'login') || str_contains($haystack, 'enabled') => 'success',
+            str_contains($haystack, 'logout') || str_contains($haystack, 'disabled') => 'gray',
+            default => 'info',
+        };
+    }
+
+    /** Short human label for the event badge. */
+    protected static function eventLabel(?string $event, ?string $description = null): string
+    {
+        if ($event) {
+            return __('app.' . $event);
+        }
+
+        $haystack = strtolower($description ?? '');
+
+        return match (true) {
+            str_contains($haystack, 'brute force') => __('app.security'),
+            str_contains($haystack, 'unauthorized') || str_contains($haystack, 'denied') => __('app.access_denied'),
+            str_contains($haystack, 'failed') => __('app.failed_login'),
+            str_contains($haystack, 'login') => __('app.login'),
+            str_contains($haystack, 'logout') => __('app.logout'),
+            default => __('app.activity'),
+        };
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -85,12 +142,13 @@ class ActivityLogResource extends Resource
 
                     Forms\Components\Placeholder::make('event')
                         ->label(__('app.action'))
-                        ->content(fn ($record) => $record?->event
-                            ? new HtmlString('<span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800">'
-                                . e($record->event)
-                                . '</span>')
-                            : null
-                        )
+                        ->content(fn ($record) => new HtmlString(\Illuminate\Support\Facades\Blade::render(
+                            '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
+                            [
+                                'color' => self::eventColor($record?->event, $record?->description),
+                                'label' => self::eventLabel($record?->event, $record?->description),
+                            ],
+                        )))
                         ->columnSpan(1),
 
                     Forms\Components\Placeholder::make('description')
@@ -111,6 +169,15 @@ class ActivityLogResource extends Resource
                             $name = $record->causer?->name
                                 ?? (class_basename($record->causer_type) . " #{$record->causer_id}");
 
+                            $url = self::causerUrl($record);
+
+                            if ($url) {
+                                return new HtmlString(
+                                    '<a href="' . e($url) . '" class="text-sm font-medium text-primary-600 hover:underline">'
+                                    . e($name) . '</a>'
+                                );
+                            }
+
                             return new HtmlString('<div class="text-sm font-medium">' . e($name) . '</div>');
                         })
                         ->columnSpan(1),
@@ -126,11 +193,9 @@ class ActivityLogResource extends Resource
                     Forms\Components\Placeholder::make('properties')
                         ->label(__('app.changes'))
                         ->content(fn ($record) => new HtmlString(
-                            '<div class="rounded bg-gray-50 dark:bg-gray-900 p-3 text-xs font-mono">
-                                <pre class="whitespace-pre-wrap">' .
-                                    e(json_encode($record->properties ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) .
-                                '</pre>
-                            </div>'
+                            '<pre class="rounded bg-gray-50 p-3 text-xs font-mono text-gray-700" style="white-space:pre-wrap;word-break:break-word;">' .
+                                e(json_encode($record->properties ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) .
+                            '</pre>'
                         ))
                         ->columnSpanFull(),
 
@@ -152,40 +217,63 @@ class ActivityLogResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('app.time'))
+                    ->dateTime('d M Y H:i')
+                    ->description(fn ($record) => $record->created_at?->diffForHumans())
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('event')
+                    ->label(__('app.event'))
+                    ->badge()
+                    ->color(fn ($record) => self::eventColor($record->event, $record->description))
+                    ->formatStateUsing(fn ($record) => self::eventLabel($record->event, $record->description))
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('causer.name')
                     ->label(__('app.user'))
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->icon('heroicon-m-user')
+                    ->default('—')
+                    ->url(fn ($record) => self::causerUrl($record))
+                    ->openUrlInNewTab()
+                    ->color(fn ($record) => self::causerUrl($record) ? 'primary' : null)
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('description')
                     ->label(__('app.actions'))
                     ->wrap()
                     ->searchable()
-                    ->toggleable(),
+                    ->limit(80),
 
                 Tables\Columns\TextColumn::make('subject_type')
                     ->label(__('app.resource'))
-                    ->formatStateUsing(fn ($state) => $state ? class_basename($state) : null)
+                    ->badge()
+                    ->color('gray')
+                    ->formatStateUsing(fn ($state, $record) => $state
+                        ? class_basename($state) . ($record->subject_id ? " #{$record->subject_id}" : '')
+                        : null)
                     ->searchable()
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('subject_id')
-                    ->label(__('app.resource_id'))
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
                 Tables\Columns\TextColumn::make('properties->ip_address')
                     ->label(__('app.ip_address'))
+                    ->icon('heroicon-m-globe-alt')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('app.time'))
-                    ->dateTime()
-                    ->sortable(),
             ])
             ->filters([
+                // Filter by causer (used by the "activity trail" link from a user).
+                Tables\Filters\SelectFilter::make('causer_id')
+                    ->label(__('app.user'))
+                    ->searchable()
+                    ->options(fn () => \App\Models\User::query()
+                        ->whereIn('id', ActivityModel::query()
+                            ->whereNotNull('causer_id')
+                            ->distinct()
+                            ->pluck('causer_id'))
+                        ->pluck('name', 'id')
+                        ->toArray()),
+
                 Tables\Filters\SelectFilter::make('log_name')
                     ->label(__('app.log_name'))
                     ->options(fn () => ActivityModel::query()

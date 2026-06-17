@@ -153,8 +153,8 @@ class AdministrateurResource extends Resource
                         Forms\Components\Placeholder::make('compte_status')
                             ->label(__('app.status'))
                             ->content(fn ($record) => $record->user?->is_active
-                                ? new \Illuminate\Support\HtmlString('<span class="font-semibold text-success-600 dark:text-success-400">' . __('app.actif') . '</span>')
-                                : new \Illuminate\Support\HtmlString('<span class="font-semibold text-danger-600 dark:text-danger-400">' . __('app.inactif') . '</span>'))
+                                ? self::badge('success', __('app.actif'))
+                                : self::badge('danger', __('app.inactif')))
                             ->visibleOn('view'),
                     ])
                     ->columns(2),
@@ -176,24 +176,24 @@ class AdministrateurResource extends Resource
                             ->content(function ($record) {
                                 $roleName = $record->user?->roles->pluck('name')->first();
                                 $label = $roleName ? __("app.{$roleName}") : '-';
-                                $classes = $roleName === 'super_admin'
-                                    ? 'bg-purple-50 text-purple-700 ring-purple-700/10 dark:bg-purple-400/10 dark:text-purple-400 dark:ring-purple-400/30'
-                                    : 'bg-blue-50 text-blue-700 ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30';
 
-                                return new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ' . $classes . '">' . ($roleName === 'super_admin' ? '🔐 ' : '👤 ') . e($label) . '</span>');
+                                return self::badge(
+                                    $roleName === 'super_admin' ? 'primary' : 'info',
+                                    $label,
+                                );
                             }),
 
                         Forms\Components\Placeholder::make('compte_status')
                             ->label(__('app.statut_compte'))
                             ->content(fn ($record) => $record->user?->is_active
-                                ? new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-700/10 dark:bg-success-400/10 dark:text-success-400 dark:ring-success-400/30">✅ ' . __('app.actif') . '</span>')
-                                : new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-50 text-red-700 ring-1 ring-inset ring-red-700/10 dark:bg-danger-400/10 dark:text-danger-400 dark:ring-danger-400/30">❌ ' . __('app.inactif') . '</span>')),
+                                ? self::badge('success', __('app.actif'))
+                                : self::badge('danger', __('app.inactif'))),
 
                         Forms\Components\Placeholder::make('two_factor_status_readonly')
                             ->label(__('app.authentication_2fa'))
                             ->content(fn ($record) => $record->user?->two_factor_enabled
-                                ? new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-700/10 dark:bg-success-400/10 dark:text-success-400 dark:ring-success-400/30">🔐 ' . __('app.actif') . '</span>')
-                                : new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-700/10 dark:bg-white/5 dark:text-gray-400 dark:ring-white/10">🔓 ' . __('app.inactif') . '</span>')),
+                                ? self::badge('success', __('app.actif'))
+                                : self::badge('gray', __('app.inactif'))),
                     ])
                     ->columns(2),
                     
@@ -209,8 +209,8 @@ class AdministrateurResource extends Resource
                         Forms\Components\Placeholder::make('two_factor_status')
                             ->label(__('app.deux_facteurs_active_court'))
                             ->content(fn ($record) => $record->user?->two_factor_enabled
-                                ? new \Illuminate\Support\HtmlString('<span class="font-semibold text-success-600 dark:text-success-400">✓ ' . __('app.actif') . '</span>')
-                                : new \Illuminate\Support\HtmlString('<span class="text-gray-600 dark:text-gray-400">✗ ' . __('app.inactif') . '</span>'))
+                                ? self::badge('success', __('app.actif'))
+                                : self::badge('gray', __('app.inactif')))
                             ->visibleOn('view'),
                             
                         Forms\Components\Textarea::make('two_factor_recovery_codes')
@@ -310,6 +310,21 @@ class AdministrateurResource extends Resource
             ->defaultSort('nom', 'asc');
     }
 
+    /**
+     * Render a native Filament badge as HTML (colors come from Filament's own CSS).
+     * Wrapped in a flex container so it shrinks to its content instead of
+     * stretching to the placeholder's full width.
+     */
+    protected static function badge(string $color, string $label): \Illuminate\Support\HtmlString
+    {
+        return new \Illuminate\Support\HtmlString(
+            \Illuminate\Support\Facades\Blade::render(
+                '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
+                ['color' => $color, 'label' => $label],
+            )
+        );
+    }
+
     /** Shared "reset password" modal form (used by the list action and the edit header). */
     public static function passwordResetFormSchema(): array
     {
@@ -342,6 +357,13 @@ class AdministrateurResource extends Resource
 
         // User model casts password => 'hashed', so pass plain (hashed once by the cast).
         $user->update(['password' => $data['password']]);
+
+        \App\Services\ActivityLogger::record(
+            'security',
+            "Password reset for {$user->name} ({$user->email})",
+            $user,
+            ['type' => 'password_reset', 'target_user_id' => $user->id],
+        );
 
         Notification::make()->title(__('app.password_updated'))->success()->send();
     }

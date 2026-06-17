@@ -79,7 +79,23 @@ class Profile extends Page
                     ->schema([
                         Forms\Components\Placeholder::make('role')
                             ->label(__('app.role'))
-                            ->content(fn () => auth()->user()->roles->pluck('name')->map(fn ($r) => __('app.' . $r))->join(', ') ?: __('app.no_roles_assigned')),
+                            ->content(function () {
+                                $roles = auth()->user()->roles->pluck('name');
+
+                                if ($roles->isEmpty()) {
+                                    return new \Illuminate\Support\HtmlString(\Illuminate\Support\Facades\Blade::render(
+                                        '<x-filament::badge color="gray">{{ $l }}</x-filament::badge>',
+                                        ['l' => __('app.no_roles_assigned')],
+                                    ));
+                                }
+
+                                $badges = $roles->map(fn ($r) => \Illuminate\Support\Facades\Blade::render(
+                                    '<x-filament::badge :color="$c">{{ $l }}</x-filament::badge>',
+                                    ['c' => $r === 'super_admin' ? 'primary' : 'info', 'l' => __('app.' . $r)],
+                                ))->join('');
+
+                                return new \Illuminate\Support\HtmlString('<div class="flex flex-wrap gap-1">' . $badges . '</div>');
+                            }),
                         Forms\Components\Placeholder::make('created_at')
                             ->label(__('app.account_created'))
                             ->content(fn () => auth()->user()->created_at?->translatedFormat('d M Y') ?: __('app.unknown')),
@@ -90,33 +106,28 @@ class Profile extends Page
                             ->label(__('app.profile_type'))
                             ->content(function () {
                                 $user = auth()->user();
-                                if ($user->profile) {
-                                    return __('app.' . strtolower(class_basename($user->profile_type)));
-                                }
-                                return __('app.no_profile_linked');
+
+                                [$color, $label] = $user->profile
+                                    ? ['info', __('app.' . strtolower(class_basename($user->profile_type)))]
+                                    : ['gray', __('app.no_profile_linked')];
+
+                                return new \Illuminate\Support\HtmlString(\Illuminate\Support\Facades\Blade::render(
+                                    '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
+                                    compact('color', 'label'),
+                                ));
                             }),
                         Forms\Components\Placeholder::make('is_active')
                             ->label(__('app.account_status'))
                             ->content(function () {
-                                $user = auth()->user();
-                                $isActive = $user->is_active;
-                                
-                                if ($isActive) {
-                                    return new \Illuminate\Support\HtmlString(
-                                        '<span class="inline-flex items-center gap-1.5 rounded-md bg-success-50 px-2.5 py-1 text-sm font-medium text-success-700 ring-1 ring-inset ring-success-600/20 dark:bg-success-400/10 dark:text-success-400 dark:ring-success-400/30">' .
-                                        '<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">' .
-                                        '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>' .
-                                        '</svg>' . __('app.active') .
-                                        '</span>'
-                                    );
-                                }
+                                $isActive = auth()->user()->is_active;
 
                                 return new \Illuminate\Support\HtmlString(
-                                    '<span class="inline-flex items-center gap-1.5 rounded-md bg-danger-50 px-2.5 py-1 text-sm font-medium text-danger-700 ring-1 ring-inset ring-danger-600/20 dark:bg-danger-400/10 dark:text-danger-400 dark:ring-danger-400/30">' .
-                                    '<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">' .
-                                    '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>' .
-                                    '</svg>' . __('app.inactive') .
-                                    '</span>'
+                                    \Illuminate\Support\Facades\Blade::render(
+                                        '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
+                                        $isActive
+                                            ? ['color' => 'success', 'label' => __('app.active')]
+                                            : ['color' => 'danger', 'label' => __('app.inactive')],
+                                    )
                                 );
                             }),
                     ])->columns(3),

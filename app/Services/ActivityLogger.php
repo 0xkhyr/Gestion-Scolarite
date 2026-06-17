@@ -8,6 +8,29 @@ use Spatie\Activitylog\Models\Activity;
 class ActivityLogger
 {
     /**
+     * Record an audit event caused by the currently authenticated user.
+     * Standardises the log name + ip/user-agent properties read by the
+     * ActivityLogResource view page.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model|null  $subject
+     */
+    public static function record(string $logName, string $description, $subject = null, array $properties = []): void
+    {
+        $chain = activity($logName)->causedBy(auth()->user());
+
+        if ($subject) {
+            $chain->performedOn($subject);
+        }
+
+        $chain
+            ->withProperties(array_merge([
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ], $properties))
+            ->log($description);
+    }
+
+    /**
      * Log activity using Spatie activitylog. Keeps compatibility with old signature.
      */
     public static function log(string $userType, ?int $userId, string $action, ?string $resource = null, $resourceId = null, ?string $description = null, ?array $changes = null, ?Request $request = null)

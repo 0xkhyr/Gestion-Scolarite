@@ -214,6 +214,13 @@ class Security extends Page
 
         $this->two_factor_code = '';
 
+        \App\Services\ActivityLogger::record(
+            'security',
+            'Two-factor authentication enabled',
+            $user,
+            ['type' => '2fa_enabled'],
+        );
+
         Notification::make()
             ->title(__('app.2fa_enabled_title'))
             ->body(__('app.2fa_enabled_body'))
@@ -223,13 +230,22 @@ class Security extends Page
 
     public function disable2FA(): void
     {
-        auth()->user()->forceFill([
+        $user = auth()->user();
+
+        $user->forceFill([
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ])->save();
 
         $this->two_factor_code = '';
+
+        \App\Services\ActivityLogger::record(
+            'security',
+            'Two-factor authentication disabled',
+            $user,
+            ['type' => '2fa_disabled'],
+        );
 
         Notification::make()
             ->title(__('app.2fa_disabled_title'))
