@@ -22,6 +22,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\MenuItem;
 use App\Filament\Pages\Account;
+use Cmsmaxinc\FilamentErrorPages\FilamentErrorPagesPlugin;
 
 class TeacherPanelProvider extends PanelProvider
 {
@@ -35,6 +36,10 @@ class TeacherPanelProvider extends PanelProvider
             ])
             ->id('teacher')
             ->path('teacher')
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->plugins([
+                FilamentErrorPagesPlugin::make(),
+            ])
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->databaseNotifications()
             ->colors([

@@ -22,6 +22,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\MenuItem;
 use App\Filament\Pages\Account;
+use Cmsmaxinc\FilamentErrorPages\FilamentErrorPagesPlugin;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -40,6 +41,10 @@ class AdminPanelProvider extends PanelProvider
             
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->plugins([
+                FilamentErrorPagesPlugin::make(),
+            ])
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->databaseNotifications()
             ->colors([
@@ -89,6 +94,8 @@ class AdminPanelProvider extends PanelProvider
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
                 AuthenticateSession::class,
+                // Sign deactivated accounts out gracefully (login redirect, not 403).
+                \App\Http\Middleware\EnsureUserIsActive::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
