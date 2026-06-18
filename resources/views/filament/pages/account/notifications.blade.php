@@ -4,7 +4,6 @@
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('app.notifications_page_subtitle') }}</p>
         </div>
         
-        @include('filament.components.account-navigation')
         
     @if (method_exists($this, 'form'))
         <form wire:submit="save">

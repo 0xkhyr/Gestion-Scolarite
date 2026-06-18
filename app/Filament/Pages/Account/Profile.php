@@ -16,11 +16,13 @@ use Filament\Notifications\Notification;
 
 class Profile extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-circle';
-    
+    protected static ?string $cluster = \App\Filament\Clusters\Account::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
+
     protected string $view = 'filament.pages.account.profile';
-    
-    protected static ?string $slug = 'account/profile';
+
+    protected static ?string $slug = 'profile';
 
     public function getTitle(): string
     {
@@ -29,12 +31,12 @@ class Profile extends Page
 
     public static function getNavigationLabel(): string
     {
-        return __('app.my_account');
+        return __('app.profile');
     }
-    
+
     protected static bool $shouldRegisterNavigation = true;
-    
-    protected static ?int $navigationSort = 9999;
+
+    protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {

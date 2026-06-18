@@ -17,13 +17,22 @@ use Filament\Pages\Page;
 
 class Security extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = null;
+    protected static ?string $cluster = \App\Filament\Clusters\Account::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shield-check';
 
     protected string $view = 'filament.pages.account.security';
 
-    protected static ?string $slug = 'account/security';
+    protected static ?string $slug = 'security';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
+
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.security');
+    }
 
     /** Password form state. */
     public ?array $data = [];

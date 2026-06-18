@@ -38,7 +38,7 @@ class ForcePasswordChange
                 ->persistent()
                 ->send();
 
-            return redirect()->route('filament.admin.pages.account.security');
+            return redirect()->route('filament.admin.account.pages.security');
         }
 
         return $next($request);
@@ -47,7 +47,7 @@ class ForcePasswordChange
     protected function isExemptRoute(Request $request): bool
     {
         $exemptRoutes = [
-            'filament.admin.pages.account.security',
+            'filament.admin.account.pages.security',
             'filament.admin.pages.two-factor-challenge',
             'filament.admin.auth.logout',
             'logout',

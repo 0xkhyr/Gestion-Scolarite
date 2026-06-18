@@ -80,16 +80,16 @@ class SendLockoutNotification
     protected function getSecurityUrl(User $user): string
     {
         if ($user->isAdmin()) {
-            return route('filament.admin.pages.account.security');
+            return route('filament.admin.account.pages.security');
         }
 
         if ($user->isTeacher()) {
-            return route('filament.teacher.pages.account.security');
+            return route('filament.teacher.account.pages.security');
         }
 
         // Staff (Secretary, Accountant) now use the admin panel.
         if ($user->hasAnyRole(['secretary', 'accountant'])) {
-            return route('filament.admin.pages.account.security');
+            return route('filament.admin.account.pages.security');
         }
 
         // Fallback for users without a specific panel (e.g., students)

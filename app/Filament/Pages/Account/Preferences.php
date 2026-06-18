@@ -13,18 +13,27 @@ use Filament\Notifications\Notification;
 
 class Preferences extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = null;
-    
+    protected static ?string $cluster = \App\Filament\Clusters\Account::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
+
     protected string $view = 'filament.pages.account.preferences';
-    
-    protected static ?string $slug = 'account/preferences';
+
+    protected static ?string $slug = 'preferences';
+
+    protected static ?int $navigationSort = 3;
 
     public function getTitle(): string
     {
         return __('app.preferences');
     }
-    
-    protected static bool $shouldRegisterNavigation = false;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.preferences');
+    }
+
+    protected static bool $shouldRegisterNavigation = true;
 
     public ?array $data = [];
 

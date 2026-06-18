@@ -19,18 +19,27 @@ use Illuminate\Support\Facades\DB;
 
 class Notifications extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = null;
-    
+    protected static ?string $cluster = \App\Filament\Clusters\Account::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bell';
+
     protected string $view = 'filament.pages.account.notifications';
-    
-    protected static ?string $slug = 'account/notifications';
+
+    protected static ?string $slug = 'notifications';
+
+    protected static ?int $navigationSort = 4;
 
     public function getTitle(): string
     {
         return __('app.notification_settings');
     }
-    
-    protected static bool $shouldRegisterNavigation = false;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.notifications');
+    }
+
+    protected static bool $shouldRegisterNavigation = true;
 
     public ?array $data = [];
 

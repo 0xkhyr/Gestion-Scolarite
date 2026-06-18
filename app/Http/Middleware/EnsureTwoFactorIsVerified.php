@@ -36,7 +36,7 @@ class EnsureTwoFactorIsVerified
         if (config('security.require_2fa', false) || $user->two_factor_required) {
             if (!$this->twoFactorService->isConfirmed($user)) {
 
-                return redirect()->route('filament.admin.pages.account.security');
+                return redirect()->route('filament.admin.account.pages.security');
             }
         }
 
@@ -59,7 +59,7 @@ class EnsureTwoFactorIsVerified
     {
         $exemptRoutes = [
             // Enrolment page (where users turn 2FA on) must stay reachable.
-            'filament.admin.pages.account.security',
+            'filament.admin.account.pages.security',
             'filament.admin.pages.two-factor-challenge',
             'filament.admin.auth.logout',
             'logout',
