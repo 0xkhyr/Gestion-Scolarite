@@ -478,8 +478,9 @@ class UserResource extends Resource
             return null;
         }
 
+        // v4 renamed the table-filter URL param from `tableFilters` to `filters`.
         return ActivityLogResource::getUrl('index', [
-            'tableFilters' => ['causer_id' => ['value' => $record->id]],
+            'filters' => ['causer_id' => ['value' => $record->id]],
         ]);
     }
 
