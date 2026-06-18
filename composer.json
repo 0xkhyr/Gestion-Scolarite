@@ -11,6 +11,7 @@
         "cmsmaxinc/filament-error-pages": "^2.0",
         "endroid/qr-code": "^5.0",
         "filament/filament": "^4.0",
+        "guava/calendar": "^2.1",
         "guzzlehttp/guzzle": "^7.2",
         "khaled.alshamaa/ar-php": "^7.0",
         "lara-zeus/activity-timeline": "^5.0",

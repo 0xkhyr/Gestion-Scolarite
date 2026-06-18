@@ -1466,6 +1466,7 @@ return [
     'access_denied' => 'Accès refusé',
     'failed_login' => 'Échec de connexion',
     'activity' => 'Activité',
+    'calendrier' => 'Calendrier',
     'payment_information' => 'Informations de paiement',
     'payment_status' => 'Statut du paiement',
     'evaluation_details' => 'Détails de l\'évaluation',

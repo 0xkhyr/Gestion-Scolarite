@@ -1391,6 +1391,7 @@ return [
     'access_denied' => 'Access Denied',
     'failed_login' => 'Failed Login',
     'activity' => 'Activity',
+    'calendrier' => 'Calendar',
     'payment_information' => 'Payment Information',
     'payment_status' => 'Payment Status',
     'evaluation_details' => 'Evaluation Details',

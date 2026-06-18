@@ -1363,6 +1363,7 @@ return [
     'access_denied' => 'تم رفض الوصول',
     'failed_login' => 'محاولة دخول فاشلة',
     'activity' => 'نشاط',
+    'calendrier' => 'التقويم',
     'payment_information' => 'معلومات الدفع',
     'payment_status' => 'حالة الدفع',
     'evaluation_details' => 'تفاصيل التقييم',
