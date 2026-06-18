@@ -1,12 +1,12 @@
 <x-filament-panels::page>
     @if (method_exists($this, 'form'))
-        <x-filament-panels::form wire:submit="save">
+        <form wire:submit="save">
             {{ $this->form }}
             
-            <x-filament-panels::form.actions 
+            <x-filament::actions 
                 :actions="$this->getFormActions()" 
                 :full-width="false"
             />
-        </x-filament-panels::form>
+        </form>
     @endif
 </x-filament-panels::page>

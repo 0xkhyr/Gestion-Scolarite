@@ -33,13 +33,13 @@
         @if (! $this->showCodes)
             <div class="max-w-2xl mx-auto">
                 <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
-                    <x-filament-panels::form wire:submit="viewCodes">
+                    <form wire:submit="viewCodes">
                         {{ $this->form }}
 
                         <div class="mt-4">
-                            <x-filament-panels::form.actions :actions="$this->getFormActions()" />
+                            <x-filament::actions :actions="$this->getFormActions()" />
                         </div>
-                    </x-filament-panels::form>
+                    </form>
                 </div>
             </div>
         @endif
@@ -78,7 +78,7 @@
                     </div>
                 </div>
 
-                <x-filament-panels::form.actions :actions="$this->getFormActions()" />
+                <x-filament::actions :actions="$this->getFormActions()" />
             </div>
         @endif
     </div>

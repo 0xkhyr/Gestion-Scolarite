@@ -7,9 +7,9 @@
         @include('filament.components.account-navigation')
         
     @if (method_exists($this, 'form'))
-        <x-filament-panels::form wire:submit="save">
+        <form wire:submit="save">
             {{ $this->form }}
-        </x-filament-panels::form>
+        </form>
     @endif
     </div>
 </x-filament-panels::page>
