@@ -53,7 +53,10 @@ class CalendarWidget extends BaseCalendarWidget
 
     protected function getEvents(FetchInfo $info): Collection | array | Builder
     {
-        return $this->getEvaluationEvents($info)
+        // Wrap in a base collection: an empty Eloquent\Collection (no evaluations
+        // in range) would otherwise use Eloquent's merge() and call getKey() on
+        // the Cours CalendarEvent value objects.
+        return collect($this->getEvaluationEvents($info))
             ->merge($this->getCoursEvents($info));
     }
 
