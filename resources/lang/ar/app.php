@@ -1364,6 +1364,7 @@ return [
     'failed_login' => 'محاولة دخول فاشلة',
     'activity' => 'نشاط',
     'calendrier' => 'التقويم',
+    'all_classes' => 'كل الفصول',
     'payment_information' => 'معلومات الدفع',
     'payment_status' => 'حالة الدفع',
     'evaluation_details' => 'تفاصيل التقييم',

@@ -1392,6 +1392,7 @@ return [
     'failed_login' => 'Failed Login',
     'activity' => 'Activity',
     'calendrier' => 'Calendar',
+    'all_classes' => 'All classes',
     'payment_information' => 'Payment Information',
     'payment_status' => 'Payment Status',
     'evaluation_details' => 'Evaluation Details',
