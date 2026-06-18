@@ -7,10 +7,10 @@
     "require": {
         "php": "^8.4",
         "barryvdh/laravel-dompdf": "^3.1",
-        "bezhansalleh/filament-language-switch": "^3",
-        "cmsmaxinc/filament-error-pages": "^1.0",
+        "bezhansalleh/filament-language-switch": "^4.0",
+        "cmsmaxinc/filament-error-pages": "^2.0",
         "endroid/qr-code": "^5.0",
-        "filament/filament": "^3.0",
+        "filament/filament": "^4.0",
         "guzzlehttp/guzzle": "^7.2",
         "khaled.alshamaa/ar-php": "^7.0",
         "laravel/fortify": "^1.21",
