@@ -2,8 +2,13 @@
 
 namespace App\Filament\Pages\Settings;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -11,9 +16,9 @@ use App\Services\SettingsService;
 
 class Academic extends Page
 {
-    protected static ?string $navigationIcon = null;
+    protected static string | \BackedEnum | null $navigationIcon = null;
     
-    protected static string $view = 'filament.pages.settings.academic';
+    protected string $view = 'filament.pages.settings.academic';
     
 
     public function getTitle(): string
@@ -55,15 +60,15 @@ class Academic extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.grading_system'))
+        return $schema
+            ->components([
+                Section::make(__('app.grading_system'))
                     ->description(__('app.grading_system_desc'))
                     ->icon('heroicon-o-calculator')
                     ->schema([
-                        Forms\Components\Select::make('grading_system')
+                        Select::make('grading_system')
                             ->label(__('app.grading_system'))
                             ->options([
                                 'sur_20' => __('app.grading_sur_20'),
@@ -72,7 +77,7 @@ class Academic extends Page
                             ])
                             ->default('sur_20')
                             ->required(),
-                        Forms\Components\TextInput::make('passing_grade')
+                        TextInput::make('passing_grade')
                             ->label(__('app.passing_grade'))
                             ->helperText(__('app.passing_grade_help'))
                             ->numeric()
@@ -81,7 +86,7 @@ class Academic extends Page
                             ->suffix('/20')
                             ->default(10)
                             ->required(),
-                        Forms\Components\TextInput::make('max_grade')
+                        TextInput::make('max_grade')
                             ->label(__('app.max_grade'))
                             ->helperText(__('app.max_grade_help'))
                             ->numeric()
@@ -92,11 +97,11 @@ class Academic extends Page
                             ->required(),
                     ])->columns(3),
                 
-                Forms\Components\Section::make(__('app.academic_structure'))
+                Section::make(__('app.academic_structure'))
                     ->description(__('app.academic_structure_desc'))
                     ->icon('heroicon-o-building-library')
                     ->schema([
-                        Forms\Components\Select::make('terms_per_year')
+                        Select::make('terms_per_year')
                             ->label(__('app.terms_per_year'))
                             ->options([
                                 '1' => __('app.term_annual'),
@@ -107,23 +112,23 @@ class Academic extends Page
                             ->required(),
                     ])->columns(2),
                 
-                Forms\Components\Section::make(__('app.attendance_policies'))
+                Section::make(__('app.attendance_policies'))
                     ->description(__('app.attendance_policies_desc'))
                     ->icon('heroicon-o-clipboard-document-check')
                     // Policy settings are children of the module flag (opt-in).
                     ->visible(fn () => feature('attendance'))
                     ->schema([
-                        Forms\Components\Toggle::make('attendance_required')
+                        Toggle::make('attendance_required')
                             ->label(__('app.attendance_required_label'))
                             ->helperText(__('app.attendance_required_help')),
-                        Forms\Components\TextInput::make('min_attendance_percentage')
+                        TextInput::make('min_attendance_percentage')
                             ->label(__('app.min_attendance_percentage'))
                             ->integer()
                             ->minValue(0)
                             ->maxValue(100)
                             ->suffix('%')
                             ->required(),
-                        Forms\Components\TextInput::make('max_absences_per_term')
+                        TextInput::make('max_absences_per_term')
                             ->label(__('app.max_absences_per_term'))
                             ->integer()
                             ->minValue(0)
@@ -131,13 +136,13 @@ class Academic extends Page
                             ->required(),
                     ])->columns(2),
                 
-                Forms\Components\Section::make(__('app.assignment_policies'))
+                Section::make(__('app.assignment_policies'))
                     ->description(__('app.assignment_policies_desc'))
                     ->icon('heroicon-o-document-text')
                     // Policy settings are children of the module flag (opt-in).
                     ->visible(fn () => feature('submissions'))
                     ->schema([
-                        Forms\Components\TextInput::make('late_submission_penalty')
+                        TextInput::make('late_submission_penalty')
                             ->label(__('app.late_submission_penalty'))
                             ->integer()
                             ->minValue(0)
@@ -146,8 +151,8 @@ class Academic extends Page
                             ->helperText(__('app.late_submission_penalty_help')),
                     ])->columns(2),
                 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')

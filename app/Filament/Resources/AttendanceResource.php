@@ -2,11 +2,24 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\AttendanceResource\Pages\ListAttendances;
+use App\Filament\Resources\AttendanceResource\Pages\EditAttendance;
 use App\Filament\Concerns\HasRoleBasedAccess;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Models\Attendance;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,7 +32,7 @@ class AttendanceResource extends Resource
 
     protected static ?string $model = Attendance::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     protected static ?int $navigationSort = 4;
 
@@ -89,21 +102,21 @@ class AttendanceResource extends Resource
         ]);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.attendance_record'))
+        return $schema
+            ->components([
+                Section::make(__('app.attendance_record'))
                     ->schema([
-                        Forms\Components\Placeholder::make('etudiant')
+                        Placeholder::make('etudiant')
                             ->label(__('app.etudiant'))
                             ->content(fn (?Attendance $record) => $record?->etudiant
                                 ? trim($record->etudiant->prenom . ' ' . $record->etudiant->nom) . ' (' . $record->etudiant->matricule . ')'
                                 : '—'),
-                        Forms\Components\Placeholder::make('date')
+                        Placeholder::make('date')
                             ->label(__('app.date'))
                             ->content(fn (?Attendance $record) => $record?->date?->translatedFormat('d M Y') ?? '—'),
-                        Forms\Components\Select::make('status')
+                        Select::make('status')
                             ->label(__('app.status'))
                             ->options([
                                 'present' => __('app.present'),
@@ -118,55 +131,55 @@ class AttendanceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('etudiant.nom')
+                TextColumn::make('etudiant.nom')
                     ->label(__('app.etudiant'))
                     ->formatStateUsing(fn ($record) => trim($record->etudiant?->prenom . ' ' . $record->etudiant?->nom))
                     ->searchable(['nom', 'prenom'])
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('classe.nom_classe')
+                TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
                     ->badge()
                     ->color('info')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('cours')
+                TextColumn::make('cours')
                     ->label(__('app.cours'))
                     ->formatStateUsing(fn ($record) => $record->cours
                         ? ucfirst($record->cours->jour) . ' · ' . ($record->cours->matiere?->nom_matiere ?? '—')
                         : '—'),
 
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->label(__('app.date'))
                     ->date('d M Y')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label(__('app.status'))
                     ->badge()
                     ->formatStateUsing(fn ($state) => __('app.' . $state))
                     ->color(fn ($state) => $state === 'present' ? 'success' : 'danger')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('markedBy.name')
+                TextColumn::make('markedBy.name')
                     ->label(__('app.marked_by'))
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->label(__('app.status'))
                     ->options([
                         'present' => __('app.present'),
                         'absent' => __('app.absent'),
                     ]),
-                Tables\Filters\SelectFilter::make('id_classe')
+                SelectFilter::make('id_classe')
                     ->label(__('app.classe'))
                     ->relationship('classe', 'nom_classe'),
-                Tables\Filters\Filter::make('date')
-                    ->form([
-                        Forms\Components\DatePicker::make('from')->label(__('app.from')),
-                        Forms\Components\DatePicker::make('until')->label(__('app.until')),
+                Filter::make('date')
+                    ->schema([
+                        DatePicker::make('from')->label(__('app.from')),
+                        DatePicker::make('until')->label(__('app.until')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -174,13 +187,13 @@ class AttendanceResource extends Resource
                             ->when($data['until'] ?? null, fn ($q, $d) => $q->whereDate('date', '<=', $d));
                     }),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('date', 'desc');
@@ -189,8 +202,8 @@ class AttendanceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAttendances::route('/'),
-            'edit' => Pages\EditAttendance::route('/{record}/edit'),
+            'index' => ListAttendances::route('/'),
+            'edit' => EditAttendance::route('/{record}/edit'),
         ];
     }
 }

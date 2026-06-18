@@ -2,8 +2,14 @@
 
 namespace App\Filament\Pages\Settings;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -11,9 +17,9 @@ use App\Services\SettingsService;
 
 class Security extends Page
 {
-    protected static ?string $navigationIcon = null;
+    protected static string | \BackedEnum | null $navigationIcon = null;
     
-    protected static string $view = 'filament.pages.settings.security';
+    protected string $view = 'filament.pages.settings.security';
     
     protected static ?string $slug = 'settings/security';
 
@@ -58,18 +64,18 @@ class Security extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.authentication_policies'))
+        return $schema
+            ->components([
+                Section::make(__('app.authentication_policies'))
                     ->icon('heroicon-o-finger-print')
                     ->description(__('app.authentication_policies_desc'))
                     ->schema([
-                        Forms\Components\Toggle::make('two_factor_required')
+                        Toggle::make('two_factor_required')
                             ->label(__('app.two_factor_required'))
                             ->helperText(__('app.two_factor_required_helper')),
-                        Forms\Components\Select::make('session_timeout')
+                        Select::make('session_timeout')
                             ->label(__('app.session_timeout'))
                             ->options([
                                 '15' => __('app.session_timeout_15'),
@@ -80,59 +86,59 @@ class Security extends Page
                                 '480' => __('app.session_timeout_480'),
                             ])
                             ->required(),
-                        Forms\Components\Toggle::make('force_https')
+                        Toggle::make('force_https')
                             ->label(__('app.force_https'))
                             ->helperText(__('app.force_https_helper')),
                     ])->columns(2),
                 
-                Forms\Components\Section::make(__('app.password_policies'))
+                Section::make(__('app.password_policies'))
                     ->icon('heroicon-o-key')
                     ->description(__('app.password_policies_desc'))
                     ->schema([
-                        Forms\Components\TextInput::make('password_min_length')
+                        TextInput::make('password_min_length')
                             ->label(__('app.password_min_length'))
                             ->integer()
                             ->minValue(6)
                             ->maxValue(50)
                             ->required(),
-                        Forms\Components\Toggle::make('password_require_uppercase')
+                        Toggle::make('password_require_uppercase')
                             ->label(__('app.password_require_uppercase'))
                             ->helperText(__('app.password_require_uppercase_helper')),
-                        Forms\Components\Toggle::make('password_require_lowercase')
+                        Toggle::make('password_require_lowercase')
                             ->label(__('app.password_require_lowercase'))
                             ->helperText(__('app.password_require_lowercase_helper')),
-                        Forms\Components\Toggle::make('password_require_numbers')
+                        Toggle::make('password_require_numbers')
                             ->label(__('app.password_require_numbers'))
                             ->helperText(__('app.password_require_numbers_helper')),
-                        Forms\Components\Toggle::make('password_require_symbols')
+                        Toggle::make('password_require_symbols')
                             ->label(__('app.password_require_symbols'))
                             ->helperText(__('app.password_require_symbols_helper')),
-                        Forms\Components\Toggle::make('password_expiry_enabled')
+                        Toggle::make('password_expiry_enabled')
                             ->label(__('app.password_expiry_enabled'))
                             ->helperText(__('app.password_expiry_enabled_helper'))
                             ->live(),
-                        Forms\Components\TextInput::make('password_expiry_days')
+                        TextInput::make('password_expiry_days')
                             ->label(__('app.password_expiry_days'))
                             ->integer()
                             ->minValue(1)
                             ->maxValue(365)
                             // Child of the toggle: only relevant when expiry is enabled.
-                            ->visible(fn (Forms\Get $get) => (bool) $get('password_expiry_enabled'))
-                            ->required(fn (Forms\Get $get) => (bool) $get('password_expiry_enabled'))
+                            ->visible(fn (Get $get) => (bool) $get('password_expiry_enabled'))
+                            ->required(fn (Get $get) => (bool) $get('password_expiry_enabled'))
                             ->helperText(__('app.password_expiry_days_helper')),
                     ])->columns(2),
                 
-                Forms\Components\Section::make(__('app.account_security'))
+                Section::make(__('app.account_security'))
                     ->icon('heroicon-o-lock-closed')
                     ->description(__('app.account_security_desc'))
                     ->schema([
-                        Forms\Components\TextInput::make('max_login_attempts')
+                        TextInput::make('max_login_attempts')
                             ->label(__('app.max_login_attempts'))
                             ->integer()
                             ->minValue(3)
                             ->maxValue(10)
                             ->required(),
-                        Forms\Components\TextInput::make('lockout_duration')
+                        TextInput::make('lockout_duration')
                             ->label(__('app.lockout_duration'))
                             ->integer()
                             ->minValue(1)
@@ -140,8 +146,8 @@ class Security extends Page
                             ->required(),
                     ])->columns(2),
                 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_security_settings'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')

@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Services\SettingsService;
 use App\Events\TeacherPaymentProcessed;
 use App\Services\NotificationService;
 use App\Support\NotificationKeys;
@@ -29,7 +30,7 @@ class SendTeacherPaymentNotification implements ShouldQueue
     public function handle(TeacherPaymentProcessed $event): void
     {
         // Check if teacher payment notifications are enabled system-wide
-        $settingsService = app(\App\Services\SettingsService::class);
+        $settingsService = app(SettingsService::class);
         if (!$settingsService->get('notifications.teacher_payment.enabled', true)) {
             return;
         }

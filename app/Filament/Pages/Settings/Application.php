@@ -2,8 +2,13 @@
 
 namespace App\Filament\Pages\Settings;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -11,9 +16,9 @@ use App\Services\SettingsService;
 
 class Application extends Page
 {
-    protected static ?string $navigationIcon = null;
+    protected static string | \BackedEnum | null $navigationIcon = null;
     
-    protected static string $view = 'filament.pages.settings.application';
+    protected string $view = 'filament.pages.settings.application';
     
 
     public function getTitle(): string
@@ -55,19 +60,19 @@ class Application extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.application_information'))
+        return $schema
+            ->components([
+                Section::make(__('app.application_information'))
                     ->description(__('app.application_information_desc'))
                     ->icon('heroicon-o-information-circle')
                     ->schema([
-                        Forms\Components\TextInput::make('app_name')
+                        TextInput::make('app_name')
                             ->label(__('app.application_name'))
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Select::make('default_user_role')
+                        Select::make('default_user_role')
                             ->label(__('app.default_user_role'))
                             ->options([
                                 'student' => __('app.student'),
@@ -78,26 +83,26 @@ class Application extends Page
                             ->required(),
                     ])->columns(2),
 
-                Forms\Components\Section::make(__('app.user_registration_access'))
+                Section::make(__('app.user_registration_access'))
                     ->description(__('app.user_registration_access_desc'))
                     ->icon('heroicon-o-user-plus')
                     ->schema([
-                        Forms\Components\Toggle::make('registration_enabled')
+                        Toggle::make('registration_enabled')
                             ->label(__('app.allow_user_registration'))
                             ->helperText(__('app.allow_user_registration_help')),
-                        Forms\Components\Toggle::make('email_verification_required')
+                        Toggle::make('email_verification_required')
                             ->label(__('app.require_email_verification'))
                             ->helperText(__('app.require_email_verification_help')),
-                        Forms\Components\Toggle::make('notifications_enabled')
+                        Toggle::make('notifications_enabled')
                             ->label(__('app.enable_system_notifications'))
                             ->helperText(__('app.enable_system_notifications_help')),
                     ])->columns(2),
 
-                Forms\Components\Section::make(__('app.file_management'))
+                Section::make(__('app.file_management'))
                     ->description(__('app.file_management_desc'))
                     ->icon('heroicon-o-document-arrow-up')
                     ->schema([
-                        Forms\Components\TextInput::make('file_upload_max_size')
+                        TextInput::make('file_upload_max_size')
                             ->label(__('app.max_file_upload_size'))
                             ->integer()
                             ->minValue(1)
@@ -105,14 +110,14 @@ class Application extends Page
                             ->required(),
                     ])->columns(2),
 
-                Forms\Components\Section::make(__('app.system_backup'))
+                Section::make(__('app.system_backup'))
                     ->description(__('app.system_backup_desc'))
                     ->icon('heroicon-o-circle-stack')
                     ->schema([
-                        Forms\Components\Toggle::make('auto_backup_enabled')
+                        Toggle::make('auto_backup_enabled')
                             ->label(__('app.enable_auto_backups'))
                             ->helperText(__('app.enable_auto_backups_help')),
-                        Forms\Components\Select::make('backup_frequency')
+                        Select::make('backup_frequency')
                             ->label(__('app.backup_frequency'))
                             ->options([
                                 'daily' => __('app.daily'),
@@ -122,8 +127,8 @@ class Application extends Page
                             ->required(),
                     ])->columns(2),
 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')

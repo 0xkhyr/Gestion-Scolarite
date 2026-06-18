@@ -2,20 +2,22 @@
 
 namespace App\Filament\Auth;
 
+use Filament\Support\Enums\Width;
+use Filament\Schemas\Schema;
+use Exception;
 use App\Services\TwoFactorService;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\SimplePage;
 
 class TwoFactorChallenge extends SimplePage
 {
-    protected static string $view = 'filament.pages.two-factor-challenge';
+    protected string $view = 'filament.pages.two-factor-challenge';
     
     protected static string $routePath = 'two-factor-challenge';
     
-    protected ?string $maxWidth = '2xl';
+    protected Width|string|null $maxWidth = '2xl';
 
     public ?string $code = null;
     public bool $useRecoveryCode = false;
@@ -37,10 +39,10 @@ class TwoFactorChallenge extends SimplePage
         }
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Toggle::make('useRecoveryCode')
                     ->label(__('app.use_recovery_code'))
                     ->helperText(__('app.recovery_code_helper'))
@@ -69,7 +71,7 @@ class TwoFactorChallenge extends SimplePage
 
         try {
             $twoFactorService->ensureNotRateLimited($user);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->danger()
                 ->title(__('app.too_many_attempts'))

@@ -2,15 +2,43 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\Str;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
+use App\Filament\Resources\PageResource\Pages\ListPages;
+use App\Filament\Resources\PageResource\Pages\CreatePage;
+use App\Filament\Resources\PageResource\Pages\ViewPage;
+use App\Filament\Resources\PageResource\Pages\EditPage;
 use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Concerns\HasRoleBasedAccess;
 
@@ -21,7 +49,7 @@ class PageResource extends Resource
 
     protected static ?string $model = Page::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
     
     protected static ?int $navigationSort = 5;
 
@@ -65,20 +93,20 @@ class PageResource extends Resource
         return auth()->user()->hasPermissionTo('page.manage') || auth()->user()->hasRole('super_admin');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.page_information'))
+        return $schema
+            ->components([
+                Section::make(__('app.page_information'))
                     ->schema([
-                        Forms\Components\TextInput::make('title')
+                        TextInput::make('title')
                             ->label(__('app.title'))
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (string $context, $state, Forms\Set $set) => $context === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
+                            ->afterStateUpdated(fn (string $context, $state, Set $set) => $context === 'create' ? $set('slug', Str::slug($state)) : null),
 
-                        Forms\Components\TextInput::make('slug')
+                        TextInput::make('slug')
                             ->label(__('app.slug'))
                             ->required()
                             ->maxLength(255)
@@ -86,7 +114,7 @@ class PageResource extends Resource
                             ->rules(['alpha_dash'])
                             ->helperText(__('app.slug_helper')),
 
-                        Forms\Components\Select::make('status')
+                        Select::make('status')
                             ->label(__('app.status'))
                             ->options([
                                 'draft' => __('app.draft'),
@@ -96,19 +124,19 @@ class PageResource extends Resource
                             ->default('draft')
                             ->required()
                             ->live()
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                            ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state === 'published' && !$set('published_at', null)) {
                                     $set('published_at', now());
                                 }
                             }),
 
-                        Forms\Components\DateTimePicker::make('published_at')
+                        DateTimePicker::make('published_at')
                             ->label(__('app.publish_date'))
                             ->helperText(__('app.publish_date_helper'))
-                            ->visible(fn (Forms\Get $get) => in_array($get('status'), ['published', 'scheduled']))
-                            ->required(fn (Forms\Get $get) => $get('status') === 'scheduled'),
+                            ->visible(fn (Get $get) => in_array($get('status'), ['published', 'scheduled']))
+                            ->required(fn (Get $get) => $get('status') === 'scheduled'),
 
-                        Forms\Components\Radio::make('editor_mode')
+                        Radio::make('editor_mode')
                             ->label(__('Content Editor Mode'))
                             ->options([
                                 'visual' => __('Visual Editor (WYSIWYG - for non-technical users)'),
@@ -117,14 +145,14 @@ class PageResource extends Resource
                             ->default('visual')
                             ->inline()
                             ->live()
-                            ->afterStateHydrated(function (Forms\Components\Radio $component, $state) {
+                            ->afterStateHydrated(function (Radio $component, $state) {
                                 if (!$state) {
                                     $component->state('visual');
                                 }
                             })
                             ->columnSpanFull(),
 
-                        Forms\Components\RichEditor::make('content')
+                        RichEditor::make('content')
                             ->label(__('app.content'))
                             ->toolbarButtons([
                                 'blockquote',
@@ -143,10 +171,10 @@ class PageResource extends Resource
                                 'underline',
                                 'undo',
                             ])
-                            ->visible(fn (Forms\Get $get) => $get('editor_mode') === 'visual')
+                            ->visible(fn (Get $get) => $get('editor_mode') === 'visual')
                             ->columnSpanFull(),
 
-                        Forms\Components\Textarea::make('content')
+                        Textarea::make('content')
                             ->label(__('HTML Content'))
                             ->rows(20)
                             ->helperText(__('Full HTML supported. Use Tailwind CSS classes for styling. Example: <div class="bg-blue-500 p-4 rounded-lg">Content</div>'))
@@ -154,26 +182,26 @@ class PageResource extends Resource
     <h1 class="text-3xl font-bold text-gray-800 mb-4">Page Title</h1>
     <p class="text-gray-600">Your content here...</p>
 </div>')
-                            ->visible(fn (Forms\Get $get) => $get('editor_mode') === 'html')
+                            ->visible(fn (Get $get) => $get('editor_mode') === 'html')
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make(__('app.seo_settings'))
+                Section::make(__('app.seo_settings'))
                     ->schema([
-                        Forms\Components\TextInput::make('meta_title')
+                        TextInput::make('meta_title')
                             ->label(__('app.meta_title'))
                             ->maxLength(60)
                             ->helperText(__('app.meta_title_helper'))
-                            ->placeholder(fn (Forms\Get $get) => $get('title')),
+                            ->placeholder(fn (Get $get) => $get('title')),
 
-                        Forms\Components\Textarea::make('meta_description')
+                        Textarea::make('meta_description')
                             ->label(__('app.meta_description'))
                             ->maxLength(160)
                             ->rows(3)
                             ->helperText(__('app.meta_description_helper')),
 
-                        Forms\Components\TextInput::make('meta_keywords')
+                        TextInput::make('meta_keywords')
                             ->label(__('app.meta_keywords'))
                             ->helperText(__('app.meta_keywords_helper'))
                             ->placeholder(__('app.keywords_placeholder')),
@@ -181,67 +209,67 @@ class PageResource extends Resource
                     ->columns(1)
                     ->collapsed(),
 
-                Forms\Components\Section::make(__('Homepage Sections'))
+                Section::make(__('Homepage Sections'))
                     ->description(__('Content shown on the homepage. Leave a field empty to use the default text.'))
-                    ->visible(fn (Forms\Get $get) => $get('slug') === 'homepage')
+                    ->visible(fn (Get $get) => $get('slug') === 'homepage')
                     ->schema([
-                        Forms\Components\TextInput::make('settings.hero_title')
+                        TextInput::make('settings.hero_title')
                             ->label(__('Hero title'))
                             ->maxLength(255),
 
-                        Forms\Components\Textarea::make('settings.hero_subtitle')
+                        Textarea::make('settings.hero_subtitle')
                             ->label(__('Hero subtitle'))
                             ->rows(2)
                             ->maxLength(500),
 
-                        Forms\Components\FileUpload::make('settings.hero_image')
+                        FileUpload::make('settings.hero_image')
                             ->label(__('Hero image'))
                             ->helperText(__('Shown next to the hero text. A neutral placeholder is used when empty.'))
                             ->image()
                             ->directory('pages')
                             ->disk('public'),
 
-                        Forms\Components\Fieldset::make(__('Primary button'))
+                        Fieldset::make(__('Primary button'))
                             ->schema([
-                                Forms\Components\TextInput::make('settings.cta_primary_label')
+                                TextInput::make('settings.cta_primary_label')
                                     ->label(__('Label'))
                                     ->maxLength(50),
-                                Forms\Components\TextInput::make('settings.cta_primary_url')
+                                TextInput::make('settings.cta_primary_url')
                                     ->label(__('URL'))
                                     ->maxLength(255),
                             ]),
 
-                        Forms\Components\Fieldset::make(__('Secondary button'))
+                        Fieldset::make(__('Secondary button'))
                             ->schema([
-                                Forms\Components\TextInput::make('settings.cta_secondary_label')
+                                TextInput::make('settings.cta_secondary_label')
                                     ->label(__('Label'))
                                     ->maxLength(50),
-                                Forms\Components\TextInput::make('settings.cta_secondary_url')
+                                TextInput::make('settings.cta_secondary_url')
                                     ->label(__('URL'))
                                     ->maxLength(255),
                             ]),
 
-                        Forms\Components\TextInput::make('settings.features_heading')
+                        TextInput::make('settings.features_heading')
                             ->label(__('Features heading'))
                             ->maxLength(255),
 
-                        Forms\Components\Textarea::make('settings.features_subheading')
+                        Textarea::make('settings.features_subheading')
                             ->label(__('Features subheading'))
                             ->rows(2)
                             ->maxLength(500),
 
-                        Forms\Components\Repeater::make('settings.features')
+                        Repeater::make('settings.features')
                             ->label(__('Features'))
                             ->schema([
-                                Forms\Components\TextInput::make('icon')
+                                TextInput::make('icon')
                                     ->label(__('Icon'))
                                     ->helperText(__('Material icon name, e.g. school, menu_book, insights'))
                                     ->maxLength(50),
-                                Forms\Components\TextInput::make('title')
+                                TextInput::make('title')
                                     ->label(__('app.title'))
                                     ->required()
                                     ->maxLength(100),
-                                Forms\Components\Textarea::make('description')
+                                Textarea::make('description')
                                     ->label(__('Description'))
                                     ->rows(2)
                                     ->maxLength(300),
@@ -252,49 +280,49 @@ class PageResource extends Resource
                             ->defaultItems(0)
                             ->columnSpanFull(),
 
-                        Forms\Components\Toggle::make('settings.show_portals')
+                        Toggle::make('settings.show_portals')
                             ->label(__('Show portals section'))
                             ->default(true),
 
-                        Forms\Components\TextInput::make('settings.portals_heading')
+                        TextInput::make('settings.portals_heading')
                             ->label(__('Portals heading'))
                             ->maxLength(255)
-                            ->visible(fn (Forms\Get $get) => $get('settings.show_portals')),
+                            ->visible(fn (Get $get) => $get('settings.show_portals')),
 
-                        Forms\Components\Textarea::make('settings.portals_subheading')
+                        Textarea::make('settings.portals_subheading')
                             ->label(__('Portals subheading'))
                             ->rows(2)
                             ->maxLength(500)
-                            ->visible(fn (Forms\Get $get) => $get('settings.show_portals')),
+                            ->visible(fn (Get $get) => $get('settings.show_portals')),
                     ])
                     ->columns(1)
                     ->collapsed(),
 
-                Forms\Components\Section::make(__('About Page Sections'))
+                Section::make(__('About Page Sections'))
                     ->description(__('Optional content blocks for the about page. Empty blocks are hidden on the site.'))
-                    ->visible(fn (Forms\Get $get) => $get('slug') === 'about')
+                    ->visible(fn (Get $get) => $get('slug') === 'about')
                     ->schema([
-                        Forms\Components\TextInput::make('settings.header_title')
+                        TextInput::make('settings.header_title')
                             ->label(__('Header title'))
                             ->maxLength(255),
 
-                        Forms\Components\Textarea::make('settings.header_subtitle')
+                        Textarea::make('settings.header_subtitle')
                             ->label(__('Header subtitle'))
                             ->rows(2)
                             ->maxLength(500),
 
-                        Forms\Components\Repeater::make('settings.highlights')
+                        Repeater::make('settings.highlights')
                             ->label(__('Highlight cards'))
                             ->schema([
-                                Forms\Components\TextInput::make('icon')
+                                TextInput::make('icon')
                                     ->label(__('Icon'))
                                     ->helperText(__('Material icon name, e.g. history, emoji_events'))
                                     ->maxLength(50),
-                                Forms\Components\TextInput::make('title')
+                                TextInput::make('title')
                                     ->label(__('app.title'))
                                     ->required()
                                     ->maxLength(100),
-                                Forms\Components\Textarea::make('description')
+                                Textarea::make('description')
                                     ->label(__('Description'))
                                     ->rows(2)
                                     ->maxLength(500),
@@ -305,30 +333,30 @@ class PageResource extends Resource
                             ->defaultItems(0)
                             ->columnSpanFull(),
 
-                        Forms\Components\TextInput::make('settings.team_heading')
+                        TextInput::make('settings.team_heading')
                             ->label(__('Team heading'))
                             ->maxLength(255),
 
-                        Forms\Components\Textarea::make('settings.team_subheading')
+                        Textarea::make('settings.team_subheading')
                             ->label(__('Team subheading'))
                             ->rows(2)
                             ->maxLength(500),
 
-                        Forms\Components\Repeater::make('settings.team')
+                        Repeater::make('settings.team')
                             ->label(__('Team members'))
                             ->schema([
-                                Forms\Components\TextInput::make('name')
+                                TextInput::make('name')
                                     ->label(__('app.name'))
                                     ->required()
                                     ->maxLength(100),
-                                Forms\Components\TextInput::make('role')
+                                TextInput::make('role')
                                     ->label(__('Role'))
                                     ->maxLength(100),
-                                Forms\Components\Textarea::make('bio')
+                                Textarea::make('bio')
                                     ->label(__('Bio'))
                                     ->rows(2)
                                     ->maxLength(300),
-                                Forms\Components\FileUpload::make('photo')
+                                FileUpload::make('photo')
                                     ->label(__('Photo'))
                                     ->image()
                                     ->directory('team')
@@ -340,15 +368,15 @@ class PageResource extends Resource
                             ->defaultItems(0)
                             ->columnSpanFull(),
 
-                        Forms\Components\Fieldset::make(__('Call to action'))
+                        Fieldset::make(__('Call to action'))
                             ->schema([
-                                Forms\Components\TextInput::make('settings.cta_heading')
+                                TextInput::make('settings.cta_heading')
                                     ->label(__('Heading'))
                                     ->maxLength(255),
-                                Forms\Components\TextInput::make('settings.cta_label')
+                                TextInput::make('settings.cta_label')
                                     ->label(__('Button label'))
                                     ->maxLength(50),
-                                Forms\Components\Textarea::make('settings.cta_text')
+                                Textarea::make('settings.cta_text')
                                     ->label(__('Text'))
                                     ->rows(2)
                                     ->maxLength(500)
@@ -358,32 +386,32 @@ class PageResource extends Resource
                     ->columns(1)
                     ->collapsed(),
 
-                Forms\Components\Section::make(__('Contact Page Sections'))
-                    ->visible(fn (Forms\Get $get) => $get('slug') === 'contact')
+                Section::make(__('Contact Page Sections'))
+                    ->visible(fn (Get $get) => $get('slug') === 'contact')
                     ->schema([
-                        Forms\Components\TextInput::make('settings.header_title')
+                        TextInput::make('settings.header_title')
                             ->label(__('Header title'))
                             ->maxLength(255),
 
-                        Forms\Components\Textarea::make('settings.header_subtitle')
+                        Textarea::make('settings.header_subtitle')
                             ->label(__('Header subtitle'))
                             ->rows(2)
                             ->maxLength(500),
 
-                        Forms\Components\Textarea::make('settings.form_intro')
+                        Textarea::make('settings.form_intro')
                             ->label(__('Form introduction'))
                             ->rows(2)
                             ->maxLength(500),
 
-                        Forms\Components\Repeater::make('settings.office_hours')
+                        Repeater::make('settings.office_hours')
                             ->label(__('Office hours'))
                             ->schema([
-                                Forms\Components\TextInput::make('label')
+                                TextInput::make('label')
                                     ->label(__('Days'))
                                     ->placeholder(__('Monday - Friday'))
                                     ->required()
                                     ->maxLength(100),
-                                Forms\Components\TextInput::make('value')
+                                TextInput::make('value')
                                     ->label(__('Hours'))
                                     ->placeholder('8:00 - 16:00')
                                     ->required()
@@ -396,19 +424,19 @@ class PageResource extends Resource
                     ->columns(1)
                     ->collapsed(),
 
-                Forms\Components\Section::make(__('app.page_settings'))
+                Section::make(__('app.page_settings'))
                     ->schema([
-                        Forms\Components\Toggle::make('is_enabled')
+                        Toggle::make('is_enabled')
                             ->label(__('app.page_enabled'))
                             ->helperText(__('app.page_enabled_helper'))
                             ->default(true),
 
-                        Forms\Components\Toggle::make('is_public')
+                        Toggle::make('is_public')
                             ->label(__('app.page_public'))
                             ->helperText(__('app.page_public_helper'))
                             ->default(true),
 
-                        Forms\Components\TextInput::make('sort_order')
+                        TextInput::make('sort_order')
                             ->label(__('app.sort_order'))
                             ->numeric()
                             ->default(0)
@@ -422,13 +450,13 @@ class PageResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__('app.title'))
                     ->searchable()
                     ->sortable()
                     ->weight('medium'),
 
-                Tables\Columns\TextColumn::make('slug')
+                TextColumn::make('slug')
                     ->label(__('app.slug'))
                     ->searchable()
                     ->sortable()
@@ -436,7 +464,7 @@ class PageResource extends Resource
                     ->badge()
                     ->color('gray'),
 
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label(__('app.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -448,13 +476,13 @@ class PageResource extends Resource
                     ->formatStateUsing(fn (string $state): string => __('app.' . $state))
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('published_at')
+                TextColumn::make('published_at')
                     ->label(__('app.published'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(),
 
-                Tables\Columns\IconColumn::make('is_enabled')
+                IconColumn::make('is_enabled')
                     ->label(__('app.enabled'))
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
@@ -463,7 +491,7 @@ class PageResource extends Resource
                     ->falseColor('danger')
                     ->sortable(),
 
-                Tables\Columns\IconColumn::make('is_public')
+                IconColumn::make('is_public')
                     ->label(__('app.public'))
                     ->boolean()
                     ->trueIcon('heroicon-o-globe-alt')
@@ -472,26 +500,26 @@ class PageResource extends Resource
                     ->falseColor('warning')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('sort_order')
+                TextColumn::make('sort_order')
                     ->label(__('app.order'))
                     ->numeric()
                     ->sortable()
                     ->alignCenter(),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('app.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('app.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->label(__('app.status'))
                     ->options([
                         'draft' => __('app.draft'),
@@ -499,31 +527,31 @@ class PageResource extends Resource
                         'scheduled' => __('app.scheduled'),
                     ]),
 
-                Tables\Filters\TernaryFilter::make('is_enabled')
+                TernaryFilter::make('is_enabled')
                     ->label(__('app.enabled'))
                     ->placeholder(__('app.all'))
                     ->trueLabel(__('app.enabled_only'))
                     ->falseLabel(__('app.disabled_only')),
 
-                Tables\Filters\TernaryFilter::make('is_public')
+                TernaryFilter::make('is_public')
                     ->label(__('app.public'))
                     ->placeholder(__('app.all'))
                     ->trueLabel(__('app.public_only'))
                     ->falseLabel(__('app.private_only')),
             ])
-            ->actions([
-                Tables\Actions\Action::make('preview')
+            ->recordActions([
+                Action::make('preview')
                     ->label(__('app.preview'))
                     ->icon('heroicon-o-eye')
                     ->color('info')
                     ->url(fn (Page $record): string => route('page.show', ['slug' => $record->slug, 'preview' => true]))
                     ->openUrlInNewTab(),
 
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
                 
-                Tables\Actions\Action::make('view_page')
+                Action::make('view_page')
                     ->label(__('app.view_live'))
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->color('success')
@@ -531,9 +559,9 @@ class PageResource extends Resource
                     ->openUrlInNewTab()
                     ->visible(fn (Page $record): bool => $record->isPublished() && $record->is_enabled && $record->is_public),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     
                     BulkAction::make('publish')
                         ->label(__('app.publish'))
@@ -594,10 +622,10 @@ class PageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPages::route('/'),
-            'create' => Pages\CreatePage::route('/create'),
-            'view' => Pages\ViewPage::route('/{record}'),
-            'edit' => Pages\EditPage::route('/{record}/edit'),
+            'index' => ListPages::route('/'),
+            'create' => CreatePage::route('/create'),
+            'view' => ViewPage::route('/{record}'),
+            'edit' => EditPage::route('/{record}/edit'),
         ];
     }
 }

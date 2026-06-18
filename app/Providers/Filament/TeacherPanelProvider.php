@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Account\Profile;
+use App\Filament\Pages\Dashboard;
+use App\Http\Middleware\EnsureTeacherRole;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -40,7 +44,7 @@ class TeacherPanelProvider extends PanelProvider
             ->plugins([
                 FilamentErrorPagesPlugin::make(),
             ])
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->login(Login::class)
             ->databaseNotifications()
             ->colors([
                 'primary' => Color::Blue,
@@ -53,14 +57,14 @@ class TeacherPanelProvider extends PanelProvider
             ->userMenuItems([
             MenuItem::make()
                 ->label(__('app.my_account'))
-                ->url(fn (): string => \App\Filament\Pages\Account\Profile::getUrl())
+                ->url(fn (): string => Profile::getUrl())
                 ->icon('heroicon-o-user-circle'),
             // ...
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                \App\Filament\Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -86,7 +90,7 @@ class TeacherPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\EnsureTeacherRole::class,
+                EnsureTeacherRole::class,
             ])
             ->spa()
             ->font('Poppins')

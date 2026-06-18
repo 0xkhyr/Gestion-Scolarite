@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +12,7 @@ class SetLocale
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request):Response $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -22,7 +23,7 @@ class SetLocale
         $available = array_keys(config('locales', ['fr' => [], 'ar' => [], 'en' => []]));
         if (in_array($locale, $available, true)) {
             app()->setLocale($locale);
-            \Carbon\Carbon::setLocale($locale);
+            Carbon::setLocale($locale);
         }
         
         return $next($request);

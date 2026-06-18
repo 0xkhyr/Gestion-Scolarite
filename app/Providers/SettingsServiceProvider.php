@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Exception;
+use DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 use App\Services\SettingsService;
@@ -42,7 +44,7 @@ class SettingsServiceProvider extends ServiceProvider
             $securitySettings = $settingsService->getSecuritySettings();
             Config::set('session.lifetime', $securitySettings['session_timeout']);
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Handle gracefully if settings table doesn't exist yet
             logger('Settings loading failed: ' . $e->getMessage());
         }
@@ -54,9 +56,9 @@ class SettingsServiceProvider extends ServiceProvider
     private function databaseExists(): bool
     {
         try {
-            \DB::connection()->getPdo();
+            DB::connection()->getPdo();
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
     }

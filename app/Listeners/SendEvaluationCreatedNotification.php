@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\Etudiant;
 use App\Events\EvaluationCreated;
 use App\Services\NotificationService;
 use App\Support\NotificationKeys;
@@ -38,10 +39,10 @@ class SendEvaluationCreatedNotification implements ShouldQueue
 
         // Find all students in this class
         // Logic: Find users where profile_type is Etudiant and profile_id is in the class students
-        $studentProfileIds = \App\Models\Etudiant::where('id_classe', $classe->id_classe)
+        $studentProfileIds = Etudiant::where('id_classe', $classe->id_classe)
             ->pluck('id_etudiant');
 
-        $users = User::where('profile_type', \App\Models\Etudiant::class)
+        $users = User::where('profile_type', Etudiant::class)
             ->whereIn('profile_id', $studentProfileIds)
             ->get();
 

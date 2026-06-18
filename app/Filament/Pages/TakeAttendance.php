@@ -2,14 +2,21 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Schemas\Components\Actions;
+use Filament\Actions\Action;
+use App\Support\Academic;
 use App\Models\Attendance;
 use App\Models\Classe;
 use App\Models\Cours;
 use App\Models\Etudiant;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
@@ -20,9 +27,9 @@ use Filament\Pages\Page;
  */
 class TakeAttendance extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static string $view = 'filament.pages.take-attendance';
+    protected string $view = 'filament.pages.take-attendance';
 
     protected static ?string $slug = 'attendance/take';
 
@@ -75,14 +82,14 @@ class TakeAttendance extends Page
         $this->form->fill(['date' => now()->toDateString()]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.attendance_session'))
+        return $schema
+            ->components([
+                Section::make(__('app.attendance_session'))
                     ->description(__('app.attendance_session_desc'))
                     ->schema([
-                        Forms\Components\Select::make('id_classe')
+                        Select::make('id_classe')
                             ->label(__('app.classe'))
                             ->options(fn () => $this->classeOptions())
                             ->required()
@@ -93,7 +100,7 @@ class TakeAttendance extends Page
                                 $set('present_students', []);
                             }),
 
-                        Forms\Components\Select::make('id_cours')
+                        Select::make('id_cours')
                             ->label(__('app.cours'))
                             ->options(fn (Get $get) => $this->coursOptions($get('id_classe')))
                             ->required()
@@ -103,7 +110,7 @@ class TakeAttendance extends Page
                                 $this->resolvePresent($get('id_classe'), $get('id_cours'), $get('date'))
                             )),
 
-                        Forms\Components\DatePicker::make('date')
+                        DatePicker::make('date')
                             ->label(__('app.date'))
                             ->required()
                             ->default(now())
@@ -115,11 +122,11 @@ class TakeAttendance extends Page
                             )),
                     ])->columns(3),
 
-                Forms\Components\Section::make(__('app.attendance_roster'))
+                Section::make(__('app.attendance_roster'))
                     ->description(__('app.attendance_roster_desc'))
                     ->visible(fn (Get $get) => filled($get('id_classe')) && filled($get('id_cours')) && filled($get('date')))
                     ->schema([
-                        Forms\Components\CheckboxList::make('present_students')
+                        CheckboxList::make('present_students')
                             ->label(__('app.present_students'))
                             ->helperText(__('app.present_students_help'))
                             ->options(fn (Get $get) => $this->rosterOptions($get('id_classe')))
@@ -127,8 +134,8 @@ class TakeAttendance extends Page
                             ->columns(2),
                     ]),
 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_attendance'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')
@@ -148,7 +155,7 @@ class TakeAttendance extends Page
         }
 
         return $query->get()->mapWithKeys(fn ($c) => [
-            $c->id_classe => $c->nom_classe . ' (' . \App\Support\Academic::levelLabel($c->niveau)
+            $c->id_classe => $c->nom_classe . ' (' . Academic::levelLabel($c->niveau)
                 . ($c->serie ? ' ' . $c->serie : '') . ')',
         ])->all();
     }

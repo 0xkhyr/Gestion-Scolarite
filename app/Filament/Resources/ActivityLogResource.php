@@ -2,12 +2,23 @@
 
 namespace App\Filament\Resources;
 
+use App\Models\User;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\Facades\Blade;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Actions\ViewAction;
+use App\Filament\Resources\ActivityLogResource\Pages\ListActivityLogs;
+use App\Filament\Resources\ActivityLogResource\Pages\ViewActivityLog;
 use App\Filament\Concerns\HasRoleBasedAccess;
 use App\Filament\Resources\ActivityLogResource\Pages;
 use Spatie\Activitylog\Models\Activity as ActivityModel;
 
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -21,7 +32,7 @@ class ActivityLogResource extends Resource
     
     protected static ?string $model = ActivityModel::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-list-bullet';
     protected static ?int $navigationSort = 4;
 
     public static function getNavigationGroup(): ?string
@@ -77,7 +88,7 @@ class ActivityLogResource extends Resource
      */
     protected static function causerUrl($record): ?string
     {
-        if (! $record?->causer_id || ! $record->causer instanceof \App\Models\User) {
+        if (! $record?->causer_id || ! $record->causer instanceof User) {
             return null;
         }
 
@@ -127,12 +138,12 @@ class ActivityLogResource extends Resource
         };
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
-            Forms\Components\Section::make(__('app.log_details') ?? 'Log Details')
+        return $schema->components([
+            Section::make(__('app.log_details') ?? 'Log Details')
                 ->schema([
-                    Forms\Components\Placeholder::make('log_name')
+                    Placeholder::make('log_name')
                         ->label(__('app.log'))
                         ->content(fn ($record) => $record?->log_name
                             ? new HtmlString('<span class="text-sm text-gray-600">' . e($record->log_name) . '</span>')
@@ -140,9 +151,9 @@ class ActivityLogResource extends Resource
                         )
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('event')
+                    Placeholder::make('event')
                         ->label(__('app.action'))
-                        ->content(fn ($record) => new HtmlString(\Illuminate\Support\Facades\Blade::render(
+                        ->content(fn ($record) => new HtmlString(Blade::render(
                             '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
                             [
                                 'color' => self::eventColor($record?->event, $record?->description),
@@ -151,7 +162,7 @@ class ActivityLogResource extends Resource
                         )))
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('description')
+                    Placeholder::make('description')
                         ->label(__('app.description'))
                         ->content(fn ($record) => $record?->description
                             ? new HtmlString('<div class="text-sm text-gray-700">' . e($record->description) . '</div>')
@@ -159,7 +170,7 @@ class ActivityLogResource extends Resource
                         )
                         ->columnSpanFull(),
 
-                    Forms\Components\Placeholder::make('causer')
+                    Placeholder::make('causer')
                         ->label(__('app.causer'))
                         ->content(function ($record) {
                             if (! $record?->causer_id) {
@@ -182,7 +193,7 @@ class ActivityLogResource extends Resource
                         })
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('subject')
+                    Placeholder::make('subject')
                         ->label(__('app.subject'))
                         ->content(fn ($record) => $record?->subject_id
                             ? new HtmlString('<div class="text-sm">' . e(class_basename($record->subject_type) . " #{$record->subject_id}") . '</div>')
@@ -190,7 +201,7 @@ class ActivityLogResource extends Resource
                         )
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('properties')
+                    Placeholder::make('properties')
                         ->label(__('app.changes'))
                         ->content(fn ($record) => new HtmlString(
                             '<pre class="rounded bg-gray-50 p-3 text-xs font-mono text-gray-700" style="white-space:pre-wrap;word-break:break-word;">' .
@@ -199,12 +210,12 @@ class ActivityLogResource extends Resource
                         ))
                         ->columnSpanFull(),
 
-                    Forms\Components\Placeholder::make('ip')
+                    Placeholder::make('ip')
                         ->label(__('app.ip_address'))
                         ->content(fn ($record) => $record->properties['ip_address'] ?? null)
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('user_agent')
+                    Placeholder::make('user_agent')
                         ->label(__('app.user_agent'))
                         ->content(fn ($record) => $record->properties['user_agent'] ?? null)
                         ->columnSpan(1),
@@ -217,20 +228,20 @@ class ActivityLogResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('app.time'))
                     ->dateTime('d M Y H:i')
                     ->description(fn ($record) => $record->created_at?->diffForHumans())
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('event')
+                TextColumn::make('event')
                     ->label(__('app.event'))
                     ->badge()
                     ->color(fn ($record) => self::eventColor($record->event, $record->description))
                     ->formatStateUsing(fn ($record) => self::eventLabel($record->event, $record->description))
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('causer.name')
+                TextColumn::make('causer.name')
                     ->label(__('app.user'))
                     ->icon('heroicon-m-user')
                     ->default('—')
@@ -239,13 +250,13 @@ class ActivityLogResource extends Resource
                     ->color(fn ($record) => self::causerUrl($record) ? 'primary' : null)
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label(__('app.actions'))
                     ->wrap()
                     ->searchable()
                     ->limit(80),
 
-                Tables\Columns\TextColumn::make('subject_type')
+                TextColumn::make('subject_type')
                     ->label(__('app.resource'))
                     ->badge()
                     ->color('gray')
@@ -255,7 +266,7 @@ class ActivityLogResource extends Resource
                     ->searchable()
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('properties->ip_address')
+                TextColumn::make('properties->ip_address')
                     ->label(__('app.ip_address'))
                     ->icon('heroicon-m-globe-alt')
                     ->searchable()
@@ -263,10 +274,10 @@ class ActivityLogResource extends Resource
             ])
             ->filters([
                 // Filter by causer (used by the "activity trail" link from a user).
-                Tables\Filters\SelectFilter::make('causer_id')
+                SelectFilter::make('causer_id')
                     ->label(__('app.user'))
                     ->searchable()
-                    ->options(fn () => \App\Models\User::query()
+                    ->options(fn () => User::query()
                         ->whereIn('id', ActivityModel::query()
                             ->whereNotNull('causer_id')
                             ->distinct()
@@ -274,7 +285,7 @@ class ActivityLogResource extends Resource
                         ->pluck('name', 'id')
                         ->toArray()),
 
-                Tables\Filters\SelectFilter::make('log_name')
+                SelectFilter::make('log_name')
                     ->label(__('app.log_name'))
                     ->options(fn () => ActivityModel::query()
                         ->distinct()
@@ -284,7 +295,7 @@ class ActivityLogResource extends Resource
                         ->toArray()
                     ),
 
-                Tables\Filters\SelectFilter::make('event')
+                SelectFilter::make('event')
                     ->label(__('app.event'))
                     ->options(fn () => ActivityModel::query()
                         ->distinct()
@@ -294,10 +305,10 @@ class ActivityLogResource extends Resource
                         ->toArray()
                     ),
 
-                Tables\Filters\Filter::make('date')
-                    ->form([
-                        Forms\Components\DatePicker::make('from')->label(__('app.from')),
-                        Forms\Components\DatePicker::make('to')->label(__('app.to')),
+                Filter::make('date')
+                    ->schema([
+                        DatePicker::make('from')->label(__('app.from')),
+                        DatePicker::make('to')->label(__('app.to')),
                     ])
                     ->query(function (Builder $query, array $data) {
                         if (! empty($data['from'])) {
@@ -309,10 +320,10 @@ class ActivityLogResource extends Resource
                         }
                     }),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
+            ->recordActions([
+                ViewAction::make(),
             ])
-            ->bulkActions([])
+            ->toolbarActions([])
             ->defaultSort('created_at', 'desc');
     }
 
@@ -324,8 +335,8 @@ class ActivityLogResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListActivityLogs::route('/'),
-            'view' => Pages\ViewActivityLog::route('/{record}'),
+            'index' => ListActivityLogs::route('/'),
+            'view' => ViewActivityLog::route('/{record}'),
         ];
     }
 }

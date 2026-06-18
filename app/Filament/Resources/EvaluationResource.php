@@ -2,11 +2,32 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use App\Models\Matiere;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\EvaluationResource\Pages\ListEvaluations;
+use App\Filament\Resources\EvaluationResource\Pages\CreateEvaluation;
+use App\Filament\Resources\EvaluationResource\Pages\EditEvaluation;
+use App\Filament\Resources\EvaluationResource\Pages\ViewEvaluation;
+use App\Filament\Resources\EvaluationResource\Pages\ManageGrades;
 use App\Filament\Resources\EvaluationResource\Pages;
 use App\Filament\Resources\EvaluationResource\RelationManagers;
 use App\Models\Evaluation;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,7 +41,7 @@ class EvaluationResource extends Resource
     use HasRoleBasedAccess;
     protected static ?string $model = Evaluation::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
     
     protected static ?int $navigationSort = 4;
 
@@ -81,19 +102,19 @@ class EvaluationResource extends Resource
         ]);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.evaluation_details'))
+        return $schema
+            ->components([
+                Section::make(__('app.evaluation_details'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('evaluation.create') || auth()->user()->hasPermissionTo('evaluation.edit'))
                     ->schema([
-                        Forms\Components\TextInput::make('titre')
+                        TextInput::make('titre')
                             ->label(__('app.title'))
                             ->maxLength(191)
                             ->placeholder(__('app.eval_title_placeholder')),
                             
-                        Forms\Components\Select::make('type')
+                        Select::make('type')
                             ->label(__('app.type'))
                             ->required()
                             ->options([
@@ -104,7 +125,7 @@ class EvaluationResource extends Resource
                                 'projet' => 'Project',
                             ]),
                         
-                        Forms\Components\Select::make('id_classe')
+                        Select::make('id_classe')
                             ->label(__('app.class'))
                             ->relationship('classe', 'nom_classe', function (Builder $query) {
                                 return static::applyRoleBasedRelationScope($query, [
@@ -120,7 +141,7 @@ class EvaluationResource extends Resource
                                 $set('id_matiere', null);
                             }),
                             
-                        Forms\Components\Select::make('id_matiere')
+                        Select::make('id_matiere')
                             ->label(__('app.subject'))
                             ->options(function (callable $get) {
                                 $classeId = $get('id_classe');
@@ -132,7 +153,7 @@ class EvaluationResource extends Resource
                                 $user = auth()->user();
                                 
                                 // Get subjects taught in the selected class
-                                $query = \App\Models\Matiere::whereHas('classes', function ($q) use ($classeId) {
+                                $query = Matiere::whereHas('classes', function ($q) use ($classeId) {
                                     $q->where('classes.id_classe', $classeId);
                                 });
                                 
@@ -158,10 +179,10 @@ class EvaluationResource extends Resource
                     ])
                     ->columns(2),
                     
-                Forms\Components\Section::make(__('app.grading'))
+                Section::make(__('app.grading'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('evaluation.create') || auth()->user()->hasPermissionTo('evaluation.edit'))
                     ->schema([
-                        Forms\Components\TextInput::make('note_max')
+                        TextInput::make('note_max')
                             ->label(__('app.note_maximum'))
                             ->required()
                             ->numeric()
@@ -170,7 +191,7 @@ class EvaluationResource extends Resource
                             ->maxValue(100)
                             ->suffix(__('app.point')),
                             
-                        Forms\Components\DatePicker::make('date')
+                        DatePicker::make('date')
                             ->label(__('app.date_evaluation'))
                             ->required()
                             ->displayFormat('d/m/Y'),
@@ -178,30 +199,30 @@ class EvaluationResource extends Resource
                     ->columns(2),
                     
                 // Read-only evaluation view for users with view-only permissions
-                Forms\Components\Section::make(__('app.evaluation_consultation'))
+                Section::make(__('app.evaluation_consultation'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('evaluation.view') && !auth()->user()->hasPermissionTo('evaluation.create') && !auth()->user()->hasPermissionTo('evaluation.edit'))
                     ->schema([
-                        Forms\Components\Placeholder::make('titre_display')
+                        Placeholder::make('titre_display')
                             ->label(__('app.titre'))
-                            ->content(fn ($record) => $record->titre ?: new \Illuminate\Support\HtmlString('<em class="text-gray-500">Sans titre</em>')),
+                            ->content(fn ($record) => $record->titre ?: new HtmlString('<em class="text-gray-500">Sans titre</em>')),
                             
-                        Forms\Components\Placeholder::make('type_display')
+                        Placeholder::make('type_display')
                             ->label(__('app.type'))
-                            ->content(fn ($record) => new \Illuminate\Support\HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10">' . ucfirst($record->type) . '</span>')),
+                            ->content(fn ($record) => new HtmlString('<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10">' . ucfirst($record->type) . '</span>')),
                             
-                        Forms\Components\Placeholder::make('matiere_display')
+                        Placeholder::make('matiere_display')
                             ->label(__('app.matiere'))
                             ->content(fn ($record) => $record->matiere?->nom_matiere ?: '-'),
                             
-                        Forms\Components\Placeholder::make('classe_display')
+                        Placeholder::make('classe_display')
                             ->label(__('app.classe'))
                             ->content(fn ($record) => $record->classe?->nom_classe ?: '-'),
                             
-                        Forms\Components\Placeholder::make('note_max_display')
+                        Placeholder::make('note_max_display')
                             ->label(__('app.note_maximum'))
-                            ->content(fn ($record) => new \Illuminate\Support\HtmlString('<span class="text-lg font-semibold text-green-600">' . $record->note_max . '</span> points')),
+                            ->content(fn ($record) => new HtmlString('<span class="text-lg font-semibold text-green-600">' . $record->note_max . '</span> points')),
                             
-                        Forms\Components\Placeholder::make('date_display')
+                        Placeholder::make('date_display')
                             ->label(__('app.date_evaluation'))
                             ->content(fn ($record) => $record->date ? $record->date->format('d/m/Y') : '-'),
                     ])
@@ -213,11 +234,11 @@ class EvaluationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('titre')
+                TextColumn::make('titre')
                     ->label(__('app.evaluation'))
                     ->searchable(),
                     
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label(__('app.type'))
                     ->badge()
                     ->formatStateUsing(fn (?string $state) => match ($state) {
@@ -237,37 +258,37 @@ class EvaluationResource extends Resource
                         default => 'gray',
                     }),
                     
-                Tables\Columns\TextColumn::make('matiere.code_matiere')
+                TextColumn::make('matiere.code_matiere')
                     ->label(__('app.matiere'))
                     ->formatStateUsing(fn ($record) => __("app." . $record->matiere->code_matiere))
                     ->searchable()
                     ->searchable()
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('classe.nom_classe')
+                TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('info'),
                     
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->label(__('app.date_evaluation'))
                     ->date('d/m/Y')
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('note_max')
+                TextColumn::make('note_max')
                     ->label(__('app.note_maximum'))
                     ->sortable()
                     ->suffix(__('app.point')),
                     
-                Tables\Columns\TextColumn::make('notes_count')
+                TextColumn::make('notes_count')
                     ->label(__('app.etudiants_notee'))
                     ->counts('notes')
                     ->badge()
                     ->color('success'),
                 
-                Tables\Columns\IconColumn::make('status')
+                IconColumn::make('status')
                     ->label(__('app.status'))
                     ->state(fn ($record) => $record->isLocked())
                     ->boolean()
@@ -279,20 +300,20 @@ class EvaluationResource extends Resource
                         ? __('app.evaluation_verrouille') 
                         : __('app.evaluation_modifiable')),
                     
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('app.cree_a'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('app.mis_a_jour_le'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type')
+                SelectFilter::make('type')
                     ->label(__('app.type'))
                     ->options([
                         'devoir' => __('app.homework'),
@@ -302,32 +323,32 @@ class EvaluationResource extends Resource
                         'projet' => __('app.project'),
                     ]),
                     
-                Tables\Filters\SelectFilter::make('id_matiere')
+                SelectFilter::make('id_matiere')
                     ->label(__('app.matiere'))
                     ->relationship('matiere', 'nom_matiere')
                     ->searchable()
                     ->preload(),
                     
-                Tables\Filters\SelectFilter::make('id_classe')
+                SelectFilter::make('id_classe')
                     ->label(__('app.classe'))
                     ->relationship('classe', 'nom_classe')
                     ->searchable()
                     ->preload(),
             ])
-            ->actions([
-                Tables\Actions\Action::make('manage_grades')
+            ->recordActions([
+                Action::make('manage_grades')
                     ->label(__('app.saisir_notes'))
                     ->icon('heroicon-o-pencil-square')
                     ->color('primary')
                     ->url(fn ($record) => static::getUrl('grades', ['record' => $record]))
                     ->visible(fn () => auth()->user()->can('grade.manage') || auth()->user()->hasRole(['super_admin', 'admin', 'teacher', 'enseignant'])),
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('date', 'desc');
@@ -343,11 +364,11 @@ class EvaluationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListEvaluations::route('/'),
-            'create' => Pages\CreateEvaluation::route('/create'),
-            'edit' => Pages\EditEvaluation::route('/{record}/edit'),
-            'view' => Pages\ViewEvaluation::route('/{record}'),
-            'grades' => Pages\ManageGrades::route('/{record}/grades'),
+            'index' => ListEvaluations::route('/'),
+            'create' => CreateEvaluation::route('/create'),
+            'edit' => EditEvaluation::route('/{record}/edit'),
+            'view' => ViewEvaluation::route('/{record}'),
+            'grades' => ManageGrades::route('/{record}/grades'),
         ];
     }
 }

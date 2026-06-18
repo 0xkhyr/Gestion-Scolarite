@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use Filament\Actions\ActionGroup;
+use Filament\Actions\Action;
 use App\Filament\Resources\UserResource;
 use App\Models\User;
 use Filament\Actions;
@@ -18,8 +20,8 @@ class ViewUser extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ActionGroup::make([
-            Actions\Action::make('toggleActive')
+            ActionGroup::make([
+            Action::make('toggleActive')
                 ->label(fn () => $this->record->is_active ? __('app.deactivate') : __('app.activate'))
                 ->icon(fn () => $this->record->is_active ? 'heroicon-o-lock-closed' : 'heroicon-o-lock-open')
                 ->color('gray')
@@ -30,29 +32,29 @@ class ViewUser extends ViewRecord
                     $this->refreshFormData(['is_active']);
                 }),
 
-            Actions\Action::make('resetPassword')
+            Action::make('resetPassword')
                 ->label(__('app.reset_password'))
                 ->icon('heroicon-o-key')
                 ->color('gray')
                 ->visible(fn () => UserResource::canManage($this->record))
                 ->modalHeading(fn () => __('app.reset_password') . ' — ' . $this->record->name)
                 ->modalSubmitActionLabel(__('app.reset_password'))
-                ->form(UserResource::passwordResetSchema())
+                ->schema(UserResource::passwordResetSchema())
                 ->action(fn (array $data) => UserResource::resetPassword($this->record, $data)),
 
-            Actions\Action::make('manageRoles')
+            Action::make('manageRoles')
                 ->label(__('app.manage_roles'))
                 ->icon('heroicon-o-shield-check')
                 ->color('gray')
                 ->visible(fn () => UserResource::canManage($this->record))
                 ->fillForm(fn () => ['roles' => $this->record->roles->pluck('name')->all()])
-                ->form(UserResource::rolesSchema())
+                ->schema(UserResource::rolesSchema())
                 ->action(function (array $data) {
                     UserResource::syncRoles($this->record, $data);
                     $this->refreshFormData(['roles']);
                 }),
 
-            Actions\Action::make('disable2fa')
+            Action::make('disable2fa')
                 ->label(__('app.force_disable_2fa'))
                 ->icon('heroicon-o-shield-exclamation')
                 ->color('gray')
@@ -63,7 +65,7 @@ class ViewUser extends ViewRecord
                     $this->refreshFormData(['two_factor_confirmed_at', 'two_factor_enabled']);
                 }),
 
-            Actions\Action::make('requireTwoFactor')
+            Action::make('requireTwoFactor')
                 ->label(fn () => $this->record->two_factor_required
                     ? __('app.cancel_2fa_requirement')
                     : __('app.require_2fa_setup'))
@@ -77,7 +79,7 @@ class ViewUser extends ViewRecord
                     $this->refreshFormData(['two_factor_required']);
                 }),
 
-            Actions\Action::make('unlock')
+            Action::make('unlock')
                 ->label(__('app.unlock_account'))
                 ->icon('heroicon-o-lock-open')
                 ->color('gray')
@@ -87,7 +89,7 @@ class ViewUser extends ViewRecord
                     UserResource::unlockAccount($this->record);
                 }),
 
-            Actions\Action::make('forceLogout')
+            Action::make('forceLogout')
                 ->label(__('app.force_logout'))
                 ->icon('heroicon-o-arrow-right-on-rectangle')
                 ->color('gray')
@@ -96,14 +98,14 @@ class ViewUser extends ViewRecord
                 ->visible(fn () => UserResource::canManage($this->record))
                 ->action(fn () => UserResource::forceLogout($this->record)),
 
-            Actions\Action::make('activityTrail')
+            Action::make('activityTrail')
                 ->label(__('app.activity_trail'))
                 ->icon('heroicon-o-list-bullet')
                 ->color('gray')
                 ->url(fn () => UserResource::activityTrailUrl($this->record))
                 ->visible(fn () => UserResource::activityTrailUrl($this->record) !== null),
 
-            Actions\Action::make('viewProfile')
+            Action::make('viewProfile')
                 ->label(__('app.view_linked_profile'))
                 ->icon('heroicon-o-identification')
                 ->color('gray')

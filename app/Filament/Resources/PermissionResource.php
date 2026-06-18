@@ -2,12 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\PermissionResource\Pages\ListPermissions;
+use App\Filament\Resources\PermissionResource\Pages\CreatePermission;
+use App\Filament\Resources\PermissionResource\Pages\EditPermission;
 use App\Filament\Concerns\HasRoleBasedAccess;
 use App\Filament\Resources\PermissionResource\Pages;
 use App\Filament\Resources\PermissionResource\RelationManagers;
 use Spatie\Permission\Models\Permission;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,7 +28,7 @@ class PermissionResource extends Resource
     
     protected static ?string $model = Permission::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-lock-closed';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-lock-closed';
 
     protected static ?int $navigationSort = 3;
 
@@ -62,17 +72,17 @@ class PermissionResource extends Resource
         return auth()->user()->hasPermissionTo('permission.manage');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.permission_information'))
+        return $schema
+            ->components([
+                Section::make(__('app.permission_information'))
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('guard_name')
+                        TextInput::make('guard_name')
                             ->required()
                             ->default('web')
                             ->maxLength(255),
@@ -84,14 +94,14 @@ class PermissionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable()
                     ->badge(),
-                Tables\Columns\TextColumn::make('guard_name')
+                TextColumn::make('guard_name')
                     ->badge()
                     ->color('gray'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -99,13 +109,13 @@ class PermissionResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -120,9 +130,9 @@ class PermissionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPermissions::route('/'),
-            'create' => Pages\CreatePermission::route('/create'),
-            'edit' => Pages\EditPermission::route('/{record}/edit'),
+            'index' => ListPermissions::route('/'),
+            'create' => CreatePermission::route('/create'),
+            'edit' => EditPermission::route('/{record}/edit'),
         ];
     }
 }

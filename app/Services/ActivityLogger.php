@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Throwable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
 
@@ -12,7 +14,7 @@ class ActivityLogger
      * Standardises the log name + ip/user-agent properties read by the
      * ActivityLogResource view page.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|null  $subject
+     * @param Model|null $subject
      */
     public static function record(string $logName, string $description, $subject = null, array $properties = []): void
     {
@@ -43,19 +45,19 @@ class ActivityLogger
         if ($userType && $userId && class_exists($userType)) {
             try {
                 $causer = $userType::find($userId);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $causer = null;
             }
         }
 
         // Try to resolve performedOn subject if resource is a model class or model instance
         $performedOn = null;
-        if ($resource instanceof \Illuminate\Database\Eloquent\Model) {
+        if ($resource instanceof Model) {
             $performedOn = $resource;
         } elseif (is_string($resource) && $resource && $resourceId && class_exists($resource)) {
             try {
                 $performedOn = $resource::find($resourceId);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $performedOn = null;
             }
         }

@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use Illuminate\Support\Collection;
 use App\Services\ActivityLogger;
 use Spatie\Permission\Events\PermissionAttached;
 use Spatie\Permission\Events\PermissionDetached;
@@ -69,7 +70,7 @@ class LogPermissionChange
      */
     protected function resolveNames(mixed $rolesOrIds, string $modelClass): array
     {
-        $items = $rolesOrIds instanceof \Illuminate\Support\Collection
+        $items = $rolesOrIds instanceof Collection
             ? $rolesOrIds->all()
             : (is_array($rolesOrIds) ? $rolesOrIds : [$rolesOrIds]);
 

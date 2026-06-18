@@ -2,8 +2,12 @@
 
 namespace App\Filament\Pages\Settings;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions;
+use Filament\Actions\Action;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
 use App\Services\SettingsService;
@@ -11,9 +15,9 @@ use App\Support\NotificationKeys;
 
 class NotificationSettings extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-bell';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bell';
     
-    protected static string $view = 'filament.pages.settings.notification-settings';
+    protected string $view = 'filament.pages.settings.notification-settings';
     
 
     public function getTitle(): string
@@ -56,57 +60,57 @@ class NotificationSettings extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.academic_notifications'))
+        return $schema
+            ->components([
+                Section::make(__('app.academic_notifications'))
                     ->description(__('app.academic_notifications_desc'))
                     ->icon('heroicon-o-academic-cap')
                     ->schema([
-                        Forms\Components\Toggle::make('enable_grade_published')
+                        Toggle::make('enable_grade_published')
                             ->label(__('app.grade_published_notifications'))
                             ->helperText(__('app.grade_published_notifications_help'))
                             ->inline(false),
 
-                        Forms\Components\Toggle::make('enable_evaluation_created')
+                        Toggle::make('enable_evaluation_created')
                             ->label(__('app.evaluation_created_notifications'))
                             ->helperText(__('app.evaluation_created_notifications_help'))
                             ->inline(false),
                     ]),
 
-                Forms\Components\Section::make(__('app.financial_notifications'))
+                Section::make(__('app.financial_notifications'))
                     ->description(__('app.financial_notifications_desc'))
                     ->icon('heroicon-o-banknotes')
                     ->schema([
-                        Forms\Components\Toggle::make('enable_teacher_payment')
+                        Toggle::make('enable_teacher_payment')
                             ->label(__('app.teacher_payment_notifications'))
                             ->helperText(__('app.teacher_payment_notifications_help'))
                             ->inline(false),
 
-                        Forms\Components\Toggle::make('enable_student_payment')
+                        Toggle::make('enable_student_payment')
                             ->label(__('app.student_payment_notifications'))
                             ->helperText(__('app.student_payment_notifications_help'))
                             ->inline(false),
                     ]),
 
-                Forms\Components\Section::make(__('app.security_notifications'))
+                Section::make(__('app.security_notifications'))
                     ->description(__('app.security_notifications_desc'))
                     ->icon('heroicon-o-shield-check')
                     ->schema([
-                        Forms\Components\Toggle::make('enable_lockout')
+                        Toggle::make('enable_lockout')
                             ->label(__('app.account_lockout_notifications'))
                             ->helperText(__('app.account_lockout_notifications_help'))
                             ->inline(false),
 
-                        Forms\Components\Toggle::make('enable_security_alert')
+                        Toggle::make('enable_security_alert')
                             ->label(__('app.security_alert_notifications'))
                             ->helperText(__('app.security_alert_notifications_help'))
                             ->inline(false),
                     ]),
 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Http\Requests\ContactFormRequest;
 use App\Models\Page;
 use App\Models\SiteSetting;
@@ -126,7 +127,7 @@ class PublicController extends Controller
 
             return back()->with('success', 'Thank you for your message! We will get back to you soon.');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Contact form submission failed', [
                 'error' => $e->getMessage(),
                 'email' => $request->email ?? 'unknown',

@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\Etudiant;
 use App\Events\StudentPaymentReceived;
 use App\Services\NotificationService;
 use App\Support\NotificationKeys;
@@ -36,7 +37,7 @@ class SendStudentPaymentNotification implements ShouldQueue
         }
 
         // Find the user associated with this student
-        $user = User::where('profile_type', \App\Models\Etudiant::class)
+        $user = User::where('profile_type', Etudiant::class)
             ->where('profile_id', $etudiant->id_etudiant)
             ->first();
 

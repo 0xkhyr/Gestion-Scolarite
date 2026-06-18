@@ -2,6 +2,7 @@
 
 namespace App\Filament\Teacher\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
 use App\Models\Note;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -46,16 +47,16 @@ class TeacherRecentNotes extends BaseWidget
                     ->limit(10);
             })
             ->columns([
-                Tables\Columns\TextColumn::make('etudiant.nom')
+                TextColumn::make('etudiant.nom')
                     ->label(__('app.etudiant'))
                     ->formatStateUsing(fn ($record) => "{$record->etudiant->nom} {$record->etudiant->prenom}")
                     ->searchable(),
                     
-                Tables\Columns\TextColumn::make('evaluation.titre')
+                TextColumn::make('evaluation.titre')
                     ->label(__('app.evaluation'))
                     ->limit(30),
                     
-                Tables\Columns\TextColumn::make('note')
+                TextColumn::make('note')
                     ->label(__('app.note'))
                     ->badge()
                     ->color(function ($state, $record) {
@@ -70,7 +71,7 @@ class TeacherRecentNotes extends BaseWidget
                         return "{$state}/{$max}";
                     }),
                     
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('app.entered_on'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),

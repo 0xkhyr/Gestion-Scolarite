@@ -2,17 +2,20 @@
 
 namespace App\Filament\Pages\Account;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 
 class Preferences extends Page
 {
-    protected static ?string $navigationIcon = null;
+    protected static string | \BackedEnum | null $navigationIcon = null;
     
-    protected static string $view = 'filament.pages.account.preferences';
+    protected string $view = 'filament.pages.account.preferences';
     
     protected static ?string $slug = 'account/preferences';
 
@@ -36,15 +39,15 @@ class Preferences extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.language_region'))
+        return $schema
+            ->components([
+                Section::make(__('app.language_region'))
                     ->description(__('app.language_region_desc'))
                     ->icon('heroicon-o-globe-alt')
                     ->schema([
-                        Forms\Components\Select::make('preferred_language')
+                        Select::make('preferred_language')
                             ->label(__('app.preferred_language'))
                             ->options([
                                 'fr' => 'Français',
@@ -52,7 +55,7 @@ class Preferences extends Page
                                 'en' => 'English',
                             ])
                             ->default('fr'),
-                        Forms\Components\Select::make('date_format')
+                        Select::make('date_format')
                             ->label(__('app.date_format'))
                             ->options([
                                 'Y-m-d' => '2026-02-03',
@@ -61,7 +64,7 @@ class Preferences extends Page
                                 'd-m-Y' => '03-02-2026',
                             ])
                             ->default('Y-m-d'),
-                        Forms\Components\Select::make('time_format')
+                        Select::make('time_format')
                             ->label(__('app.time_format'))
                             ->options([
                                 '24' => __('app.time_format_24'),
@@ -70,11 +73,11 @@ class Preferences extends Page
                             ->default('24'),
                     ])->columns(2),
                 
-                Forms\Components\Section::make(__('app.interface_preferences'))
+                Section::make(__('app.interface_preferences'))
                     ->description(__('app.interface_preferences_desc'))
                     ->icon('heroicon-o-paint-brush')
                     ->schema([
-                        Forms\Components\Select::make('theme')
+                        Select::make('theme')
                             ->label(__('app.theme'))
                             ->options([
                                 'system' => __('app.theme_system'),
@@ -82,7 +85,7 @@ class Preferences extends Page
                                 'dark' => __('app.theme_dark'),
                             ])
                             ->default('system'),
-                        Forms\Components\Select::make('sidebar_collapsed')
+                        Select::make('sidebar_collapsed')
                             ->label(__('app.sidebar_behavior'))
                             ->options([
                                 'expanded' => __('app.sidebar_expanded'),
@@ -92,8 +95,8 @@ class Preferences extends Page
                             ->default('auto'),
                     ])->columns(2),
 
-                    Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                    Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')

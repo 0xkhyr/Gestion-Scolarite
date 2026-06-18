@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\EnseignantResource\Pages;
 
+use App\Models\Enseignant;
 use App\Filament\Resources\EnseignantResource;
 use App\Models\User;
 use Filament\Actions;
@@ -36,7 +37,7 @@ class CreateEnseignant extends CreateRecord
                 'email' => $email,
                 'password' => bcrypt($password),
                 'is_active' => $this->data['is_active'] ?? true,
-                'profile_type' => \App\Models\Enseignant::class,
+                'profile_type' => Enseignant::class,
                 'profile_id' => $this->record->id_enseignant,
             ]);
             

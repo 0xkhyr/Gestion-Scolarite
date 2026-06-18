@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use Throwable;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -20,9 +21,9 @@ use Illuminate\Support\Facades\URL;
  */
 class Backups extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-circle-stack';
 
-    protected static string $view = 'filament.pages.backups';
+    protected string $view = 'filament.pages.backups';
 
     protected static ?string $slug = 'backups';
 
@@ -89,7 +90,7 @@ class Backups extends Page
                 ->title(__('app.backup_completed'))
                 ->success()
                 ->send();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Notification::make()
                 ->title(__('app.backup_failed'))
                 ->body($e->getMessage())
@@ -127,7 +128,7 @@ class Backups extends Page
                         ),
                     ];
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Disk unreachable (e.g. S3 not configured yet) — skip it.
             }
         }

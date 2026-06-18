@@ -2,18 +2,24 @@
 
 namespace App\Filament\Pages\Account;
 
+use Throwable;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Actions;
+use Hash;
+use App\Services\ActivityLogger;
 use App\Services\TwoFactorService;
 use Filament\Actions\Action;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
 class Security extends Page
 {
-    protected static ?string $navigationIcon = null;
+    protected static string | \BackedEnum | null $navigationIcon = null;
 
-    protected static string $view = 'filament.pages.account.security';
+    protected string $view = 'filament.pages.account.security';
 
     protected static ?string $slug = 'account/security';
 
@@ -90,7 +96,7 @@ class Security extends Page
 
         try {
             return json_decode(decrypt($user->two_factor_recovery_codes), true) ?? [];
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return [];
         }
     }
@@ -100,37 +106,37 @@ class Security extends Page
     | Change password form
     |--------------------------------------------------------------------------
     */
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.change_password'))
+        return $schema
+            ->components([
+                Section::make(__('app.change_password'))
                     ->description(__('app.change_password_desc'))
                     ->icon('heroicon-o-key')
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        Forms\Components\TextInput::make('current_password')
+                        TextInput::make('current_password')
                             ->label(__('app.current_password'))
                             ->password()
                             ->revealable()
                             ->requiredWith('new_password')
                             ->currentPassword(),
-                        Forms\Components\TextInput::make('new_password')
+                        TextInput::make('new_password')
                             ->label(__('app.new_password'))
                             ->password()
                             ->revealable()
                             ->minLength(8)
                             ->confirmed()
                             ->requiredWith('current_password'),
-                        Forms\Components\TextInput::make('new_password_confirmation')
+                        TextInput::make('new_password_confirmation')
                             ->label(__('app.confirm_new_password'))
                             ->password()
                             ->revealable()
                             ->requiredWith('new_password'),
 
-                        Forms\Components\Actions::make([
-                            Forms\Components\Actions\Action::make('save')
+                        Actions::make([
+                            Action::make('save')
                                 ->label(__('app.save_changes'))
                                 ->icon('heroicon-m-check-circle')
                                 ->color('primary')
@@ -166,7 +172,7 @@ class Security extends Page
 
         if (! empty($data['new_password'])) {
             $user->update([
-                'password' => \Hash::make($data['new_password']),
+                'password' => Hash::make($data['new_password']),
             ]);
 
             $this->form->fill([]);
@@ -214,7 +220,7 @@ class Security extends Page
 
         $this->two_factor_code = '';
 
-        \App\Services\ActivityLogger::record(
+        ActivityLogger::record(
             'security',
             'Two-factor authentication enabled',
             $user,
@@ -240,7 +246,7 @@ class Security extends Page
 
         $this->two_factor_code = '';
 
-        \App\Services\ActivityLogger::record(
+        ActivityLogger::record(
             'security',
             'Two-factor authentication disabled',
             $user,

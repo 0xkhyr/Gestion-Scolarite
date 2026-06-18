@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Pages\Auth\Login as BaseLogin;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -11,7 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
-class Login extends BaseLogin
+class Login extends \Filament\Auth\Pages\Login
 {
     public function mount(): void
     {
@@ -65,7 +65,7 @@ class Login extends BaseLogin
         // Default to admin
         return 'admin';
     }
-    public function authenticate(): ?\Filament\Http\Responses\Auth\Contracts\LoginResponse
+    public function authenticate(): ?LoginResponse
     {
         // Get security settings from database
         $maxAttempts = (int) setting('security.max_login_attempts', 5);

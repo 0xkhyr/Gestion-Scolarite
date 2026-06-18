@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use Spatie\Permission\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -40,7 +41,7 @@ class CreateNewUser implements CreatesNewUsers
         // Assign the admin-configured default role to self-registered users.
         // Guarded so a missing/renamed role never breaks registration.
         $defaultRole = setting('app.default_user_role', 'student');
-        if ($defaultRole && \Spatie\Permission\Models\Role::where('name', $defaultRole)->exists()) {
+        if ($defaultRole && Role::where('name', $defaultRole)->exists()) {
             $user->assignRole($defaultRole);
         }
 

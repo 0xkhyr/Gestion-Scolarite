@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\NotificationLog;
 use Illuminate\Auth\Events\Lockout;
 use App\Services\NotificationService;
 use App\Support\NotificationKeys;
@@ -47,7 +48,7 @@ class SendLockoutNotification
 
         if ($user) {
             // Prevent spam detected: Check if a similar notification was sent in the last 5 minutes
-            $recentNotification = \App\Models\NotificationLog::where('user_id', $user->id)
+            $recentNotification = NotificationLog::where('user_id', $user->id)
                 ->where('key', NotificationKeys::SECURITY_ALERT)
                 ->where('created_at', '>=', now()->subMinutes(5))
                 ->exists();

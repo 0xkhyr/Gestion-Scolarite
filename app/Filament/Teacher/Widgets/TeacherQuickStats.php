@@ -2,6 +2,7 @@
 
 namespace App\Filament\Teacher\Widgets;
 
+use App\Models\Evaluation;
 use App\Models\Etudiant;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -42,7 +43,7 @@ class TeacherQuickStats extends BaseWidget
             ->count();
             
         // Count total evaluations for teacher's classes
-        $totalEvaluations = \App\Models\Evaluation::whereIn('id_classe', $teacherClasses)->count();
+        $totalEvaluations = Evaluation::whereIn('id_classe', $teacherClasses)->count();
         
         return [
             Stat::make(__('app.etudiants_hommes'), $maleStudents)

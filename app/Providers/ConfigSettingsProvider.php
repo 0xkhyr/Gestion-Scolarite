@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Exception;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 
@@ -24,7 +25,7 @@ class ConfigSettingsProvider extends ServiceProvider
         if ($this->app->bound('db') && $this->app->bound('cache')) {
             try {
                 $this->applySettingsToConfig();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Silently fail during testing or if database isn't ready
             }
         }
@@ -38,21 +39,21 @@ class ConfigSettingsProvider extends ServiceProvider
         // Update mail configuration with settings
         $schoolEmail = setting('school.email');
         $schoolName = setting('school.name');
-        
+
         if ($schoolEmail) {
             Config::set('mail.from.address', $schoolEmail);
         }
-        
+
         if ($schoolName) {
             Config::set('mail.from.name', $schoolName);
         }
-        
+
         // Update session configuration with settings
         $sessionTimeout = setting('security.session_timeout');
         if ($sessionTimeout) {
             Config::set('session.lifetime', (int) $sessionTimeout);
         }
-        
+
         // Enforce 2FA based on the admin setting (drives EnsureTwoFactorIsVerified).
         // Falls back to the existing config value, so nothing changes until opt-in.
         Config::set('security.require_2fa', (bool) setting(
@@ -68,7 +69,7 @@ class ConfigSettingsProvider extends ServiceProvider
                 return ['required', 'file', 'max:' . $maxSizeKB];
             });
         }
-        
+
         // You can add more config updates here as needed
     }
 }

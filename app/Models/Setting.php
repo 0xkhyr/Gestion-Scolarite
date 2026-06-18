@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -45,7 +46,7 @@ class Setting extends Model
                     if ($setting) {
                         return static::castValue($setting->value, $setting->type);
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // If database isn't ready, fall back to ENV
                 }
 
@@ -60,7 +61,7 @@ class Setting extends Model
                 // 3. Use default value (lowest priority)
                 return $default;
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // If cache write fails (filesystem permission, disk full, etc.), avoid raising an exception
             logger()->warning('Settings cache write failed: ' . $e->getMessage());
 

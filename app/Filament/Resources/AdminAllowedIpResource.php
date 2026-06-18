@@ -2,11 +2,23 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\AdminAllowedIpResource\Pages\ListAdminAllowedIps;
+use App\Filament\Resources\AdminAllowedIpResource\Pages\CreateAdminAllowedIp;
+use App\Filament\Resources\AdminAllowedIpResource\Pages\EditAdminAllowedIp;
 use App\Filament\Concerns\HasRoleBasedAccess;
 use App\Filament\Resources\AdminAllowedIpResource\Pages;
 use App\Models\AdminAllowedIp;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,7 +30,7 @@ class AdminAllowedIpResource extends Resource
     
     protected static ?string $model = AdminAllowedIp::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-finger-print';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-finger-print';
 
     protected static ?int $navigationSort = 5;
 
@@ -62,13 +74,13 @@ class AdminAllowedIpResource extends Resource
         return auth()->user()->hasPermissionTo('system.manage_settings');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.ip_autorisee'))
+        return $schema
+            ->components([
+                Section::make(__('app.ip_autorisee'))
                     ->schema([
-                        Forms\Components\TextInput::make('ip_address')
+                        TextInput::make('ip_address')
                             ->label(__('app.ip_address'))
                             ->required()
                             ->unique(ignoreRecord: true)
@@ -76,7 +88,7 @@ class AdminAllowedIpResource extends Resource
                             ->ipv4() // Or ipv6() depending on needs, ipv4 is safer default validation
                             ->maxLength(45),
                         
-                        Forms\Components\Textarea::make('description')
+                        Textarea::make('description')
                             ->label(__('app.description'))
                             ->rows(3)
                             ->columnSpanFull(),
@@ -88,26 +100,26 @@ class AdminAllowedIpResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('ip_address')
+                TextColumn::make('ip_address')
                     ->label(__('app.ip_address'))
                     ->searchable()
                     ->sortable()
                     ->copyable(),
                     
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label(__('app.description'))
                     ->limit(50)
                     ->tooltip(function (AdminAllowedIp $record): ?string {
                         return $record->description;
                     }),
                     
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('app.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(),
                     
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('app.updated_at'))
                     ->dateTime()
                     ->sortable()
@@ -116,14 +128,14 @@ class AdminAllowedIpResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -138,9 +150,9 @@ class AdminAllowedIpResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAdminAllowedIps::route('/'),
-            'create' => Pages\CreateAdminAllowedIp::route('/create'),
-            'edit' => Pages\EditAdminAllowedIp::route('/{record}/edit'),
+            'index' => ListAdminAllowedIps::route('/'),
+            'create' => CreateAdminAllowedIp::route('/create'),
+            'edit' => EditAdminAllowedIp::route('/{record}/edit'),
         ];
     }
 }

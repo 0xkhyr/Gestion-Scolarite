@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\RoleRedirectService;
 use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class RedirectIfAuthenticated
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request):Response $next
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {
@@ -24,7 +25,7 @@ class RedirectIfAuthenticated
                 $user = Auth::guard($guard)->user();
                 
                 // Use the RoleRedirectService for consistent redirect logic
-                $redirectPath = \App\Services\RoleRedirectService::getRedirectPath($user);
+                $redirectPath = RoleRedirectService::getRedirectPath($user);
                 return redirect($redirectPath);
             }
         }

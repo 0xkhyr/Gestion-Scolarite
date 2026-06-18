@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\AttendanceResource\Pages;
 
+use Filament\Actions\Action;
+use App\Filament\Pages\TakeAttendance;
 use App\Filament\Resources\AttendanceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -14,11 +16,11 @@ class ListAttendances extends ListRecords
     {
         return [
             // Records are created via the Take Attendance page.
-            Actions\Action::make('take')
+            Action::make('take')
                 ->label(__('app.take_attendance'))
                 ->icon('heroicon-o-clipboard-document-check')
-                ->url(fn () => \App\Filament\Pages\TakeAttendance::getUrl())
-                ->visible(fn () => \App\Filament\Pages\TakeAttendance::canAccess()),
+                ->url(fn () => TakeAttendance::getUrl())
+                ->visible(fn () => TakeAttendance::canAccess()),
         ];
     }
 }

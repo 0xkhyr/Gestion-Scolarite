@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\RoleRedirectService;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 
@@ -17,6 +18,6 @@ class Authenticate extends Middleware
         }
 
         // Use the RoleRedirectService for consistent login URL determination
-        return \App\Services\RoleRedirectService::getLoginUrl($request);
+        return RoleRedirectService::getLoginUrl($request);
     }
 }

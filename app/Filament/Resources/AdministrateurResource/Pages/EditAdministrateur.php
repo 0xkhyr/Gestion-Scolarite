@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\AdministrateurResource\Pages;
 
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use App\Models\Administrateur;
 use App\Filament\Resources\AdministrateurResource;
 use App\Models\User;
 use Filament\Actions;
@@ -14,23 +17,23 @@ class EditAdministrateur extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('resetPassword')
+            Action::make('resetPassword')
                 ->label(__('app.reset_password'))
                 ->icon('heroicon-o-key')
                 ->color('warning')
                 ->visible(fn () => auth()->user()->hasPermissionTo('user.manage'))
                 ->modalHeading(__('app.reset_password'))
                 ->modalSubmitActionLabel(__('app.reset_password'))
-                ->form(AdministrateurResource::passwordResetFormSchema())
+                ->schema(AdministrateurResource::passwordResetFormSchema())
                 ->action(fn (array $data) => AdministrateurResource::applyPasswordReset($this->record, $data)),
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Load user account data if exists
-        $user = User::where('profile_type', \App\Models\Administrateur::class)
+        $user = User::where('profile_type', Administrateur::class)
             ->where('profile_id', $this->record->id_administrateur)
             ->first();
         
@@ -54,7 +57,7 @@ class EditAdministrateur extends EditRecord
     protected function afterSave(): void
     {
         // Find the user associated with this administrator
-        $user = User::where('profile_type', \App\Models\Administrateur::class)
+        $user = User::where('profile_type', Administrateur::class)
             ->where('profile_id', $this->record->id_administrateur)
             ->first();
         

@@ -2,11 +2,31 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\EtudiantResource\Pages\ListEtudiants;
+use App\Filament\Resources\EtudiantResource\Pages\CreateEtudiant;
+use App\Filament\Resources\EtudiantResource\Pages\EditEtudiant;
+use App\Filament\Resources\EtudiantResource\Pages\ViewEtudiant;
 use App\Filament\Resources\EtudiantResource\Pages;
 use App\Filament\Resources\EtudiantResource\RelationManagers;
 use App\Models\Etudiant;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -22,7 +42,7 @@ class EtudiantResource extends Resource
     use HasRoleBasedAccess;
     protected static ?string $model = Etudiant::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
     
     protected static ?int $navigationSort = 2;
 
@@ -96,35 +116,35 @@ class EtudiantResource extends Resource
         return $teacherClasses->contains($student->id_classe);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.informations_personnelles'))
+        return $schema
+            ->components([
+                Section::make(__('app.informations_personnelles'))
                     ->schema([
-                        Forms\Components\TextInput::make('matricule')
+                        TextInput::make('matricule')
                             ->label(__('app.matricule'))
                             ->disabled()
                             ->dehydrated(false)
                             ->placeholder(__('app.placeholder_matricule')),
                             
-                        Forms\Components\TextInput::make('nom')
+                        TextInput::make('nom')
                             ->label(__('app.nom'))
                             ->required()
                             ->maxLength(191),
                                     
-                        Forms\Components\TextInput::make('prenom')
+                        TextInput::make('prenom')
                             ->label(__('app.prenom'))
                             ->required()
                             ->maxLength(191),
                             
-                        Forms\Components\DatePicker::make('date_naissance')
+                        DatePicker::make('date_naissance')
                             ->label(__('app.date_naissance'))
                             ->required()
                             ->maxDate(now()->subYears(5))
                             ->displayFormat('d/m/Y'),
                             
-                        Forms\Components\Select::make('genre')
+                        Select::make('genre')
                             ->label(__('app.genre'))
                             ->required()
                             ->options([
@@ -132,7 +152,7 @@ class EtudiantResource extends Resource
                                 'F' => __('app.F'),
                             ]),
                             
-                        Forms\Components\Select::make('id_classe')
+                        Select::make('id_classe')
                             ->label(__('app.classe'))
                             ->relationship('classe', 'nom_classe', function (Builder $query) {
                                 return static::applyRoleBasedRelationScope($query, [
@@ -145,63 +165,63 @@ class EtudiantResource extends Resource
                     ])
                     ->columns(2),
                     
-                Forms\Components\Section::make(__('app.informations_compte'))
+                Section::make(__('app.informations_compte'))
                     ->visible(fn () => !auth()->user()->hasPermissionTo('user.manage'))
                     ->description(__('app.account_info_readonly'))
                     ->schema([
-                        Forms\Components\Placeholder::make('contact_readonly')
+                        Placeholder::make('contact_readonly')
                             ->label(__('app.telephone'))
                             ->content(fn ($record) => $record->telephone ?? __('app.not_provided'))
                             ->visibleOn(['edit', 'view']),
                             
-                        Forms\Components\Placeholder::make('email_readonly')
+                        Placeholder::make('email_readonly')
                             ->label(__('app.email'))
                             ->content(fn ($record) => $record->user?->email ?? __('app.aucun_compte'))
                             ->visibleOn(['edit', 'view']),
                             
-                        Forms\Components\Placeholder::make('account_status_readonly')
+                        Placeholder::make('account_status_readonly')
                             ->label(__('app.statut_compte'))
                             ->content(fn ($record) => $record->user?->is_active 
-                                ? new \Illuminate\Support\HtmlString('<span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">' . __('app.actif') . '</span>')
-                                : new \Illuminate\Support\HtmlString('<span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">' . __('app.inactif') . '</span>'))
+                                ? new HtmlString('<span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">' . __('app.actif') . '</span>')
+                                : new HtmlString('<span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">' . __('app.inactif') . '</span>'))
                             ->visibleOn(['edit', 'view']),
                     ])
                     ->columns(2),
                     
-                Forms\Components\Section::make(__('app.contact_information'))
+                Section::make(__('app.contact_information'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('user.manage'))
                     ->schema([
-                        Forms\Components\TextInput::make('telephone')
+                        TextInput::make('telephone')
                             ->label(__('app.telephone'))
                             ->tel()
                             ->maxLength(191),
                             
-                        Forms\Components\Textarea::make('adresse')
+                        Textarea::make('adresse')
                             ->label(__('app.adresse'))
                             ->rows(3)
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
                     
-                Forms\Components\Section::make(__('app.compte_utilisateur'))
+                Section::make(__('app.compte_utilisateur'))
                     ->description(__('app.compte_utilisateur_description'))
                     ->visible(fn () => auth()->user()->hasPermissionTo('user.manage'))
                     ->schema([
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->label(__('app.email'))
                             ->email()
                             ->maxLength(191)
                             ->helperText(__('app.leave_empty_for_no_account'))
                             ->hiddenOn('view'),
                             
-                        Forms\Components\TextInput::make('email_display')
+                        TextInput::make('email_display')
                             ->label(__('app.email'))
                             ->disabled()
                             ->dehydrated(false)
                             ->visibleOn('view')
                             ->default(fn ($record) => $record->user?->email ?? '-'),
                                     
-                        Forms\Components\TextInput::make('password')
+                        TextInput::make('password')
                             ->label(__('app.password'))
                             ->password()
                             ->revealable()
@@ -209,16 +229,16 @@ class EtudiantResource extends Resource
                             ->helperText(__('app.leave_empty_to_keep_current'))
                             ->hiddenOn('view'),
                                     
-                        Forms\Components\Toggle::make('is_active')
+                        Toggle::make('is_active')
                             ->label(__('app.compte_actif'))
                             ->default(true)
                             ->hiddenOn('view'),
                             
-                        Forms\Components\Placeholder::make('compte_status')
+                        Placeholder::make('compte_status')
                             ->label(__('app.status'))
                             ->content(fn ($record) => $record->user?->is_active 
-                                ? new \Illuminate\Support\HtmlString('<span class="text-success-600 font-semibold">' . __('app.actif') . '</span>')
-                                : new \Illuminate\Support\HtmlString('<span class="text-danger-600 font-semibold">' . __('app.inactif') . '</span>'))
+                                ? new HtmlString('<span class="text-success-600 font-semibold">' . __('app.actif') . '</span>')
+                                : new HtmlString('<span class="text-danger-600 font-semibold">' . __('app.inactif') . '</span>'))
                             ->visibleOn('view'),
                     ])
                     ->columns(2),
@@ -230,7 +250,7 @@ class EtudiantResource extends Resource
         return $table
             ->striped()
             ->columns([
-                Tables\Columns\TextColumn::make('matricule')
+                TextColumn::make('matricule')
                     ->label(__('app.matricule'))
                     ->searchable()
                     ->sortable()
@@ -238,30 +258,30 @@ class EtudiantResource extends Resource
                     ->badge()
                     ->color('primary'),
                     
-                Tables\Columns\TextColumn::make('nom')
+                TextColumn::make('nom')
                     ->label(__('app.nom'))
                     ->searchable()
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('prenom')
+                TextColumn::make('prenom')
                     ->label(__('app.prenom'))
                     ->searchable()
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('classe.nom_classe')
+                TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('info'),
                     
-                Tables\Columns\TextColumn::make('date_naissance')
+                TextColumn::make('date_naissance')
                     ->label(__('app.date_naissance'))
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                     
-                Tables\Columns\TextColumn::make('genre')
+                TextColumn::make('genre')
                     ->label(__('app.genre'))
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'M' => __('app.M'),
@@ -276,7 +296,7 @@ class EtudiantResource extends Resource
                     })
                     ->toggleable(),
                     
-                Tables\Columns\TextColumn::make('telephone')
+                TextColumn::make('telephone')
                     ->label(__('app.telephone'))
                     ->searchable()
                     ->toggleable()
@@ -284,7 +304,7 @@ class EtudiantResource extends Resource
                     ->icon('heroicon-o-phone')
                     ->visible(fn () => auth()->user()->hasRole('super_admin') || auth()->user()->can('student.manage_accounts')),
 
-                Tables\Columns\IconColumn::make('user.is_active')
+                IconColumn::make('user.is_active')
                     ->label(__('app.compte_actif'))
                     ->boolean()
                     ->sortable()
@@ -292,7 +312,7 @@ class EtudiantResource extends Resource
                     ->default(false)
                     ->visible(fn () => auth()->user()->hasRole('super_admin') || auth()->user()->can('student.manage_accounts')),
                     
-                Tables\Columns\TextColumn::make('user.email')
+                TextColumn::make('user.email')
                     ->label(__('app.email'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -301,7 +321,7 @@ class EtudiantResource extends Resource
                     ->default(__('app.aucun_compte'))
                     ->visible(fn () => auth()->user()->hasRole('super_admin') || auth()->user()->can('student.manage_accounts')),
                     
-                Tables\Columns\TextColumn::make('user.last_login_at')
+                TextColumn::make('user.last_login_at')
                     ->label(__('app.derniere_connexion'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
@@ -309,14 +329,14 @@ class EtudiantResource extends Resource
                     ->placeholder(__('app.never'))
                     ->visible(fn () => auth()->user()->hasRole('super_admin') || auth()->user()->can('student.manage_accounts')),
                     
-                Tables\Columns\TextColumn::make('notes_count')
+                TextColumn::make('notes_count')
                     ->label(__('app.notes'))
                     ->counts('notes')
                     ->badge()
                     ->color('success')
                     ->toggleable(),
                     
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('app.date_creation'))
                     ->dateTime('d/m/Y')
                     ->sortable()
@@ -324,7 +344,7 @@ class EtudiantResource extends Resource
                     ->visible(fn () => auth()->user()->hasRole('super_admin') || auth()->user()->can('student.manage_accounts')),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('id_classe')
+                SelectFilter::make('id_classe')
                     ->label(__('app.classe'))
                     ->relationship('classe', 'nom_classe', function (Builder $query) {
                         return static::applyRoleBasedRelationScope($query, [
@@ -334,29 +354,29 @@ class EtudiantResource extends Resource
                     ->searchable()
                     ->preload(),
                     
-                Tables\Filters\SelectFilter::make('genre')
+                SelectFilter::make('genre')
                     ->label(__('app.genre'))
                     ->options([
                         'M' => __('app.M'),
                         'F' => __('app.F'),
                     ]),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                     ->visible(function (Model $record) {
                         if (auth()->user()->hasRole(['teacher', 'enseignant'])) {
                             return static::canTeacherAccessStudent($record);
                         }
                         return static::canView($record);
                     }),
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->visible(fn (Model $record) => auth()->user()->hasPermissionTo('student.edit')),
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->visible(fn (Model $record) => auth()->user()->hasPermissionTo('student.delete')),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->visible(fn () => auth()->user()->hasPermissionTo('student.delete'))
                 ]),
             ])
@@ -374,10 +394,10 @@ class EtudiantResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListEtudiants::route('/'),
-            'create' => Pages\CreateEtudiant::route('/create'),
-            'edit' => Pages\EditEtudiant::route('/{record}/edit'),
-            'view' => Pages\ViewEtudiant::route('/{record}'),
+            'index' => ListEtudiants::route('/'),
+            'create' => CreateEtudiant::route('/create'),
+            'edit' => EditEtudiant::route('/{record}/edit'),
+            'view' => ViewEtudiant::route('/{record}'),
         ];
     }
 }

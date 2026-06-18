@@ -2,6 +2,7 @@
 
 namespace App\Filament\Teacher\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
 use App\Models\Evaluation;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -44,12 +45,12 @@ class TeacherUpcomingEvaluations extends BaseWidget
                     ->orderBy('date');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('titre')
+                TextColumn::make('titre')
                     ->label(__('app.evaluation'))
                     ->limit(30)
                     ->searchable(),
                     
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label(__('app.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -61,17 +62,17 @@ class TeacherUpcomingEvaluations extends BaseWidget
                         default => 'gray',
                     }),
                     
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->label(__('app.date'))
                     ->date('d/m/Y')
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('classe.nom_classe')
+                TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
                     ->badge()
                     ->color('info'),
                     
-                Tables\Columns\TextColumn::make('note_max')
+                TextColumn::make('note_max')
                     ->label(__('app.note_max'))
                     ->suffix('/20'),
             ])

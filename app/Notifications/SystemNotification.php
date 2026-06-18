@@ -2,13 +2,13 @@
 
 namespace App\Notifications;
 
+use Filament\Actions\Action;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Support\NotificationChannels;
 use Filament\Notifications\Notification as FilamentNotification;
-use Filament\Notifications\Actions\Action;
 
 /**
  * A generic, queued system notification that handles dynamic channels and data.

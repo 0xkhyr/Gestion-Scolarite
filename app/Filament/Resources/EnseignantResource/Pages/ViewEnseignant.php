@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\EnseignantResource\Pages;
 
+use Filament\Actions\EditAction;
+use Illuminate\Support\Collection;
 use App\Filament\Resources\EnseignantResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions;
@@ -13,7 +15,7 @@ class ViewEnseignant extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
     
@@ -60,7 +62,7 @@ HTML;
     }
 
     protected function formatBadges(
-        \Illuminate\Support\Collection $items,
+        Collection $items,
         string $badgeClass,
         callable $labelResolver,
     ): string {

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -115,7 +116,7 @@ class ContactForm extends Component
             $this->showSuccess = true;
             $this->showError = false;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Contact form submission failed (Livewire)', [
                 'error' => $e->getMessage(),
                 'email' => $this->email ?? 'unknown',

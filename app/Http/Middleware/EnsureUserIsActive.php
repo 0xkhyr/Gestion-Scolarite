@@ -32,7 +32,7 @@ class EnsureUserIsActive
                 ->persistent()
                 ->send();
 
-            $loginUrl = Filament::getCurrentPanel()?->getLoginUrl()
+            $loginUrl = Filament::getCurrentOrDefaultPanel()?->getLoginUrl()
                 ?? route('filament.admin.auth.login');
 
             return redirect()->to($loginUrl);

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
+use Exception;
 use App\Models\Note;
 use App\Models\Etudiant;
 use App\Models\Evaluation;
@@ -19,7 +21,7 @@ class GradeService
      * @param float $note
      * @param string|null $commentaire
      * @return Note
-     * @throws \Exception
+     * @throws Exception
      */
     public function saveGrade(int $etudiantId, int $evaluationId, float $note, ?string $commentaire = null): Note
     {
@@ -35,7 +37,7 @@ class GradeService
             // Validate grade is within range
             $noteMax = $evaluation->note_max ?? 20;
             if ($note < 0 || $note > $noteMax) {
-                throw new \InvalidArgumentException("Note must be between 0 and {$noteMax}");
+                throw new InvalidArgumentException("Note must be between 0 and {$noteMax}");
             }
 
             // Find or create grade
@@ -73,7 +75,7 @@ class GradeService
 
             return $grade;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Grade save failed', [
                 'student_id' => $etudiantId,
@@ -89,7 +91,7 @@ class GradeService
      *
      * @param int $gradeId
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteGrade(int $gradeId): bool
     {
@@ -117,7 +119,7 @@ class GradeService
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Grade deletion failed', [
                 'grade_id' => $gradeId,
@@ -148,7 +150,7 @@ class GradeService
                     'student_id' => $studentId,
                     'grade_id' => $grade->id,
                 ];
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $results['failed'][] = [
                     'student_id' => $studentId,
                     'error' => $e->getMessage(),

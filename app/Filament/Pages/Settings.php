@@ -2,13 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Pages\Settings\System;
 use Filament\Pages\Page;
 
 class Settings extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static string $view = 'filament.pages.settings';
+    protected string $view = 'filament.pages.settings';
 
     public function getTitle(): string
     {
@@ -38,6 +39,6 @@ class Settings extends Page
     public function mount()
     {
         // Redirect to system settings page by default
-        return redirect()->to(\App\Filament\Pages\Settings\System::getUrl());
+        return redirect()->to(System::getUrl());
     }
 }

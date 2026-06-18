@@ -2,6 +2,7 @@
 
 namespace App\Filament\Teacher\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
 use App\Models\Cours;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -64,27 +65,27 @@ class TeacherTodaySchedule extends BaseWidget
                     ->orderBy('date_debut');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('date_debut')
+                TextColumn::make('date_debut')
                     ->label(__('app.heure_debut'))
                     ->time('H:i')
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('date_fin')
+                TextColumn::make('date_fin')
                     ->label(__('app.heure_fin'))
                     ->time('H:i')
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('classe.nom_classe')
+                TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
                     ->badge()
                     ->color('info'),
                     
-                Tables\Columns\TextColumn::make('matiere.nom_matiere')
+                TextColumn::make('matiere.nom_matiere')
                     ->label(__('app.matiere'))
                     ->badge()
                     ->color('success'),
                     
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label(__('app.description'))
                     ->limit(50),
             ])

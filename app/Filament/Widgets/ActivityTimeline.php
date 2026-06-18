@@ -16,7 +16,7 @@ class ActivityTimeline extends Widget
 
     protected int | string | array $columnSpan = 'half';
 
-    protected static string $view = 'filament.widgets.activity-timeline';
+    protected string $view = 'filament.widgets.activity-timeline';
 
     public function getActivities()
     {

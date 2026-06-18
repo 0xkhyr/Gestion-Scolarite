@@ -2,8 +2,13 @@
 
 namespace App\Filament\Pages\Account;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -14,9 +19,9 @@ use Illuminate\Support\Facades\DB;
 
 class Notifications extends Page
 {
-    protected static ?string $navigationIcon = null;
+    protected static string | \BackedEnum | null $navigationIcon = null;
     
-    protected static string $view = 'filament.pages.account.notifications';
+    protected string $view = 'filament.pages.account.notifications';
     
     protected static ?string $slug = 'account/notifications';
 
@@ -66,70 +71,70 @@ class Notifications extends Page
         return true;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.security_notifications'))
+        return $schema
+            ->components([
+                Section::make(__('app.security_notifications'))
                     ->description(__('app.account_security_notifications_desc'))
                     ->icon('heroicon-o-shield-check')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('label_login')
+                                Placeholder::make('label_login')
                                     ->label(__('app.login_attempts'))
                                     ->content(__('app.login_attempts_desc')),
-                                Forms\Components\Toggle::make('login_attempt_mail')
+                                Toggle::make('login_attempt_mail')
                                     ->label(__('app.email')),
-                                Forms\Components\Toggle::make('login_attempt_database')
+                                Toggle::make('login_attempt_database')
                                     ->label(__('app.in_app')),
                             ]),
-                        Forms\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('label_security')
+                                Placeholder::make('label_security')
                                     ->label(__('app.security_alerts'))
                                     ->content(__('app.security_alerts_desc')),
-                                Forms\Components\Toggle::make('security_alert_mail')
+                                Toggle::make('security_alert_mail')
                                     ->label(__('app.email')),
-                                Forms\Components\Toggle::make('security_alert_database')
+                                Toggle::make('security_alert_database')
                                     ->label(__('app.in_app')),
                             ]),
                     ]),
 
-                Forms\Components\Section::make(__('app.system_notifications'))
+                Section::make(__('app.system_notifications'))
                     ->description(__('app.system_notifications_account_desc'))
                     ->icon('heroicon-o-cog-6-tooth')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('label_system')
+                                Placeholder::make('label_system')
                                     ->label(__('app.system_updates'))
                                     ->content(__('app.system_updates_desc')),
-                                Forms\Components\Toggle::make('system_update_mail')
+                                Toggle::make('system_update_mail')
                                     ->label(__('app.email')),
-                                Forms\Components\Toggle::make('system_update_database')
+                                Toggle::make('system_update_database')
                                     ->label(__('app.in_app')),
                             ]),
                     ]),
 
-                Forms\Components\Section::make(__('app.academic_notifications'))
+                Section::make(__('app.academic_notifications'))
                     ->description(__('app.academic_notifications_account_desc'))
                     ->icon('heroicon-o-academic-cap')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('label_grades')
+                                Placeholder::make('label_grades')
                                     ->label(__('app.grade_published'))
                                     ->content(__('app.grade_published_desc')),
-                                Forms\Components\Toggle::make('grade_published_mail')
+                                Toggle::make('grade_published_mail')
                                     ->label(__('app.email')),
-                                Forms\Components\Toggle::make('grade_published_database')
+                                Toggle::make('grade_published_database')
                                     ->label(__('app.in_app')),
                             ]),
                     ]),
 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')

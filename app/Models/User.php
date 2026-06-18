@@ -345,7 +345,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function notificationPreferences()
     {
-        return $this->hasMany(\App\Models\NotificationPreference::class);
+        return $this->hasMany(NotificationPreference::class);
     }
 
     /**
@@ -353,6 +353,6 @@ class User extends Authenticatable implements FilamentUser
      */
     public function notificationLogs()
     {
-        return $this->hasMany(\App\Models\NotificationLog::class);
+        return $this->hasMany(NotificationLog::class);
     }
 }

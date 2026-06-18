@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Academic;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Translatable;
@@ -19,7 +20,7 @@ class Classe extends Model
     // Cycle this class belongs to (fondamental|college|lycee), via config/academic.
     public function getCycleAttribute(): ?string
     {
-        return \App\Support\Academic::cycleForLevel($this->niveau);
+        return Academic::cycleForLevel($this->niveau);
     }
     
     public function etudiants()

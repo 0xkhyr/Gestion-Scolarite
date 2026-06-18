@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\StudentPaymentReceived;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,14 +29,14 @@ class EtudePaiement extends Model
         static::created(function ($payment) {
             // Check if status is Paid or if we notify for all new entries
             if ($payment->statut === 'Payé' || $payment->statut === 'Complet') {
-                event(new \App\Events\StudentPaymentReceived($payment));
+                event(new StudentPaymentReceived($payment));
             }
         });
 
         static::updated(function ($payment) {
             // If status changed to Paid
             if ($payment->isDirty('statut') && ($payment->statut === 'Payé' || $payment->statut === 'Complet')) {
-                event(new \App\Events\StudentPaymentReceived($payment));
+                event(new StudentPaymentReceived($payment));
             }
         });
     }

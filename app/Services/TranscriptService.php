@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\Academic;
 use App\Models\Etudiant;
 use App\Models\Note;
 use Carbon\Carbon;
@@ -21,7 +22,7 @@ class TranscriptService
         $weightedSum = 0;
 
         // Mauritanian grading is /20; a student passes at 10/20.
-        $passingGradeOn20 = \App\Support\Academic::passingGrade();
+        $passingGradeOn20 = Academic::passingGrade();
 
         foreach ($notesByMatiere as $matiere => $matiereNotes) {
             // Resolve the real subject + série straight from the notes so the
@@ -86,7 +87,7 @@ class TranscriptService
     public function getGradeLetter($average)
     {
         $gradingSystem = setting('academic.grading_system', 'sur_20');
-        $passingGradeOn20 = \App\Support\Academic::passingGrade();
+        $passingGradeOn20 = Academic::passingGrade();
 
         if ($gradingSystem === 'letter') {
             if ($average >= 18) return 'A+';
@@ -115,7 +116,7 @@ class TranscriptService
     public function getMention($average)
     {
         // /20-native mentions via the canonical academic reference.
-        return __('app.mention_' . \App\Support\Academic::mentionKey((float) $average));
+        return __('app.mention_' . Academic::mentionKey((float) $average));
     }
 
     public function getTrimestreInfo($trimestre)

@@ -2,6 +2,15 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Account\Profile;
+use App\Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
+use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\EnsureAdminRole;
+use App\Http\Middleware\EnsureTwoFactorIsVerified;
+use App\Http\Middleware\ForcePasswordChange;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -45,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentErrorPagesPlugin::make(),
             ])
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->login(Login::class)
             ->databaseNotifications()
             ->colors([
                 'primary' => Color::Amber,
@@ -60,19 +69,19 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
             MenuItem::make()
                 ->label(__('app.my_account'))
-                ->url(fn (): string => \App\Filament\Pages\Account\Profile::getUrl())
+                ->url(fn (): string => Profile::getUrl())
                 ->icon('heroicon-o-user-circle'),
             // ...
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                \App\Filament\Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                AccountWidget::class,
+                FilamentInfoWidget::class,
 
             ])
             ->bootUsing(function () {
@@ -95,7 +104,7 @@ class AdminPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 // Sign deactivated accounts out gracefully (login redirect, not 403).
-                \App\Http\Middleware\EnsureUserIsActive::class,
+                EnsureUserIsActive::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
@@ -104,11 +113,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\EnsureAdminRole::class,
+                EnsureAdminRole::class,
                 // No-op unless security.two_factor_required is enabled in settings.
-                \App\Http\Middleware\EnsureTwoFactorIsVerified::class,
+                EnsureTwoFactorIsVerified::class,
                 // No-op unless security.password_expiry_enabled is on.
-                \App\Http\Middleware\ForcePasswordChange::class,
+                ForcePasswordChange::class,
             ])
             ->spa()
             ->font('Poppins')

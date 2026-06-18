@@ -2,17 +2,23 @@
 
 namespace App\Filament\Pages\Account;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Blade;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 
 class Profile extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-circle';
     
-    protected static string $view = 'filament.pages.account.profile';
+    protected string $view = 'filament.pages.account.profile';
     
     protected static ?string $slug = 'account/profile';
 
@@ -47,19 +53,19 @@ class Profile extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.profile_information'))
+        return $schema
+            ->components([
+                Section::make(__('app.profile_information'))
                     ->description(__('app.profile_information_desc'))
                     ->icon('heroicon-o-user')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->label(__('app.full_name'))
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->label(__('app.email'))
                             ->email()
                             ->disabled(fn () => ! auth()->user()->hasRole('super_admin'))
@@ -67,42 +73,42 @@ class Profile extends Page
                             ->required(fn () => auth()->user()->hasRole('super_admin'))
                             ->unique(table: 'users', column: 'email', ignorable: auth()->user())
                             ->helperText(fn () => auth()->user()->hasRole('super_admin') ? null : __('app.email_cannot_be_changed')),
-                        Forms\Components\TextInput::make('phone')
+                        TextInput::make('phone')
                             ->label(__('app.phone_number'))
                             ->tel()
                             ->maxLength(20),
                     ])->columns(2),
 
-                Forms\Components\Section::make(__('app.account_details'))
+                Section::make(__('app.account_details'))
                     ->description(__('app.account_details_desc'))
                     ->icon('heroicon-o-identification')
                     ->schema([
-                        Forms\Components\Placeholder::make('role')
+                        Placeholder::make('role')
                             ->label(__('app.role'))
                             ->content(function () {
                                 $roles = auth()->user()->roles->pluck('name');
 
                                 if ($roles->isEmpty()) {
-                                    return new \Illuminate\Support\HtmlString(\Illuminate\Support\Facades\Blade::render(
+                                    return new HtmlString(Blade::render(
                                         '<x-filament::badge color="gray">{{ $l }}</x-filament::badge>',
                                         ['l' => __('app.no_roles_assigned')],
                                     ));
                                 }
 
-                                $badges = $roles->map(fn ($r) => \Illuminate\Support\Facades\Blade::render(
+                                $badges = $roles->map(fn ($r) => Blade::render(
                                     '<x-filament::badge :color="$c">{{ $l }}</x-filament::badge>',
                                     ['c' => $r === 'super_admin' ? 'primary' : 'info', 'l' => __('app.' . $r)],
                                 ))->join('');
 
-                                return new \Illuminate\Support\HtmlString('<div class="flex flex-wrap gap-1">' . $badges . '</div>');
+                                return new HtmlString('<div class="flex flex-wrap gap-1">' . $badges . '</div>');
                             }),
-                        Forms\Components\Placeholder::make('created_at')
+                        Placeholder::make('created_at')
                             ->label(__('app.account_created'))
                             ->content(fn () => auth()->user()->created_at?->translatedFormat('d M Y') ?: __('app.unknown')),
-                        Forms\Components\Placeholder::make('last_login')
+                        Placeholder::make('last_login')
                             ->label(__('app.last_login'))
                             ->content(fn () => auth()->user()->last_login_at?->translatedFormat('d M Y H:i') ?: __('app.never')),
-                        Forms\Components\Placeholder::make('profile_info')
+                        Placeholder::make('profile_info')
                             ->label(__('app.profile_type'))
                             ->content(function () {
                                 $user = auth()->user();
@@ -111,18 +117,18 @@ class Profile extends Page
                                     ? ['info', __('app.' . strtolower(class_basename($user->profile_type)))]
                                     : ['gray', __('app.no_profile_linked')];
 
-                                return new \Illuminate\Support\HtmlString(\Illuminate\Support\Facades\Blade::render(
+                                return new HtmlString(Blade::render(
                                     '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
                                     compact('color', 'label'),
                                 ));
                             }),
-                        Forms\Components\Placeholder::make('is_active')
+                        Placeholder::make('is_active')
                             ->label(__('app.account_status'))
                             ->content(function () {
                                 $isActive = auth()->user()->is_active;
 
-                                return new \Illuminate\Support\HtmlString(
-                                    \Illuminate\Support\Facades\Blade::render(
+                                return new HtmlString(
+                                    Blade::render(
                                         '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
                                         $isActive
                                             ? ['color' => 'success', 'label' => __('app.active')]
@@ -132,8 +138,8 @@ class Profile extends Page
                             }),
                     ])->columns(3),
                 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')

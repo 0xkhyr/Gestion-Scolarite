@@ -2,13 +2,31 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use App\Models\Administrateur;
+use App\Models\Enseignant;
+use App\Models\Etudiant;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use Filament\Forms;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -25,7 +43,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
 
     protected static ?int $navigationSort = 2;
 
@@ -111,14 +129,14 @@ class UserResource extends Resource
     public static function passwordResetSchema(): array
     {
         return [
-            Forms\Components\TextInput::make('password')
+            TextInput::make('password')
                 ->label(__('app.new_password'))
                 ->password()
                 ->revealable()
                 ->required()
                 ->minLength(8)
                 ->confirmed(),
-            Forms\Components\TextInput::make('password_confirmation')
+            TextInput::make('password_confirmation')
                 ->label(__('app.confirm_new_password'))
                 ->password()
                 ->revealable()
@@ -130,7 +148,7 @@ class UserResource extends Resource
     public static function rolesSchema(): array
     {
         return [
-            Forms\Components\CheckboxList::make('roles')
+            CheckboxList::make('roles')
                 ->label(__('app.roles'))
                 ->options(fn () => Role::query()
                     ->orderBy('name')
@@ -145,28 +163,28 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label(__('app.full_name'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label(__('app.email'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('roles.name')
+                TextColumn::make('roles.name')
                     ->label(__('app.role'))
                     ->badge()
                     ->color(fn ($state) => $state === 'super_admin' ? 'primary' : 'info')
                     ->formatStateUsing(fn ($state) => __('app.' . $state)),
-                Tables\Columns\TextColumn::make('profile_type')
+                TextColumn::make('profile_type')
                     ->label(__('app.profile_type'))
                     ->badge()
                     ->color('gray')
                     ->formatStateUsing(fn ($state) => $state ? __('app.' . strtolower(class_basename($state))) : null)
                     ->toggleable(),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label(__('app.account_status'))
                     ->boolean(),
-                Tables\Columns\TextColumn::make('last_login_at')
+                TextColumn::make('last_login_at')
                     ->label(__('app.last_login'))
                     ->dateTime('d M Y H:i')
                     ->placeholder('—')
@@ -174,14 +192,14 @@ class UserResource extends Resource
                     ->toggleable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('roles')
+                SelectFilter::make('roles')
                     ->label(__('app.role'))
                     ->relationship('roles', 'name')
                     ->getOptionLabelFromRecordUsing(fn ($record) => __('app.' . $record->name))
                     ->multiple()
                     ->preload(),
 
-                Tables\Filters\SelectFilter::make('profile_type')
+                SelectFilter::make('profile_type')
                     ->label(__('app.profile_type'))
                     ->options(fn () => User::query()
                         ->distinct()
@@ -190,14 +208,14 @@ class UserResource extends Resource
                         ->mapWithKeys(fn ($v) => [$v => __('app.' . strtolower(class_basename($v)))])
                         ->toArray()),
 
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->label(__('app.account_status')),
             ])
-            ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
+            ->recordActions([
+                ActionGroup::make([
+                    ViewAction::make(),
 
-                    Tables\Actions\Action::make('toggleActive')
+                    Action::make('toggleActive')
                         ->label(fn (User $record) => $record->is_active ? __('app.deactivate') : __('app.activate'))
                         ->icon(fn (User $record) => $record->is_active ? 'heroicon-o-lock-closed' : 'heroicon-o-lock-open')
                         ->color('gray')
@@ -205,26 +223,26 @@ class UserResource extends Resource
                         ->visible(fn (User $record) => self::canManage($record))
                         ->action(fn (User $record) => self::toggleActive($record)),
 
-                    Tables\Actions\Action::make('resetPassword')
+                    Action::make('resetPassword')
                         ->label(__('app.reset_password'))
                         ->icon('heroicon-o-key')
                         ->color('gray')
                         ->visible(fn (User $record) => self::canManage($record))
                         ->modalHeading(fn (User $record) => __('app.reset_password') . ' — ' . $record->name)
                         ->modalSubmitActionLabel(__('app.reset_password'))
-                        ->form(self::passwordResetSchema())
+                        ->schema(self::passwordResetSchema())
                         ->action(fn (User $record, array $data) => self::resetPassword($record, $data)),
 
-                    Tables\Actions\Action::make('manageRoles')
+                    Action::make('manageRoles')
                         ->label(__('app.manage_roles'))
                         ->icon('heroicon-o-shield-check')
                         ->color('gray')
                         ->visible(fn (User $record) => self::canManage($record))
                         ->fillForm(fn (User $record) => ['roles' => $record->roles->pluck('name')->all()])
-                        ->form(self::rolesSchema())
+                        ->schema(self::rolesSchema())
                         ->action(fn (User $record, array $data) => self::syncRoles($record, $data)),
 
-                    Tables\Actions\Action::make('disable2fa')
+                    Action::make('disable2fa')
                         ->label(__('app.force_disable_2fa'))
                         ->icon('heroicon-o-shield-exclamation')
                         ->color('gray')
@@ -232,7 +250,7 @@ class UserResource extends Resource
                         ->visible(fn (User $record) => self::canManage($record) && self::hasTwoFactor($record))
                         ->action(fn (User $record) => self::disable2fa($record)),
 
-                    Tables\Actions\Action::make('requireTwoFactor')
+                    Action::make('requireTwoFactor')
                         ->label(fn (User $record) => $record->two_factor_required
                             ? __('app.cancel_2fa_requirement')
                             : __('app.require_2fa_setup'))
@@ -243,7 +261,7 @@ class UserResource extends Resource
                         ->visible(fn (User $record) => self::canManage($record) && ! self::hasTwoFactor($record))
                         ->action(fn (User $record) => self::setTwoFactorRequired($record, ! $record->two_factor_required)),
 
-                    Tables\Actions\Action::make('unlock')
+                    Action::make('unlock')
                         ->label(__('app.unlock_account'))
                         ->icon('heroicon-o-lock-open')
                         ->color('gray')
@@ -251,7 +269,7 @@ class UserResource extends Resource
                         ->visible(fn (User $record) => self::canManage($record) && self::isLocked($record))
                         ->action(fn (User $record) => self::unlockAccount($record)),
 
-                    Tables\Actions\Action::make('forceLogout')
+                    Action::make('forceLogout')
                         ->label(__('app.force_logout'))
                         ->icon('heroicon-o-arrow-right-on-rectangle')
                         ->color('gray')
@@ -260,14 +278,14 @@ class UserResource extends Resource
                         ->visible(fn (User $record) => self::canManage($record))
                         ->action(fn (User $record) => self::forceLogout($record)),
 
-                    Tables\Actions\Action::make('activityTrail')
+                    Action::make('activityTrail')
                         ->label(__('app.activity_trail'))
                         ->icon('heroicon-o-list-bullet')
                         ->color('gray')
                         ->url(fn (User $record) => self::activityTrailUrl($record))
                         ->visible(fn (User $record) => self::activityTrailUrl($record) !== null),
 
-                    Tables\Actions\Action::make('viewProfile')
+                    Action::make('viewProfile')
                         ->label(__('app.view_linked_profile'))
                         ->icon('heroicon-o-identification')
                         ->color('gray')
@@ -275,16 +293,16 @@ class UserResource extends Resource
                         ->visible(fn (User $record) => self::profileUrl($record) !== null),
                 ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('activate')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('activate')
                         ->label(__('app.activate'))
                         ->icon('heroicon-o-lock-open')
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(fn ($records) => $records->each(fn (User $r) => self::canManage($r) ? self::setActive($r, true) : null))
                         ->deselectRecordsAfterCompletion(),
-                    Tables\Actions\BulkAction::make('deactivate')
+                    BulkAction::make('deactivate')
                         ->label(__('app.deactivate'))
                         ->icon('heroicon-o-lock-closed')
                         ->color('danger')
@@ -435,10 +453,10 @@ class UserResource extends Resource
     {
         $record->tokens()->delete();
 
-        $record->forceFill(['remember_token' => \Illuminate\Support\Str::random(60)])->save();
+        $record->forceFill(['remember_token' => Str::random(60)])->save();
 
         if (config('session.driver') === 'database') {
-            \Illuminate\Support\Facades\DB::table(config('session.table', 'sessions'))
+            DB::table(config('session.table', 'sessions'))
                 ->where('user_id', $record->id)
                 ->delete();
         }
@@ -469,9 +487,9 @@ class UserResource extends Resource
     public static function profileUrl(User $record): ?string
     {
         $map = [
-            \App\Models\Administrateur::class => AdministrateurResource::class,
-            \App\Models\Enseignant::class => EnseignantResource::class,
-            \App\Models\Etudiant::class => EtudiantResource::class,
+            Administrateur::class => AdministrateurResource::class,
+            Enseignant::class => EnseignantResource::class,
+            Etudiant::class => EtudiantResource::class,
         ];
 
         $resource = $map[$record->profile_type] ?? null;
@@ -483,9 +501,9 @@ class UserResource extends Resource
         return $resource::getUrl('view', ['record' => $record->profile_id]);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist->schema([
+        return $schema->components([
             Section::make(__('app.profile_information'))
                 ->icon('heroicon-o-user')
                 ->schema([
@@ -552,8 +570,8 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'view' => Pages\ViewUser::route('/{record}'),
+            'index' => ListUsers::route('/'),
+            'view' => ViewUser::route('/{record}'),
         ];
     }
 }

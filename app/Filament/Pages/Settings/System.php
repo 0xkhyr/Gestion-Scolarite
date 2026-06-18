@@ -2,8 +2,15 @@
 
 namespace App\Filament\Pages\Settings;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -11,9 +18,9 @@ use App\Services\SettingsService;
 
 class System extends Page
 {
-    protected static ?string $navigationIcon = null;
+    protected static string | \BackedEnum | null $navigationIcon = null;
     
-    protected static string $view = 'filament.pages.settings.system';
+    protected string $view = 'filament.pages.settings.system';
     
     protected static ?string $slug = 'settings/system';
 
@@ -65,44 +72,44 @@ class System extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.organization_information'))
+        return $schema
+            ->components([
+                Section::make(__('app.organization_information'))
                     ->description(__('app.organization_information_desc'))
                     ->icon('heroicon-o-building-office-2')
                     ->schema([
-                        Forms\Components\TextInput::make('school_name')
+                        TextInput::make('school_name')
                             ->label(__('app.school_name'))
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Textarea::make('school_address')
+                        Textarea::make('school_address')
                             ->label(__('app.school_address'))
                             ->rows(3),
-                        Forms\Components\TextInput::make('school_phone')
+                        TextInput::make('school_phone')
                             ->label(__('app.phone_number'))
                             ->tel()
                             ->maxLength(20),
-                        Forms\Components\TextInput::make('school_email')
+                        TextInput::make('school_email')
                             ->label(__('app.email'))
                             ->email()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('school_website')
+                        TextInput::make('school_website')
                             ->label(__('app.website'))
                             ->url()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('school_location')
+                        TextInput::make('school_location')
                             ->label(__('app.location_city'))
                             ->maxLength(255)
                             ->helperText(__('app.location_city_help')),
                     ])->columns(2),
 
-                Forms\Components\Section::make(__('app.map_coordinates'))
+                Section::make(__('app.map_coordinates'))
                     ->description(__('app.map_coordinates_desc'))
                     ->icon('heroicon-o-map-pin')
                     ->schema([
-                        Forms\Components\TextInput::make('school_latitude')
+                        TextInput::make('school_latitude')
                             ->label(__('app.latitude'))
                             ->numeric()
                             ->minValue(-90)
@@ -110,7 +117,7 @@ class System extends Page
                             ->step('any')
                             ->reactive()
                             ->helperText(__('app.coord_example_latitude')),
-                        Forms\Components\TextInput::make('school_longitude')
+                        TextInput::make('school_longitude')
                             ->label(__('app.longitude'))
                             ->numeric()
                             ->minValue(-180)
@@ -118,7 +125,7 @@ class System extends Page
                             ->step('any')
                             ->reactive()
                             ->helperText(__('app.coord_example_longitude')),
-                        Forms\Components\Placeholder::make('coordinate_helper')
+                        Placeholder::make('coordinate_helper')
                             ->label('')
                             ->content(function () {
                                 $jsLabels = json_encode([
@@ -211,31 +218,31 @@ JS;
 </div>
 HTML;
 
-                                return new \Illuminate\Support\HtmlString($html);
+                                return new HtmlString($html);
                             }),
                     ])->columns(2),
                 
-                Forms\Components\Section::make(__('app.academic_year'))
+                Section::make(__('app.academic_year'))
                     ->description(__('app.academic_year_desc'))
                     ->icon('heroicon-o-calendar-days')
                     ->schema([
-                        Forms\Components\TextInput::make('academic_year_start')
+                        TextInput::make('academic_year_start')
                             ->label(__('app.academic_year_start'))
                             ->placeholder('09-01')
                             ->helperText(__('app.academic_year_start_help'))
                             ->maxLength(5),
-                        Forms\Components\TextInput::make('academic_year_end')
+                        TextInput::make('academic_year_end')
                             ->label(__('app.academic_year_end'))
                             ->placeholder('06-30')
                             ->helperText(__('app.academic_year_end_help'))
                             ->maxLength(5),
                     ])->columns(2),
 
-                Forms\Components\Section::make(__('app.regional_settings'))
+                Section::make(__('app.regional_settings'))
                     ->description(__('app.regional_settings_desc'))
                     ->icon('heroicon-o-globe-alt')
                     ->schema([
-                        Forms\Components\Select::make('timezone')
+                        Select::make('timezone')
                             ->label(__('app.default_timezone'))
                             ->options([
                                 'UTC' => 'UTC (UTC+0)',
@@ -248,7 +255,7 @@ HTML;
                             ])
                             ->searchable()
                             ->required(),
-                        Forms\Components\Select::make('language')
+                        Select::make('language')
                             ->label(__('app.default_language'))
                             ->options([
                                 'en' => 'English',
@@ -257,7 +264,7 @@ HTML;
                                 'es' => 'Español',
                             ])
                             ->required(),
-                        Forms\Components\Select::make('currency')
+                        Select::make('currency')
                             ->label(__('app.default_currency'))
                             ->options([
                                 'USD' => 'US Dollar (USD)',
@@ -267,7 +274,7 @@ HTML;
                                 'DZD' => 'Algerian Dinar (DZD)',
                             ])
                             ->required(),
-                        Forms\Components\Select::make('date_format')
+                        Select::make('date_format')
                             ->label(__('app.date_format'))
                             ->options([
                                 'Y-m-d' => 'YYYY-MM-DD (2024-12-31)',
@@ -278,11 +285,11 @@ HTML;
                             ->required(),
                     ])->columns(2),
                 
-                Forms\Components\Section::make(__('app.system_preferences'))
+                Section::make(__('app.system_preferences'))
                     ->description(__('app.system_preferences_desc'))
                     ->icon('heroicon-o-cog-6-tooth')
                     ->schema([
-                        Forms\Components\Select::make('items_per_page')
+                        Select::make('items_per_page')
                             ->label(__('app.items_per_page'))
                             ->options([
                                 '10' => '10',
@@ -293,8 +300,8 @@ HTML;
                             ->required(),
                     ]),
                 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
+                Actions::make([
+                    Action::make('save')
                         ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Widgets;
 
+use Illuminate\Contracts\Support\Htmlable;
+use Filament\Tables\Columns\TextColumn;
 use App\Models\Cours;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,7 +21,7 @@ class DailyScheduleWidget extends BaseWidget
         return auth()->user()->hasRole(['super_admin', 'admin', 'director', 'academic_coordinator', 'teacher', 'secretary']);
     }
 
-    public function getTableHeading(): string | \Illuminate\Contracts\Support\Htmlable | null
+    public function getTableHeading(): string | Htmlable | null
     {
         $dayMap = [
             'Monday' => 'lundi',
@@ -73,18 +75,18 @@ class DailyScheduleWidget extends BaseWidget
                 return $query->orderBy('date_debut');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('classe.nom_classe')
+                TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('matiere.nom_matiere')
+                TextColumn::make('matiere.nom_matiere')
                     ->label(__('app.matiere')),
-                Tables\Columns\TextColumn::make('enseignant.nom')
+                TextColumn::make('enseignant.nom')
                     ->label(__('app.enseignant'))
                     ->formatStateUsing(fn ($record) => ($record->enseignant->nom ?? '') . ' ' . ($record->enseignant->prenom ?? '')),
-                Tables\Columns\TextColumn::make('date_debut')
+                TextColumn::make('date_debut')
                     ->label(__('app.debut'))
                     ->time('H:i'),
-                Tables\Columns\TextColumn::make('date_fin')
+                TextColumn::make('date_fin')
                     ->label(__('app.fin'))
                     ->time('H:i'),
             ])

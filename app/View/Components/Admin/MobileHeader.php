@@ -2,6 +2,7 @@
 
 namespace App\View\Components\Admin;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
 class MobileHeader extends Component
@@ -17,7 +18,7 @@ class MobileHeader extends Component
     /**
      * Get the view / contents that represent the component.
      *
-     * @return \Illuminate\Contracts\View\View|string
+     * @return View|string
      */
     public function render()
     {

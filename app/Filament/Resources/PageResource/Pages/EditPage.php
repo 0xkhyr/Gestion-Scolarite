@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\PageResource\Pages;
 
+use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
 use App\Filament\Resources\PageResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
@@ -14,7 +17,7 @@ class EditPage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('resetToDefault')
+            Action::make('resetToDefault')
                 ->label(__('app.reset_to_default'))
                 ->icon('heroicon-o-arrow-path')
                 ->color('warning')
@@ -33,8 +36,8 @@ class EditPage extends EditRecord
                         ->success()
                         ->send();
                 }),
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

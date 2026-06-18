@@ -2,6 +2,21 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Events\Logout;
+use App\Listeners\LogLogout;
+use App\Events\GradePublished;
+use App\Listeners\SendGradePublishedNotification;
+use App\Events\EvaluationCreated;
+use App\Listeners\SendEvaluationCreatedNotification;
+use App\Events\StudentPaymentReceived;
+use App\Listeners\SendStudentPaymentNotification;
+use App\Events\TeacherPaymentProcessed;
+use App\Listeners\SendTeacherPaymentNotification;
+use Spatie\Permission\Events\RoleAttached;
+use App\Listeners\LogPermissionChange;
+use Spatie\Permission\Events\RoleDetached;
+use Spatie\Permission\Events\PermissionAttached;
+use Spatie\Permission\Events\PermissionDetached;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
@@ -26,37 +41,37 @@ class EventServiceProvider extends ServiceProvider
         Login::class => [
             UpdateLastLoginAt::class,
         ],
-        \Illuminate\Auth\Events\Logout::class => [
-            \App\Listeners\LogLogout::class,
+        Logout::class => [
+            LogLogout::class,
         ],
         Lockout::class => [
             SendLockoutNotification::class,
         ],
-        \App\Events\GradePublished::class => [
-            \App\Listeners\SendGradePublishedNotification::class,
+        GradePublished::class => [
+            SendGradePublishedNotification::class,
         ],
-        \App\Events\EvaluationCreated::class => [
-            \App\Listeners\SendEvaluationCreatedNotification::class,
+        EvaluationCreated::class => [
+            SendEvaluationCreatedNotification::class,
         ],
-        \App\Events\StudentPaymentReceived::class => [
-            \App\Listeners\SendStudentPaymentNotification::class,
+        StudentPaymentReceived::class => [
+            SendStudentPaymentNotification::class,
         ],
-        \App\Events\TeacherPaymentProcessed::class => [
-            \App\Listeners\SendTeacherPaymentNotification::class,
+        TeacherPaymentProcessed::class => [
+            SendTeacherPaymentNotification::class,
         ],
 
         // Audit role/permission assignment changes (security-critical).
-        \Spatie\Permission\Events\RoleAttached::class => [
-            [\App\Listeners\LogPermissionChange::class, 'handleRoleAttached'],
+        RoleAttached::class => [
+            [LogPermissionChange::class, 'handleRoleAttached'],
         ],
-        \Spatie\Permission\Events\RoleDetached::class => [
-            [\App\Listeners\LogPermissionChange::class, 'handleRoleDetached'],
+        RoleDetached::class => [
+            [LogPermissionChange::class, 'handleRoleDetached'],
         ],
-        \Spatie\Permission\Events\PermissionAttached::class => [
-            [\App\Listeners\LogPermissionChange::class, 'handlePermissionAttached'],
+        PermissionAttached::class => [
+            [LogPermissionChange::class, 'handlePermissionAttached'],
         ],
-        \Spatie\Permission\Events\PermissionDetached::class => [
-            [\App\Listeners\LogPermissionChange::class, 'handlePermissionDetached'],
+        PermissionDetached::class => [
+            [LogPermissionChange::class, 'handlePermissionDetached'],
         ],
     ];
 
