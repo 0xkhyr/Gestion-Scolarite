@@ -17,18 +17,28 @@ use App\Services\SettingsService;
 
 class Security extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = null;
+    protected static ?string $cluster = \App\Filament\Clusters\Settings::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shield-check';
+
+    protected static ?int $navigationSort = 6;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.security_settings');
+    }
+
     
     protected string $view = 'filament.pages.settings.security';
     
-    protected static ?string $slug = 'settings/security';
+    protected static ?string $slug = 'security';
 
     public function getTitle(): string
     {
         return __('app.security_settings');
     }
     
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function canAccess(): bool
     {

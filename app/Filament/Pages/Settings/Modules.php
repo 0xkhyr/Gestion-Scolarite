@@ -14,7 +14,17 @@ use App\Services\SettingsService;
 
 class Modules extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = null;
+    protected static ?string $cluster = \App\Filament\Clusters\Settings::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-squares-2x2';
+
+    protected static ?int $navigationSort = 4;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.modules_settings');
+    }
+
 
     protected string $view = 'filament.pages.settings.modules';
 
@@ -23,9 +33,9 @@ class Modules extends Page
         return __('app.modules_settings');
     }
 
-    protected static ?string $slug = 'settings/modules';
+    protected static ?string $slug = 'modules';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function canAccess(): bool
     {

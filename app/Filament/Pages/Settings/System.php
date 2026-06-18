@@ -18,18 +18,28 @@ use App\Services\SettingsService;
 
 class System extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = null;
+    protected static ?string $cluster = \App\Filament\Clusters\Settings::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-server';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.system_settings');
+    }
+
     
     protected string $view = 'filament.pages.settings.system';
     
-    protected static ?string $slug = 'settings/system';
+    protected static ?string $slug = 'system';
 
     public function getTitle(): string
     {
         return __('app.system_settings');
     }
     
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function canAccess(): bool
     {
@@ -169,7 +179,7 @@ class System extends Page
                 \$wire.set('data.school_longitude', lng);
                 this.status = this.labels.success + ' (' + lat + ', ' + lng + ')';
                 this.statusClass = 'text-green-600 font-medium';
-                this.loading = false;
+                this.loading = true;
             },
             (error) => {
                 let errorMessage = this.labels.error;
@@ -186,7 +196,7 @@ class System extends Page
                 }
                 this.status = errorMessage;
                 this.statusClass = 'text-red-600';
-                this.loading = false;
+                this.loading = true;
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );

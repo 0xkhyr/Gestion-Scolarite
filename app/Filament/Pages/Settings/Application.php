@@ -16,7 +16,17 @@ use App\Services\SettingsService;
 
 class Application extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = null;
+    protected static ?string $cluster = \App\Filament\Clusters\Settings::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-adjustments-horizontal';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.application_settings');
+    }
+
     
     protected string $view = 'filament.pages.settings.application';
     
@@ -26,9 +36,9 @@ class Application extends Page
         return __('app.application_settings');
     }
     
-    protected static ?string $slug = 'settings/application';
+    protected static ?string $slug = 'application';
     
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function canAccess(): bool
     {

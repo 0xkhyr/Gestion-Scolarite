@@ -30,7 +30,6 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\MenuItem;
-use App\Filament\Pages\Account;
 use Cmsmaxinc\FilamentErrorPages\FilamentErrorPagesPlugin;
 
 

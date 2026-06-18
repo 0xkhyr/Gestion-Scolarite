@@ -15,7 +15,17 @@ use App\Support\NotificationKeys;
 
 class NotificationSettings extends Page
 {
+    protected static ?string $cluster = \App\Filament\Clusters\Settings::class;
+
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bell';
+
+    protected static ?int $navigationSort = 5;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.notification_settings');
+    }
+
     
     protected string $view = 'filament.pages.settings.notification-settings';
     
@@ -25,9 +35,9 @@ class NotificationSettings extends Page
         return __('app.notification_settings');
     }
     
-    protected static ?string $slug = 'settings/notifications';
+    protected static ?string $slug = 'notifications';
     
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function canAccess(): bool
     {

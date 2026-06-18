@@ -16,7 +16,17 @@ use App\Services\SettingsService;
 
 class Academic extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = null;
+    protected static ?string $cluster = \App\Filament\Clusters\Settings::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?int $navigationSort = 3;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.academic_settings');
+    }
+
     
     protected string $view = 'filament.pages.settings.academic';
     
@@ -26,9 +36,9 @@ class Academic extends Page
         return __('app.academic_settings');
     }
     
-    protected static ?string $slug = 'settings/academic';
+    protected static ?string $slug = 'academic';
     
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function canAccess(): bool
     {

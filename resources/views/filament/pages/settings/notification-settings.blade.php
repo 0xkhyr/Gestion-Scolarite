@@ -7,7 +7,6 @@
             </p>
         </div>
         
-        @include('filament.components.settings-navigation')
         
         @if (method_exists($this, 'form'))
             <form wire:submit="save">
