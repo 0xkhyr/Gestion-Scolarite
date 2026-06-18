@@ -188,11 +188,20 @@ class Academic extends Page
             'academic.passing_grade' => (int) $data['passing_grade'],
             'academic.max_grade' => (int) $data['max_grade'],
             'academic.terms_per_year' => (int) $data['terms_per_year'],
-            'academic.attendance_required' => $data['attendance_required'],
-            'academic.min_attendance_percentage' => (int) $data['min_attendance_percentage'],
-            'academic.max_absences_per_term' => (int) $data['max_absences_per_term'],
-            'academic.late_submission_penalty' => (int) $data['late_submission_penalty'],
         ];
+
+        // The attendance + submission sections are feature-gated (->visible()).
+        // In Filament v4 a hidden section's fields are absent from getState(),
+        // so only persist these when their section was actually shown.
+        if (array_key_exists('attendance_required', $data)) {
+            $academicData['academic.attendance_required'] = $data['attendance_required'];
+            $academicData['academic.min_attendance_percentage'] = (int) $data['min_attendance_percentage'];
+            $academicData['academic.max_absences_per_term'] = (int) $data['max_absences_per_term'];
+        }
+
+        if (array_key_exists('late_submission_penalty', $data)) {
+            $academicData['academic.late_submission_penalty'] = (int) $data['late_submission_penalty'];
+        }
 
         $this->settingsService->updateAcademicSettings($academicData);
 

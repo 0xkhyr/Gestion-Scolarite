@@ -175,7 +175,6 @@ class Application extends Page
         Notification::make()
             ->title(__('app.application_settings_saved'))
             ->success()
-            ->send()
-            ->refresh();
+            ->send();
     }
 }
