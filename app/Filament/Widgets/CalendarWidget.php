@@ -30,10 +30,16 @@ class CalendarWidget extends BaseCalendarWidget
                     $title .= ' — ' . $evaluation->matiere->nom_matiere;
                 }
 
+                // Single all-day event on the evaluation date. NB: do NOT use
+                // date_fin here — it is a time-only cast field and resolves to
+                // *today*, which would put `end` before `start` and the calendar
+                // hides such events. End is exclusive, so use date + 1 day.
+                $date = \Illuminate\Support\Carbon::parse($evaluation->date)->startOfDay();
+
                 return CalendarEvent::make()
                     ->title($title)
-                    ->start($evaluation->date)
-                    ->end($evaluation->date_fin ?: $evaluation->date)
+                    ->start($date)
+                    ->end($date->copy()->addDay())
                     ->allDay(true)
                     ->url(
                         EvaluationResource::getUrl('view', ['record' => $evaluation->getKey()]),
