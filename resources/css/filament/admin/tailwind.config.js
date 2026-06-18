@@ -8,5 +8,7 @@ export default {
         './vendor/filament/**/*.blade.php',
         // Error-pages plugin views (so their utility classes get compiled).
         './vendor/cmsmaxinc/filament-error-pages/resources/**/*.blade.php',
+        // Language-switch plugin views (relies on Tailwind scanning, ships no CSS).
+        './vendor/bezhansalleh/filament-language-switch/resources/**/*.blade.php',
     ],
 }
