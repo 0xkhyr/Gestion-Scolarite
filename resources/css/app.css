@@ -1,6 +1,37 @@
-/* Custom styles */
+@import 'tailwindcss';
+@import url('https://fonts.bunny.net/css?family=Inter:400,500,600,700&display=swap');
+
+/* Keep the existing JS theme config (content paths + runtime CSS-var primary
+   palette + typography plugin) via Tailwind v4's legacy-config bridge. */
+@config '../../tailwind.config.js';
+
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* Additional custom styles can go here */
+/* Custom component classes (utility names updated for Tailwind v4). */
+@layer components {
+    .btn {
+        @apply px-4 py-2 rounded-sm font-medium transition-colors duration-200;
+    }
+
+    .btn-primary {
+        @apply bg-blue-600 text-white hover:bg-blue-700;
+    }
+
+    .btn-secondary {
+        @apply bg-gray-600 text-white hover:bg-gray-700;
+    }
+
+    .btn-outline {
+        @apply border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white;
+    }
+
+    .card {
+        @apply bg-white rounded-lg shadow-sm border;
+    }
+
+    .form-input {
+        @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-xs focus:outline-hidden focus:ring-blue-500 focus:border-blue-500;
+    }
+}

@@ -1,3 +1,9 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
 
-@config 'tailwind.config.js';
+/* Content sources scanned for utility classes (Tailwind v4 @source). */
+@source '../../../../app/Filament';
+@source '../../../../resources/views/filament';
+@source '../../../../vendor/filament/**/*.blade.php';
+/* Plugins that ship no compiled CSS and rely on theme scanning. */
+@source '../../../../vendor/cmsmaxinc/filament-error-pages/resources/**/*.blade.php';
+@source '../../../../vendor/bezhansalleh/filament-language-switch/resources/**/*.blade.php';
