@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Etudiant;
 use App\Policies\EtudiantPolicy;
 use App\Models\Enseignant;
@@ -35,6 +35,10 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Map the filament-spatie-laravel-backup ability checks (hyphenated)
+        // onto the app's backup.* permissions.
+        Gate::define('create-backup', fn ($user) => $user->can('backup.create'));
+        Gate::define('download-backup', fn ($user) => $user->can('backup.download'));
+        Gate::define('delete-backup', fn ($user) => $user->can('backup.delete'));
     }
 }

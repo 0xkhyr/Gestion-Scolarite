@@ -92,7 +92,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'system.manage_settings',
             'setting.view',
             'setting.manage',
-            'database.backup',
+            'backup.view',
+            'backup.create',
+            'backup.download',
+            'backup.delete',
             'page.manage',
         ];
 

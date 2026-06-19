@@ -54,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentErrorPagesPlugin::make(),
                 FilamentSpatieLaravelBackupPlugin::make()
-                    ->authorize(fn (): bool => (bool) auth()->user()?->hasRole('super_admin'))
+                    ->authorize(fn (): bool => (bool) auth()->user()?->can('backup.view'))
                     ->navigationGroup(fn (): string => __('app.system'))
                     ->navigationLabel(fn (): string => __('app.backups'))
                     ->navigationIcon('heroicon-o-circle-stack')
