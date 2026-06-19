@@ -31,6 +31,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\MenuItem;
 use Cmsmaxinc\FilamentErrorPages\FilamentErrorPagesPlugin;
+use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -52,6 +53,12 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->plugins([
                 FilamentErrorPagesPlugin::make(),
+                FilamentSpatieLaravelBackupPlugin::make()
+                    ->authorize(fn (): bool => (bool) auth()->user()?->hasRole('super_admin'))
+                    ->navigationGroup(fn (): string => __('app.system'))
+                    ->navigationLabel(fn (): string => __('app.backups'))
+                    ->navigationIcon('heroicon-o-circle-stack')
+                    ->navigationSort(99),
             ])
             ->login(Login::class)
             ->databaseNotifications()

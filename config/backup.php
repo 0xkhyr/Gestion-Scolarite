@@ -314,8 +314,15 @@ return [
      */
     'monitor_backups' => [
         [
-            'name' => env('APP_NAME', 'laravel-backup'),
-            'disks' => ['local'],
+            // Must match backup.name above (the slugged folder/prefix), and the
+            // same disks the backups are written to — otherwise the monitor looks
+            // in the wrong place and reports "unhealthy / no backups".
+            'name' => env('BACKUP_PREFIX')
+                ?: (\Illuminate\Support\Str::slug(env('APP_NAME', 'backup')) ?: 'backup'),
+            'disks' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', env('BACKUP_DISKS', 'local'))
+            ))),
             'health_checks' => [
                 MaximumAgeInDays::class => 1,
                 MaximumStorageInMegabytes::class => 5000,
