@@ -60,8 +60,14 @@ class DailyScheduleWidget extends BaseWidget
 
         return $table
             ->query(function () use ($todayKey, $user) {
-                $query = Cours::query()->where('jour', $todayKey);
-                
+                // Today's recurring slots (no date) + any one-off session dated today.
+                $query = Cours::query()
+                    ->where(function (Builder $q) use ($todayKey) {
+                        $q->where(fn (Builder $r) => $r->whereNull('date')->where('jour', $todayKey))
+                          ->orWhereDate('date', Carbon::today());
+                    })
+                    ->with(['classe', 'matiere', 'enseignant']);
+
                 // Teachers see only their courses
                 if ($user->hasRole('teacher')) {
                     $enseignant = $user->profile;
@@ -71,15 +77,23 @@ class DailyScheduleWidget extends BaseWidget
                         $query->whereRaw('1 = 0');
                     }
                 }
-                
+
                 return $query->orderBy('date_debut');
             })
             ->columns([
                 TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
+                    ->formatStateUsing(fn ($record) => $record->classe?->code)
+                    ->badge()
+                    ->color('info')
                     ->sortable(),
                 TextColumn::make('matiere.nom_matiere')
-                    ->label(__('app.matiere')),
+                    ->label(__('app.matiere'))
+                    ->formatStateUsing(fn ($record) => $record->matiere
+                        ? (__('app.' . $record->matiere->code_matiere) === 'app.' . $record->matiere->code_matiere
+                            ? $record->matiere->nom_matiere
+                            : __('app.' . $record->matiere->code_matiere))
+                        : '—'),
                 TextColumn::make('enseignant.nom')
                     ->label(__('app.enseignant'))
                     ->formatStateUsing(fn ($record) => ($record->enseignant->nom ?? '') . ' ' . ($record->enseignant->prenom ?? '')),

@@ -12,6 +12,8 @@ use App\Filament\Widgets\TeacherRecentNotes;
 use App\Filament\Widgets\TeacherStudentPerformance;
 use App\Filament\Widgets\TeacherStudentsByClass;
 use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\AcademicOverview;
+use App\Filament\Widgets\FinanceOverview;
 use App\Filament\Widgets\StudentsByClassChart;
 use App\Filament\Widgets\DailyScheduleWidget;
 use App\Filament\Widgets\StudentChart;
@@ -69,20 +71,22 @@ class Dashboard extends BaseDashboard
                         ->label(__('app.classe'))
                         ->options(function () {
                             $user = auth()->user();
-                            
+
                             // Admins see all classes
                             if ($user->hasRole(['super_admin', 'admin', 'director'])) {
-                                return Classe::pluck('nom_classe', 'id_classe');
+                                return Classe::orderBy('niveau')->orderBy('serie')->orderBy('groupe')
+                                    ->get()->mapWithKeys(fn ($c) => [$c->id_classe => $c->code]);
                             }
-                            
+
                             // Teachers see only their classes
                             if ($user->hasRole('teacher')) {
                                 $enseignant = $user->profile;
                                 if ($enseignant) {
-                                    return $enseignant->classes()->pluck('nom_classe', 'classes.id_classe');
+                                    return $enseignant->classes()->get()
+                                        ->mapWithKeys(fn ($c) => [$c->id_classe => $c->code]);
                                 }
                             }
-                            
+
                             return [];
                         })
                         ->required()
@@ -147,7 +151,7 @@ class Dashboard extends BaseDashboard
 
                     return response()->streamDownload(function () use ($pdf) {
                         echo $pdf->output();
-                    }, "emploi_du_temps_{$classe->nom_classe}.pdf");
+                    }, "emploi_du_temps_{$classe->code}.pdf");
                 }),
         ];
     }
@@ -172,34 +176,40 @@ class Dashboard extends BaseDashboard
             // Secretary widgets - focused on student administration
             return [
                 StatsOverview::class,
+                StudentChart::class,
                 StudentsByClassChart::class,
                 DailyScheduleWidget::class,
-                StudentChart::class,
             ];
         }
-        
+
         if ($user && $user->hasRole('accountant')) {
             // Accountant widgets - focused on financial data
             return [
                 StatsOverview::class,
+                FinanceOverview::class,
                 PaymentsChart::class,
                 StudentsByClassChart::class,
             ];
         }
-        
+
         // Admin widgets (super_admin, admin, director, academic_coordinator)
         return [
             StatsOverview::class,
+            AcademicOverview::class,
+            FinanceOverview::class,
             StudentChart::class,
             StudentsByClassChart::class,
+            PaymentsChart::class,
             DailyScheduleWidget::class,
             ActivityTimeline::class,
-            PaymentsChart::class,
         ];
     }
 
     public function getColumns(): int|array
     {
-        return 2;
+        return [
+            'default' => 1,
+            'md' => 2,
+        ];
     }
 }

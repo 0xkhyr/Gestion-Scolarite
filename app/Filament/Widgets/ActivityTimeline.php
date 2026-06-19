@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\ActivityLogResource;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
@@ -53,8 +54,7 @@ class ActivityTimeline extends Widget implements HasSchemas
                                 'deleted' => 'danger',
                                 default => 'gray',
                             }),
-                    ])
-                    ->aside(),
+                    ]),
             ]);
     }
 
@@ -69,10 +69,14 @@ class ActivityTimeline extends Widget implements HasSchemas
             $causer = $a->causer?->name
                 ?? ($a->causer_type ? class_basename($a->causer_type) . " #{$a->causer_id}" : '—');
 
-            $title = e($a->description ?: __('app.activity'));
+            $label = e($a->description ?: __('app.activity'));
             if ($resource) {
-                $title .= " — <span class='text-gray-500 dark:text-gray-400'>" . e($resource) . '</span>';
+                $label .= " — <span class='text-gray-500 dark:text-gray-400'>" . e($resource) . '</span>';
             }
+
+            // Each entry links to its full activity-log detail page.
+            $url = ActivityLogResource::getUrl('view', ['record' => $a->getKey()]);
+            $title = "<a href='" . e($url) . "' class='hover:underline'>{$label}</a>";
 
             return [
                 'title' => $title,
