@@ -565,7 +565,8 @@ class UserResource extends Resource
                         ->placeholder(__('app.never')),
                 ])
                 ->columns(3),
-        ]);
+        ])
+        ->columns(1);
     }
 
     public static function getPages(): array

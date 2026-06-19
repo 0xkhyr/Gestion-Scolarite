@@ -93,7 +93,8 @@ class RoleResource extends Resource
                             ->preload()
                             ->searchable(),
                     ]),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table

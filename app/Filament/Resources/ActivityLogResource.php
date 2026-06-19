@@ -221,7 +221,8 @@ class ActivityLogResource extends Resource
                         ->columnSpan(1),
                 ])
                 ->columns(2),
-        ]);
+        ])
+        ->columns(1);
     }
 
     public static function table(Table $table): Table

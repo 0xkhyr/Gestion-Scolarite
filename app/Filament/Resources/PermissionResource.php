@@ -87,7 +87,8 @@ class PermissionResource extends Resource
                             ->default('web')
                             ->maxLength(255),
                     ]),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table

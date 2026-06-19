@@ -177,7 +177,8 @@ class EtudePaiementResource extends Resource
                             ->content(fn ($record) => $record->date_paiement ? $record->date_paiement->format('d/m/Y') : '-'),
                     ])
                     ->columns(2),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
