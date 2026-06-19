@@ -3,54 +3,59 @@
 namespace Database\Seeders;
 
 use App\Models\Classe;
+use App\Support\Academic;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ClassesSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Mauritanian academic structure (see config/academic.php):
+     *   - Fondamental 1AF–6AF (no série)
+     *   - Collège     1AS–4AS (no série)
+     *   - Lycée       5AS–7AS (séries C / D / LM / LO)
+     *
+     * A level may be split into several groups (1AS-G1, 1AS-G2) when there are
+     * too many students for one room. `code` = niveau [+ série] -G{groupe}.
      */
     public function run(): void
     {
-        $classes = [
-            // Maternelle (Preschool) - Ages 3-5
-            ['nom_classe' => 'Petite Section', 'niveau' => 1],
-            ['nom_classe' => 'Moyenne Section', 'niveau' => 2],
-            ['nom_classe' => 'Grande Section', 'niveau' => 3],
-            
-            // Élémentaire (Primary) - Ages 6-10
-            ['nom_classe' => 'CP', 'niveau' => 4],
-            ['nom_classe' => 'CE1', 'niveau' => 5],
-            ['nom_classe' => 'CE2', 'niveau' => 6],
-            ['nom_classe' => 'CM1', 'niveau' => 7],
-            ['nom_classe' => 'CM2', 'niveau' => 8],
-            
-            // Collège (Middle School) - Ages 11-14
-            ['nom_classe' => '6ème A', 'niveau' => 9],
-            ['nom_classe' => '6ème B', 'niveau' => 9],
-            ['nom_classe' => '5ème A', 'niveau' => 10],
-            ['nom_classe' => '5ème B', 'niveau' => 10],
-            ['nom_classe' => '4ème A', 'niveau' => 11],
-            ['nom_classe' => '4ème B', 'niveau' => 11],
-            ['nom_classe' => '3ème A', 'niveau' => 12],
-            ['nom_classe' => '3ème B', 'niveau' => 12],
-            
-            // Lycée (High School) - Ages 15-17
-            ['nom_classe' => '2nde A', 'niveau' => 13],
-            ['nom_classe' => '2nde B', 'niveau' => 13],
-            ['nom_classe' => '1ère Littéraire', 'niveau' => 14],
-            ['nom_classe' => '1ère Scientifique', 'niveau' => 14],
-            ['nom_classe' => '1ère Économique', 'niveau' => 14],
-            ['nom_classe' => 'Terminale L', 'niveau' => 15],
-            ['nom_classe' => 'Terminale S', 'niveau' => 15],
-            ['nom_classe' => 'Terminale ES', 'niveau' => 15],
+        $structure = [
+            // [niveau, séries (null = none), number of groups]
+            ['niveau' => '1AF', 'series' => [null], 'groupes' => 2],
+            ['niveau' => '2AF', 'series' => [null], 'groupes' => 2],
+            ['niveau' => '3AF', 'series' => [null], 'groupes' => 1],
+            ['niveau' => '4AF', 'series' => [null], 'groupes' => 1],
+            ['niveau' => '5AF', 'series' => [null], 'groupes' => 1],
+            ['niveau' => '6AF', 'series' => [null], 'groupes' => 1],
+
+            ['niveau' => '1AS', 'series' => [null], 'groupes' => 2],
+            ['niveau' => '2AS', 'series' => [null], 'groupes' => 2],
+            ['niveau' => '3AS', 'series' => [null], 'groupes' => 2],
+            ['niveau' => '4AS', 'series' => [null], 'groupes' => 2],
+
+            ['niveau' => '5AS', 'series' => ['C', 'D', 'LM', 'LO'], 'groupes' => 1],
+            ['niveau' => '6AS', 'series' => ['C', 'D', 'LM', 'LO'], 'groupes' => 1],
+            ['niveau' => '7AS', 'series' => ['C', 'D', 'LM', 'LO'], 'groupes' => 1],
         ];
 
-        foreach ($classes as $classe) {
-            Classe::create($classe);
+        foreach ($structure as $row) {
+            foreach ($row['series'] as $serie) {
+                for ($groupe = 1; $groupe <= $row['groupes']; $groupe++) {
+                    $label = Academic::levelLabel($row['niveau'])
+                        . ($serie ? ' ' . $serie : '')
+                        . ' — G' . $groupe;
+
+                    Classe::create([
+                        'nom_classe' => $label,
+                        'niveau' => $row['niveau'],
+                        'serie' => $serie,
+                        'groupe' => $groupe,
+                    ]);
+                }
+            }
         }
-        
-        $this->command->info(count($classes) . ' classes seeded.');
+
+        $this->command->info(Classe::count() . ' classes seeded (Mauritanian levels + groups).');
     }
 }

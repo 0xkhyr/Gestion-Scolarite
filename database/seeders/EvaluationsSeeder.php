@@ -83,25 +83,36 @@ class EvaluationsSeeder extends Seeder
         }
     }
     
+    /**
+     * Start year of the academic year we're currently in — so seeded
+     * evaluations land in the live year (and show up on the calendar today).
+     */
+    private function academicStartYear(): int
+    {
+        $startMonth = (int) config('school.academic_year_start_month', 10);
+
+        return (int) date('n') >= $startMonth ? (int) date('Y') : (int) date('Y') - 1;
+    }
+
     private function getTrimesterDates(int $trimester): array
     {
-        $currentYear = date('Y');
-        
+        $y = $this->academicStartYear();
+
         switch ($trimester) {
             case 1:
                 return [
-                    'start' => Carbon::create($currentYear, 10, 1),
-                    'end' => Carbon::create($currentYear, 12, 31)
+                    'start' => Carbon::create($y, 10, 1),
+                    'end' => Carbon::create($y, 12, 31)
                 ];
             case 2:
                 return [
-                    'start' => Carbon::create($currentYear + 1, 1, 1),
-                    'end' => Carbon::create($currentYear + 1, 4, 30)
+                    'start' => Carbon::create($y + 1, 1, 1),
+                    'end' => Carbon::create($y + 1, 4, 30)
                 ];
             case 3:
                 return [
-                    'start' => Carbon::create($currentYear + 1, 5, 1),
-                    'end' => Carbon::create($currentYear + 1, 7, 31)
+                    'start' => Carbon::create($y + 1, 5, 1),
+                    'end' => Carbon::create($y + 1, 7, 31)
                 ];
             default:
                 return [
@@ -128,7 +139,7 @@ class EvaluationsSeeder extends Seeder
     private function isMainSubject(string $subject): bool
     {
         $mainSubjects = [
-            'Mathématiques', 'Français', 'Anglais', 'Sciences Physiques',
+            'Mathématiques', 'Français', 'Anglais', 'Arabe', 'Sciences Physiques',
             'Histoire-Géographie', 'Sciences de la Vie et de la Terre'
         ];
         

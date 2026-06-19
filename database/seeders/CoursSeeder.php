@@ -9,6 +9,7 @@ use App\Models\Matiere;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class CoursSeeder extends Seeder
 {
@@ -55,8 +56,34 @@ class CoursSeeder extends Seeder
             }
         }
 
+        // A handful of one-off makeup sessions (rattrapage) on real dates.
+        $this->createRattrapageSessions($assignments);
+
         $coursCount = Cours::count();
         $this->command->info("{$coursCount} course sessions seeded.");
+    }
+
+    /** One-off dated sessions (date set) — makeup classes in the coming weeks. */
+    private function createRattrapageSessions($assignments): void
+    {
+        foreach ($assignments->shuffle()->take(6) as $a) {
+            $date = Carbon::now()->addDays(rand(3, 21));
+
+            // Push to a teaching weekday (Sun–Thu in Mauritania; avoid Fri/Sat).
+            while (in_array($date->dayOfWeek, [Carbon::FRIDAY, Carbon::SATURDAY], true)) {
+                $date->addDay();
+            }
+
+            Cours::create([
+                'id_matiere' => $a->id_matiere,
+                'id_classe' => $a->id_classe,
+                'id_enseignant' => $a->id_enseignant,
+                'date' => $date->toDateString(),
+                'date_debut' => '16:00',
+                'date_fin' => '18:00',
+                'description' => "Séance de rattrapage — {$a->nom_matiere} ({$a->nom_classe})",
+            ]);
+        }
     }
 
     private function getWeeklySchedule(string $matiere): array
