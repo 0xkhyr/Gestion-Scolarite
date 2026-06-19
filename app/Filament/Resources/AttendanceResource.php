@@ -124,7 +124,8 @@ class AttendanceResource extends Resource
                             ])
                             ->required(),
                     ])->columns(3),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -139,6 +140,7 @@ class AttendanceResource extends Resource
 
                 TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
+                    ->formatStateUsing(fn ($record) => $record->classe?->label)
                     ->badge()
                     ->color('info')
                     ->sortable(),
@@ -175,7 +177,8 @@ class AttendanceResource extends Resource
                     ]),
                 SelectFilter::make('id_classe')
                     ->label(__('app.classe'))
-                    ->relationship('classe', 'nom_classe'),
+                    ->relationship('classe', 'nom_classe')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->label),
                 Filter::make('date')
                     ->schema([
                         DatePicker::make('from')->label(__('app.from')),

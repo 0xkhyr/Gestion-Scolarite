@@ -77,9 +77,10 @@ class TeacherTodaySchedule extends BaseWidget
                     
                 TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
+                    ->formatStateUsing(fn ($record) => $record->classe?->label)
                     ->badge()
                     ->color('info'),
-                    
+
                 TextColumn::make('matiere.nom_matiere')
                     ->label(__('app.matiere'))
                     ->badge()

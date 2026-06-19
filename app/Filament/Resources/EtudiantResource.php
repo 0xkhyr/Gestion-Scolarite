@@ -159,6 +159,7 @@ class EtudiantResource extends Resource
                                     'classColumn' => 'id_classe'
                                 ]);
                             })
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->label)
                             ->required()
                             ->searchable()
                             ->preload(),
@@ -351,6 +352,7 @@ class EtudiantResource extends Resource
                             'classColumn' => 'id_classe'
                         ]);
                     })
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->label)
                     ->searchable()
                     ->preload(),
                     

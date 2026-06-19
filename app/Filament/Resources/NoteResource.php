@@ -320,6 +320,7 @@ class NoteResource extends Resource
                     
                 TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
+                    ->formatStateUsing(fn ($record) => $record->classe?->label)
                     ->sortable()
                     ->toggleable(),
                     
@@ -346,9 +347,10 @@ class NoteResource extends Resource
                 SelectFilter::make('id_classe')
                     ->label(__('app.classe'))
                     ->relationship('classe', 'nom_classe')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->label)
                     ->searchable()
                     ->preload(),
-                    
+
                 SelectFilter::make('type')
                     ->label(__('app.type'))
                     ->options([

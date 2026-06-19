@@ -132,6 +132,7 @@ class EvaluationResource extends Resource
                                     'classColumn' => 'id_classe'
                                 ]);
                             })
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->label)
                             ->required()
                             ->searchable()
                             ->preload()
@@ -227,7 +228,8 @@ class EvaluationResource extends Resource
                             ->content(fn ($record) => $record->date ? $record->date->format('d/m/Y') : '-'),
                     ])
                     ->columns(2),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -267,6 +269,7 @@ class EvaluationResource extends Resource
                     
                 TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
+                    ->formatStateUsing(fn ($record) => $record->classe?->label)
                     ->searchable()
                     ->sortable()
                     ->badge()
@@ -332,6 +335,7 @@ class EvaluationResource extends Resource
                 SelectFilter::make('id_classe')
                     ->label(__('app.classe'))
                     ->relationship('classe', 'nom_classe')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->label)
                     ->searchable()
                     ->preload(),
             ])

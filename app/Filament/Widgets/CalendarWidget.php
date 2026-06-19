@@ -7,6 +7,7 @@ use App\Filament\Resources\EvaluationResource;
 use App\Models\Classe;
 use App\Models\Cours;
 use App\Models\Evaluation;
+use App\Models\Matiere;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Guava\Calendar\Filament\CalendarWidget as BaseCalendarWidget;
@@ -44,7 +45,8 @@ class CalendarWidget extends BaseCalendarWidget
                 'center' => 'title',
                 'end' => 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
             ],
-            'dayMaxEvents' => true,
+            'height' => 800,
+            'dayMaxEvents' => 4,
         ];
     }
 
@@ -54,7 +56,7 @@ class CalendarWidget extends BaseCalendarWidget
         return [
             Action::make('filterClass')
                 ->label($this->classeId
-                    ? (Classe::find($this->classeId)?->nom_classe ?? __('app.classe'))
+                    ? (Classe::find($this->classeId)?->code ?? __('app.classe'))
                     : __('app.all_classes'))
                 ->icon('heroicon-o-funnel')
                 ->color($this->classeId ? 'primary' : 'gray')
@@ -62,7 +64,7 @@ class CalendarWidget extends BaseCalendarWidget
                 ->schema([
                     Select::make('classeId')
                         ->label(__('app.classe'))
-                        ->options(fn () => Classe::orderBy('nom_classe')->pluck('nom_classe', 'id_classe'))
+                        ->options(fn () => $this->classeOptions())
                         ->searchable()
                         ->placeholder(__('app.all_classes')),
                 ])
@@ -87,8 +89,25 @@ class CalendarWidget extends BaseCalendarWidget
         // Wrap in a base collection: an empty Eloquent\Collection (no evaluations
         // in range) would otherwise use Eloquent's merge() and call getKey() on
         // the Cours CalendarEvent value objects.
-        return collect($this->getEvaluationEvents($info))
-            ->merge($this->getCoursEvents($info));
+        // Exams and one-off sessions (rattrapage) are real dated events — show
+        // them in every view.
+        $events = collect($this->getEvaluationEvents($info))
+            ->merge($this->getOneOffCoursEvents($info));
+
+        // The weekly timetable is a *recurring* schedule, so it only reads well
+        // at week/day zoom. Month and list views fetch a multi-week block — there
+        // we keep an uncluttered overview instead of repeating every slot.
+        if ($this->isTimetableView($info)) {
+            $events = $events->merge($this->getRecurringCoursEvents($info));
+        }
+
+        return $events;
+    }
+
+    /** Week/day views fetch ≤ ~8 days; month/list fetch a multi-week block. */
+    private function isTimetableView(FetchInfo $info): bool
+    {
+        return $info->start->diffInDays($info->end) <= 8;
     }
 
     /** Exams/assessments — one all-day event on the evaluation date. */
@@ -98,12 +117,12 @@ class CalendarWidget extends BaseCalendarWidget
             ->whereNotNull('date')
             ->whereBetween('date', [$info->start, $info->end])
             ->when($this->classeId, fn ($q) => $q->where('id_classe', $this->classeId))
-            ->with(['matiere'])
+            ->with(['matiere', 'classe'])
             ->get()
             ->map(function (Evaluation $evaluation): CalendarEvent {
-                $title = $evaluation->titre ?: __('app.evaluation');
-                if ($evaluation->matiere?->nom_matiere) {
-                    $title .= ' — ' . $evaluation->matiere->nom_matiere;
+                $title = $this->matiereLabel($evaluation->matiere);
+                if ($evaluation->classe) {
+                    $title .= ' (' . $evaluation->classe->code . ')';
                 }
 
                 $date = Carbon::parse($evaluation->date)->startOfDay();
@@ -117,35 +136,56 @@ class CalendarWidget extends BaseCalendarWidget
             });
     }
 
-    /** Weekly timetable — expand each Cours into timed occurrences in the range. */
-    protected function getCoursEvents(FetchInfo $info): Collection
+    /**
+     * One-off sessions (rattrapage) — Cours with a specific date. Real dated
+     * events, shown in every view, in amber so they stand out from the routine.
+     */
+    protected function getOneOffCoursEvents(FetchInfo $info): Collection
     {
-        $cours = Cours::query()
+        return Cours::query()
+            ->whereNotNull('date')
+            ->whereBetween('date', [$info->start, $info->end])
+            ->when($this->classeId, fn ($q) => $q->where('id_classe', $this->classeId))
+            ->with(['matiere', 'classe'])
+            ->get()
+            ->map(function (Cours $c): CalendarEvent {
+                $day = Carbon::parse($c->date)->startOfDay();
+
+                return CalendarEvent::make($c)
+                    ->title($this->coursTitle($c))
+                    ->start($day->copy()->setTimeFromTimeString($c->getRawOriginal('date_debut') ?: '08:00:00'))
+                    ->end($day->copy()->setTimeFromTimeString($c->getRawOriginal('date_fin') ?: '09:00:00'))
+                    ->backgroundColor('#f59e0b'); // amber — one-off / rattrapage
+            });
+    }
+
+    /**
+     * Weekly timetable — expand each recurring Cours (no date) into timed
+     * occurrences across the visible range. Only ever called for week/day views
+     * (see getEvents), so the range is at most a few days.
+     */
+    protected function getRecurringCoursEvents(FetchInfo $info): Collection
+    {
+        $from = Carbon::parse($info->start)->startOfDay();
+        $to = Carbon::parse($info->end)->startOfDay();
+
+        // Index courses by weekday once, so the day loop is a direct lookup
+        // instead of re-scanning every Cours for every day in the range.
+        $coursByDay = Cours::query()
+            ->whereNull('date')
             ->whereNotNull('jour')
             ->when($this->classeId, fn ($q) => $q->where('id_classe', $this->classeId))
             ->with(['matiere', 'classe'])
-            ->get();
+            ->get()
+            ->groupBy(fn (Cours $c) => self::JOURS[strtolower((string) $c->jour)] ?? -1);
 
         $events = collect();
-        $period = CarbonPeriod::create(
-            Carbon::parse($info->start)->startOfDay(),
-            Carbon::parse($info->end)->startOfDay(),
-        );
 
-        foreach ($period as $day) {
-            foreach ($cours as $c) {
-                if ((self::JOURS[strtolower((string) $c->jour)] ?? null) !== $day->dayOfWeek) {
-                    continue;
-                }
-
-                $title = $c->matiere?->nom_matiere ?: __('app.cours');
-                if ($c->classe?->nom_classe) {
-                    $title .= ' — ' . $c->classe->nom_classe;
-                }
-
+        foreach (CarbonPeriod::create($from, $to) as $day) {
+            foreach ($coursByDay->get($day->dayOfWeek, collect()) as $c) {
                 $events->push(
                     CalendarEvent::make($c)
-                        ->title($title)
+                        ->title($this->coursTitle($c))
                         ->start($day->copy()->setTimeFromTimeString($c->getRawOriginal('date_debut') ?: '08:00:00'))
                         ->end($day->copy()->setTimeFromTimeString($c->getRawOriginal('date_fin') ?: '09:00:00'))
                         ->backgroundColor('#3b82f6') // blue — timetable
@@ -154,5 +194,41 @@ class CalendarWidget extends BaseCalendarWidget
         }
 
         return $events;
+    }
+
+    /** "Subject (Code)" label for a course event — subject translated. */
+    private function coursTitle(Cours $c): string
+    {
+        $title = $this->matiereLabel($c->matiere);
+
+        if ($c->classe) {
+            $title .= ' (' . $c->classe->code . ')';
+        }
+
+        return $title;
+    }
+
+    /** Translated subject name via its code (app.<code>), falling back to nom_matiere. */
+    private function matiereLabel(?Matiere $matiere): string
+    {
+        if (! $matiere) {
+            return __('app.cours');
+        }
+
+        $key = 'app.' . $matiere->code_matiere;
+        $translated = __($key);
+
+        return $translated === $key ? (string) $matiere->nom_matiere : $translated;
+    }
+
+    /** Class-filter options keyed by id, labelled by code, in academic order. */
+    private function classeOptions(): array
+    {
+        return Classe::orderBy('niveau')
+            ->orderBy('serie')
+            ->orderBy('groupe')
+            ->get()
+            ->mapWithKeys(fn (Classe $c) => [$c->id_classe => $c->code])
+            ->all();
     }
 }

@@ -17,4 +17,14 @@ class EditCours extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    /** Recurring slots carry no date; clear any value left by the hidden field. */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (empty($data['date'])) {
+            $data['date'] = null;
+        }
+
+        return $data;
+    }
 }

@@ -69,9 +69,10 @@ class TeacherUpcomingEvaluations extends BaseWidget
                     
                 TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
+                    ->formatStateUsing(fn ($record) => $record->classe?->label)
                     ->badge()
                     ->color('info'),
-                    
+
                 TextColumn::make('note_max')
                     ->label(__('app.note_max'))
                     ->suffix('/20'),
