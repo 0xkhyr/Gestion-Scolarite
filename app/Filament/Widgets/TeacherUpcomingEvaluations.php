@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Tables\Columns\TextColumn;
 use App\Models\Evaluation;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,7 +21,7 @@ class TeacherUpcomingEvaluations extends BaseWidget
 
     public function getTableHeading(): string
     {
-        return __('app.mes_evaluations_a_venir');
+        return __('app.my_upcoming_evaluations');
     }
 
     public function table(Table $table): Table
@@ -44,12 +45,12 @@ class TeacherUpcomingEvaluations extends BaseWidget
                     ->orderBy('date');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('titre')
+                TextColumn::make('titre')
                     ->label(__('app.evaluation'))
                     ->limit(30)
                     ->searchable(),
                     
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label(__('app.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -61,23 +62,23 @@ class TeacherUpcomingEvaluations extends BaseWidget
                         default => 'gray',
                     }),
                     
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->label(__('app.date'))
                     ->date('d/m/Y')
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('classe.nom_classe')
+                TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
                     ->badge()
                     ->color('info'),
                     
-                Tables\Columns\TextColumn::make('note_max')
+                TextColumn::make('note_max')
                     ->label(__('app.note_max'))
                     ->suffix('/20'),
             ])
             ->defaultSort('date', 'asc')
             ->paginated(false)
             ->emptyStateHeading(__('app.aucune_evaluation_a_venir'))
-            ->emptyStateDescription(__('app.aucune_evaluation_programmee'));
+            ->emptyStateDescription(__('app.no_evaluation_scheduled'));
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\EtudiantResource\Pages;
 
+use Filament\Actions\DeleteAction;
+use App\Models\Etudiant;
 use App\Filament\Resources\EtudiantResource;
 use App\Models\User;
 use Filament\Actions;
@@ -15,7 +17,7 @@ class EditEtudiant extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
     
@@ -87,7 +89,7 @@ class EditEtudiant extends EditRecord
                     $userData['password'] = bcrypt($this->record->matricule);
                 }
                 
-                $userData['profile_type'] = \App\Models\Etudiant::class;
+                $userData['profile_type'] = Etudiant::class;
                 $userData['profile_id'] = $this->record->id_etudiant;
                 
                 $user = User::create($userData);

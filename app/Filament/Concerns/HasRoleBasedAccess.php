@@ -2,6 +2,7 @@
 
 namespace App\Filament\Concerns;
 
+use App\Models\Etudiant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -177,7 +178,7 @@ trait HasRoleBasedAccess
         }
         
         // Student's own profile
-        if ($record instanceof \App\Models\Etudiant) {
+        if ($record instanceof Etudiant) {
             return $record->id_etudiant === $etudiant->id_etudiant;
         }
         

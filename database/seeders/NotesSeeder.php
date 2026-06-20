@@ -27,8 +27,11 @@ class NotesSeeder extends Seeder
         $batch = [];
         $stop = false;
 
-        // Iterate evaluations in chunks to limit memory usage
-        Evaluation::with('classe')->chunk(100, function ($evaluations) use (&$totalInserted, &$batch, &$stop, $maxNotesPerEval, $maxNotesTotal, $batchSize) {
+        // Only grade evaluations that have already taken place — upcoming ones
+        // stay ungraded, like a real mid-year gradebook.
+        Evaluation::with('classe')
+            ->whereDate('date', '<=', now())
+            ->chunk(100, function ($evaluations) use (&$totalInserted, &$batch, &$stop, $maxNotesPerEval, $maxNotesTotal, $batchSize) {
             foreach ($evaluations as $evaluation) {
                 if ($stop) {
                     return false; // stops chunking evaluations

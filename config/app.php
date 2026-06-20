@@ -185,7 +185,6 @@ return [
         App\Providers\ConfigSettingsProvider::class,
         App\Providers\Filament\AdminPanelProvider::class,
         App\Providers\Filament\TeacherPanelProvider::class,
-        App\Providers\Filament\StaffPanelProvider::class,
         App\Providers\Filament\LanguageSwitchServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
     ])->toArray(),

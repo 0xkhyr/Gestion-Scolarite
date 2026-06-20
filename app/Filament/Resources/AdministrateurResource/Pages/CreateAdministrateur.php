@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AdministrateurResource\Pages;
 
+use App\Models\Administrateur;
 use App\Filament\Resources\AdministrateurResource;
 use App\Models\User;
 use Filament\Actions;
@@ -27,7 +28,7 @@ class CreateAdministrateur extends CreateRecord
             'password' => bcrypt($this->data['password']),
             'is_active' => $this->data['is_active'] ?? true,
             'two_factor_enabled' => $this->data['two_factor_enabled'] ?? false,
-            'profile_type' => \App\Models\Administrateur::class,
+            'profile_type' => Administrateur::class,
             'profile_id' => $this->record->id_administrateur,
         ]);
         

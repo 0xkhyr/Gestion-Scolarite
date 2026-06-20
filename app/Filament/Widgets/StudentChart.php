@@ -26,7 +26,7 @@ class StudentChart extends ChartWidget
     {
         $user = auth()->user();
         if ($user->hasRole('teacher')) {
-            return __('app.repartition_mes_etudiants');
+            return __('app.my_students_distribution');
         }
         return __('app.repartition_etudiants');
     }
@@ -35,10 +35,7 @@ class StudentChart extends ChartWidget
     {
         $user = auth()->user();
         
-        if ($user->hasRole('super_admin')) {
-            // Admins see all students
-            $query = Etudiant::query();
-        } else if ($user->hasRole('teacher')) {
+        if ($user->hasRole('teacher')) {
             // Teachers see only their students
             $enseignant = $user->profile;
             if (!$enseignant) {
@@ -47,14 +44,12 @@ class StudentChart extends ChartWidget
                     'labels' => [],
                 ];
             }
-            
+
             $teacherClasses = $enseignant->classes()->pluck('classes.id_classe');
             $query = Etudiant::whereIn('id_classe', $teacherClasses);
         } else {
-            return [
-                'datasets' => [],
-                'labels' => [],
-            ];
+            // All administrative roles see all students
+            $query = Etudiant::query();
         }
         
         $data = $query->select('genre', DB::raw('count(*) as total'))

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\EvaluationCreated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -74,7 +75,7 @@ class Evaluation extends Model
     protected static function booted()
     {
         static::created(function ($evaluation) {
-            event(new \App\Events\EvaluationCreated($evaluation));
+            event(new EvaluationCreated($evaluation));
         });
     }
     

@@ -2,15 +2,17 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Actions\Action;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use App\Models\Evaluation;
 use Filament\Pages\Page;
 use App\Models\Etudiant;
 use App\Models\Note;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Card;
-use Filament\Forms\Components\Grid;
 use Barryvdh\DomPDF\Facade\Pdf;
 use ArPHP\I18N\Arabic;
 use App\Models\Classe;
@@ -20,12 +22,25 @@ class ReleveNotes extends Page implements HasForms
 {
     use InteractsWithForms, HasRoleBasedAccess;
 
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-academic-cap';
     public static function getNavigationGroup(): ?string
     {
         return __('app.gestion_academique');
     }
-    protected static string $view = 'filament.pages.releve-notes';
+    protected string $view = 'filament.pages.releve-notes';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('print')
+                ->label(__('app.imprimer_releve'))
+                ->icon('heroicon-o-printer')
+                ->color('success')
+                ->visible(fn () => $this->id_etudiant
+                    && (auth()->user()?->hasRole('super_admin') || auth()->user()?->can('transcript.export')))
+                ->action(fn () => $this->printReleve()),
+        ];
+    }
 
     public ?int $id_classe = null;
     public ?int $id_etudiant = null;
@@ -84,16 +99,27 @@ class ReleveNotes extends Page implements HasForms
         return __('app.releve_notes');
     }
 
-    public static function canViewAny(): bool
+    /**
+     * Filament Pages gate access via canAccess() (not canViewAny()). This also
+     * drives whether the page is reachable by URL.
+     */
+    public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('super_admin') || auth()->user()->can('report.view');
+        $user = auth()->user();
+
+        return $user && ($user->hasRole('super_admin') || $user->can('transcript.view'));
     }
 
-    public function form(Form $form): Form
+    public static function shouldRegisterNavigation(): bool
     {
-        return $form
-            ->schema([
-                Card::make()->schema([
+        return static::canAccess();
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make()->schema([
                     Grid::make(2)->schema([
                         Select::make('id_classe')
                             ->label(__('app.classe'))
@@ -234,7 +260,7 @@ class ReleveNotes extends Page implements HasForms
     protected function getStudentNotes($etudiant)
     {
         // Récupérer toutes les évaluations de la classe de l'élève
-        $evaluations = \App\Models\Evaluation::where('id_classe', $etudiant->id_classe)
+        $evaluations = Evaluation::where('id_classe', $etudiant->id_classe)
             ->with('matiere')
             ->get();
 
@@ -351,6 +377,12 @@ class ReleveNotes extends Page implements HasForms
 
     public function printReleve()
     {
+        // PDF export requires the transcript.export permission (super_admin exempt).
+        abort_unless(
+            auth()->user()?->hasRole('super_admin') || auth()->user()?->can('transcript.export'),
+            403
+        );
+
         $etudiant = $this->etudiant;
         if (!$etudiant) return;
 

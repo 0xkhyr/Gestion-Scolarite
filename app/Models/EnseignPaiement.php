@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\TeacherPaymentProcessed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,7 +29,7 @@ class EnseignPaiement extends Model
     {
         static::created(function ($payment) {
             if ($payment->statut === 'paye' && !$payment->notified) {
-                event(new \App\Events\TeacherPaymentProcessed($payment));
+                event(new TeacherPaymentProcessed($payment));
             }
         });
 
@@ -38,7 +39,7 @@ class EnseignPaiement extends Model
                 $payment->statut === 'paye' &&
                 !$payment->notified
             ) {
-                event(new \App\Events\TeacherPaymentProcessed($payment));
+                event(new TeacherPaymentProcessed($payment));
             }
         });
     }

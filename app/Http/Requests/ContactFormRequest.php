@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ContactFormRequest extends FormRequest
@@ -17,7 +18,7 @@ class ContactFormRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -95,14 +96,14 @@ class ContactFormRequest extends FormRequest
             // Check for potential spam patterns
             $spamWords = ['viagra', 'casino', 'lottery', 'bitcoin', 'crypto'];
             $content = strtolower($this->message . ' ' . $this->subject);
-            
+
             foreach ($spamWords as $word) {
                 if (str_contains($content, $word)) {
                     $validator->errors()->add('message', 'Your message contains prohibited content.');
                     break;
                 }
             }
-            
+
             // Rate limiting check could be added here
             // For example, checking if the same email has submitted recently
         });

@@ -21,61 +21,54 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         $user = auth()->user();
-        
-        // Admin stats - show everything
-        if ($user->hasRole('super_admin')) {
-            return [
-                Stat::make(__('app.total_etudiants'), Etudiant::count())
-                    ->description(__('app.etudiants'))
-                    ->descriptionIcon('heroicon-m-academic-cap')
-                    ->color('success'),
-                Stat::make(__('app.total_enseignants'), Enseignant::count())
-                    ->description(__('app.enseignants'))
-                    ->descriptionIcon('heroicon-m-user-group')
-                    ->color('info'),
-                Stat::make(__('app.total_classes'), Classe::count())
-                    ->description(__('app.classes'))
-                    ->descriptionIcon('heroicon-m-home-modern')
-                    ->color('warning'),
-                Stat::make(__('app.total_cours'), Cours::count())
-                    ->description(__('app.cours'))
-                    ->descriptionIcon('heroicon-m-calendar-days')
-                    ->color('primary'),
-            ];
-        }
-        
-        // Teacher stats - show only their data
+
+        // Teachers see only their own scope.
         if ($user->hasRole('teacher')) {
             $enseignant = $user->profile;
-            if (!$enseignant) {
+            if (! $enseignant) {
                 return [];
             }
-            
+
             $teacherClasses = $enseignant->classes()->pluck('classes.id_classe');
-            $myStudentsCount = Etudiant::whereIn('id_classe', $teacherClasses)->count();
-            $myClassesCount = $teacherClasses->count();
-            $myCoursCount = Cours::where('id_enseignant', $enseignant->id_enseignant)->count();
-            
+
             return [
-                Stat::make(__('app.mes_etudiants'), $myStudentsCount)
-                    ->description(__('app.etudiants_dans_mes_classes'))
+                Stat::make(__('app.mes_etudiants'), Etudiant::whereIn('id_classe', $teacherClasses)->count())
+                    ->description(__('app.students_in_my_classes'))
                     ->descriptionIcon('heroicon-m-academic-cap')
                     ->color('success'),
-                Stat::make(__('app.mes_classes'), $myClassesCount)
-                    ->description(__('app.classes_enseignees'))
+                Stat::make(__('app.mes_classes'), $teacherClasses->count())
+                    ->description(__('app.classes_taught'))
                     ->descriptionIcon('heroicon-m-home-modern')
                     ->color('info'),
-                Stat::make(__('app.mes_cours'), $myCoursCount)
-                    ->description(__('app.cours_programmes'))
+                Stat::make(__('app.mes_cours'), Cours::where('id_enseignant', $enseignant->id_enseignant)->count())
+                    ->description(__('app.scheduled_courses'))
                     ->descriptionIcon('heroicon-m-calendar-days')
                     ->color('warning'),
-                Stat::make(__('app.mes_matieres'), $enseignant->matieres()->count())
+                Stat::make(__('app.my_subjects'), $enseignant->matieres()->count())
                     ->description(__('app.matieres_enseignees'))
                     ->descriptionIcon('heroicon-m-book-open')
                     ->color('primary'),
             ];
         }
-        
-        return [];
+
+        // All administrative roles see school-wide stats.
+        return [
+            Stat::make(__('app.total_etudiants'), Etudiant::count())
+                ->description(__('app.etudiants'))
+                ->descriptionIcon('heroicon-m-academic-cap')
+                ->color('success'),
+            Stat::make(__('app.total_enseignants'), Enseignant::count())
+                ->description(__('app.enseignants'))
+                ->descriptionIcon('heroicon-m-user-group')
+                ->color('info'),
+            Stat::make(__('app.total_classes'), Classe::count())
+                ->description(__('app.classes'))
+                ->descriptionIcon('heroicon-m-home-modern')
+                ->color('warning'),
+            Stat::make(__('app.total_cours'), Cours::whereNull('date')->count())
+                ->description(__('app.cours'))
+                ->descriptionIcon('heroicon-m-calendar-days')
+                ->color('primary'),
+        ];
     }
 }

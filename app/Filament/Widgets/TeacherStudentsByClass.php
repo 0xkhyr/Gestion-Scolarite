@@ -15,7 +15,7 @@ class TeacherStudentsByClass extends ChartWidget
         return auth()->user()->hasRole('teacher');
     }
 
-    protected static ?string $heading = 'Étudiants par classe';
+    protected ?string $heading = 'Étudiants par classe';
 
     protected function getData(): array
     {

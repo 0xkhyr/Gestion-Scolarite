@@ -2,8 +2,13 @@
 
 namespace App\Filament\Pages\Settings;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -11,15 +16,29 @@ use App\Services\SettingsService;
 
 class Application extends Page
 {
-    protected static ?string $navigationIcon = null;
+    protected static ?string $cluster = \App\Filament\Clusters\Settings::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-adjustments-horizontal';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.application_settings');
+    }
+
     
-    protected static string $view = 'filament.pages.settings.application';
+    protected string $view = 'filament.pages.settings.application';
     
-    protected static ?string $title = 'Application Settings';
+
+    public function getTitle(): string
+    {
+        return __('app.application_settings');
+    }
     
-    protected static ?string $slug = 'settings/application';
+    protected static ?string $slug = 'application';
     
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function canAccess(): bool
     {
@@ -51,72 +70,76 @@ class Application extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Application Information')
-                    ->description('Basic application configuration')
+        return $schema
+            ->components([
+                Section::make(__('app.application_information'))
+                    ->description(__('app.application_information_desc'))
+                    ->icon('heroicon-o-information-circle')
                     ->schema([
-                        Forms\Components\TextInput::make('app_name')
-                            ->label('Application Name')
+                        TextInput::make('app_name')
+                            ->label(__('app.application_name'))
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Select::make('default_user_role')
-                            ->label('Default User Role')
+                        Select::make('default_user_role')
+                            ->label(__('app.default_user_role'))
                             ->options([
-                                'student' => 'Student',
-                                'teacher' => 'Teacher',
-                                'parent' => 'Parent',
-                                'staff' => 'Staff',
+                                'student' => __('app.student'),
+                                'teacher' => __('app.teacher'),
+                                'parent' => __('app.parent'),
+                                'staff' => __('app.staff'),
                             ])
                             ->required(),
                     ])->columns(2),
-                
-                Forms\Components\Section::make('User Registration & Access')
-                    ->description('Configure user registration and verification')
+
+                Section::make(__('app.user_registration_access'))
+                    ->description(__('app.user_registration_access_desc'))
+                    ->icon('heroicon-o-user-plus')
                     ->schema([
-                        Forms\Components\Toggle::make('registration_enabled')
-                            ->label('Allow User Registration')
-                            ->helperText('Enable new user registration'),
-                        Forms\Components\Toggle::make('email_verification_required')
-                            ->label('Require Email Verification')
-                            ->helperText('Require email verification for new accounts'),
-                        Forms\Components\Toggle::make('notifications_enabled')
-                            ->label('Enable System Notifications')
-                            ->helperText('Allow system to send notifications to users'),
+                        Toggle::make('registration_enabled')
+                            ->label(__('app.allow_user_registration'))
+                            ->helperText(__('app.allow_user_registration_help')),
+                        Toggle::make('email_verification_required')
+                            ->label(__('app.require_email_verification'))
+                            ->helperText(__('app.require_email_verification_help')),
+                        Toggle::make('notifications_enabled')
+                            ->label(__('app.enable_system_notifications'))
+                            ->helperText(__('app.enable_system_notifications_help')),
                     ])->columns(2),
-                
-                Forms\Components\Section::make('File Management')
-                    ->description('Configure file upload and storage settings')
+
+                Section::make(__('app.file_management'))
+                    ->description(__('app.file_management_desc'))
+                    ->icon('heroicon-o-document-arrow-up')
                     ->schema([
-                        Forms\Components\TextInput::make('file_upload_max_size')
-                            ->label('Maximum File Upload Size (MB)')
+                        TextInput::make('file_upload_max_size')
+                            ->label(__('app.max_file_upload_size'))
                             ->integer()
                             ->minValue(1)
                             ->maxValue(100)
                             ->required(),
                     ])->columns(2),
-                
-                Forms\Components\Section::make('System Backup')
-                    ->description('Configure automatic backup settings')
+
+                Section::make(__('app.system_backup'))
+                    ->description(__('app.system_backup_desc'))
+                    ->icon('heroicon-o-circle-stack')
                     ->schema([
-                        Forms\Components\Toggle::make('auto_backup_enabled')
-                            ->label('Enable Automatic Backups')
-                            ->helperText('Enable scheduled automatic backups'),
-                        Forms\Components\Select::make('backup_frequency')
-                            ->label('Backup Frequency')
+                        Toggle::make('auto_backup_enabled')
+                            ->label(__('app.enable_auto_backups'))
+                            ->helperText(__('app.enable_auto_backups_help')),
+                        Select::make('backup_frequency')
+                            ->label(__('app.backup_frequency'))
                             ->options([
-                                'daily' => 'Daily',
-                                'weekly' => 'Weekly',
-                                'monthly' => 'Monthly',
+                                'daily' => __('app.daily'),
+                                'weekly' => __('app.weekly'),
+                                'monthly' => __('app.monthly'),
                             ])
                             ->required(),
                     ])->columns(2),
-                
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
-                        ->label('Save Changes')
+
+                Actions::make([
+                    Action::make('save')
+                        ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')
                         ->action(function () {
@@ -150,9 +173,8 @@ class Application extends Page
         $this->settingsService->updateApplicationSettings($applicationData);
 
         Notification::make()
-            ->title('Application settings saved successfully')
+            ->title(__('app.application_settings_saved'))
             ->success()
-            ->send()
-            ->refresh();
+            ->send();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\NotificationLog;
 use Illuminate\Auth\Events\Lockout;
 use App\Services\NotificationService;
 use App\Support\NotificationKeys;
@@ -47,7 +48,7 @@ class SendLockoutNotification
 
         if ($user) {
             // Prevent spam detected: Check if a similar notification was sent in the last 5 minutes
-            $recentNotification = \App\Models\NotificationLog::where('user_id', $user->id)
+            $recentNotification = NotificationLog::where('user_id', $user->id)
                 ->where('key', NotificationKeys::SECURITY_ALERT)
                 ->where('created_at', '>=', now()->subMinutes(5))
                 ->exists();
@@ -79,19 +80,19 @@ class SendLockoutNotification
     protected function getSecurityUrl(User $user): string
     {
         if ($user->isAdmin()) {
-            return route('filament.admin.pages.account.security');
+            return route('filament.admin.account.pages.security');
         }
 
         if ($user->isTeacher()) {
-            return route('filament.teacher.pages.account.security');
+            return route('filament.teacher.account.pages.security');
         }
 
-        // Staff roles (Secretary, Accountant, etc.)
+        // Staff (Secretary, Accountant) now use the admin panel.
         if ($user->hasAnyRole(['secretary', 'accountant'])) {
-            return route('filament.staff.pages.account.security');
+            return route('filament.admin.account.pages.security');
         }
 
         // Fallback for users without a specific panel (e.g., students)
-        return url('/'); 
+        return url('/');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -63,7 +64,7 @@ class SendTestNotification extends Command
             $this->info('Notification dispatched successfully!');
             $this->info('Check the Filament UI bell icon.');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error("Failed to prompt notification: " . $e->getMessage());
         }
     }

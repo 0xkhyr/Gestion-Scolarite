@@ -11,12 +11,12 @@ class ApplySecuritySettings
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request):Response $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         // Force HTTPS if setting is enabled
-        if (setting('force_https', false) && !$request->secure() && app()->environment('production')) {
+        if (setting('security.force_https', false) && !$request->secure() && app()->environment('production')) {
             return redirect()->secure($request->getRequestUri());
         }
 

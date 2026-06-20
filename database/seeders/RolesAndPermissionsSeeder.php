@@ -80,12 +80,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'payment.delete',
             'payment.manage_reports',
             
-            // Reports & Analytics
-            'report.view',
-            'report.generate',
-            'report.export',
-            'report.view_statistics',
-            
+            // Transcripts (relevé de notes)
+            'transcript.view',
+            'transcript.export',
+
             // System Administration
             'user.manage',
             'role.manage',
@@ -94,7 +92,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'system.manage_settings',
             'setting.view',
             'setting.manage',
-            'database.backup',
+            'backup.view',
+            'backup.create',
+            'backup.download',
+            'backup.delete',
             'page.manage',
         ];
 
@@ -126,7 +127,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'setting.view', 'setting.manage',
             'page.manage',
             // Reports
-            'report.view', 'report.generate', 'report.export', 'report.view_statistics',
+            'transcript.view', 'transcript.export',
         ]);
 
         // 3. DIRECTOR - Full academic management, no system administration  
@@ -146,7 +147,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'evaluation.view', 'evaluation.create', 'evaluation.edit', 'evaluation.delete', 'evaluation.view_all',
             'grade.view', 'grade.create', 'grade.edit', 'grade.delete', 'grade.manage', 'grade.view_all', 'grade.edit_comments',
             // Reports
-            'report.view', 'report.generate', 'report.export', 'report.view_statistics',
+            'transcript.view', 'transcript.export',
             // Payments
             'payment.view', 'payment.create', 'payment.edit', 'payment.delete', 'payment.manage_reports',
             // Activity monitoring
@@ -168,7 +169,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'evaluation.view', 'evaluation.create', 'evaluation.edit', 'evaluation.view_all',
             'grade.view', 'grade.view_all',
             // Reports
-            'report.view', 'report.generate', 'report.view_statistics',
+            'transcript.view',
         ]);
 
         // 5. TEACHER - Classroom management
@@ -184,7 +185,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'evaluation.view', 'evaluation.create', 'evaluation.edit',
             'grade.view', 'grade.create', 'grade.edit', 'grade.manage', 'grade.edit_comments',
             // Basic reports
-            'report.view',
+            'transcript.view',
         ]);
 
         // 6. SECRETARY - Administrative support
@@ -197,7 +198,7 @@ class RolesAndPermissionsSeeder extends Seeder
             // Classes
             'class.view', 'course.view', 'timetable.view', 'timetable.manage',
             // Basic reports
-            'report.view', 'report.export',
+            'transcript.view', 'transcript.export',
             // Payments
             'payment.view', 'payment.create', 'payment.edit',
         ]);
@@ -213,7 +214,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'payment.view', 'payment.create', 'payment.edit', 'payment.delete',
             'payment.manage_reports',
             // Financial reports
-            'report.view', 'report.generate', 'report.export', 'report.view_statistics',
+            'transcript.view', 'transcript.export',
         ]);
 
         // 8. STUDENT - Self-service access

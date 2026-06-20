@@ -57,6 +57,46 @@ class EnseignantsSeeder extends Seeder
                 'email' => 'lemine@ecole.com',
                 'password' => 'teacher123',
             ],
+            [
+                'nom' => 'Mint Cheikh',
+                'prenom' => 'Mariem',
+                'telephone' => '+222 20 11 22 38',
+                'adresse' => 'Arafat, Nouakchott',
+                'email' => 'mariem@ecole.com',
+                'password' => 'teacher123',
+            ],
+            [
+                'nom' => 'Ould Abdallahi',
+                'prenom' => 'Cheikh',
+                'telephone' => '+222 20 11 22 39',
+                'adresse' => 'Toujounine, Nouakchott',
+                'email' => 'cheikh@ecole.com',
+                'password' => 'teacher123',
+            ],
+            [
+                'nom' => 'Mint Vall',
+                'prenom' => 'Zeynab',
+                'telephone' => '+222 20 11 22 40',
+                'adresse' => 'Riad, Nouakchott',
+                'email' => 'zeynab@ecole.com',
+                'password' => 'teacher123',
+            ],
+            [
+                'nom' => 'Ould Mohamed',
+                'prenom' => 'Brahim',
+                'telephone' => '+222 20 11 22 41',
+                'adresse' => 'Medina, Nouakchott',
+                'email' => 'brahim@ecole.com',
+                'password' => 'teacher123',
+            ],
+            [
+                'nom' => 'Mint Yahya',
+                'prenom' => 'Aïcha',
+                'telephone' => '+222 20 11 22 42',
+                'adresse' => 'Ksar, Nouakchott',
+                'email' => 'aicha@ecole.com',
+                'password' => 'teacher123',
+            ],
         ];
 
         foreach ($enseignants as $data) {

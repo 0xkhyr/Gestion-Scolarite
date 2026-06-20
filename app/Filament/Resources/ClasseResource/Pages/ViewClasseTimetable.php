@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ClasseResource\Pages;
 
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Actions\EditAction;
 use App\Filament\Resources\ClasseResource;
 use App\Models\Classe;
 use App\Models\Cours;
@@ -16,7 +18,7 @@ class ViewClasseTimetable extends ViewRecord
 
     protected static string $resource = ClasseResource::class;
 
-    protected static string $view = 'filament.resources.classe-resource.pages.view-classe-timetable';
+    protected string $view = 'filament.resources.classe-resource.pages.view-classe-timetable';
 
     public function getTitle(): string
     {
@@ -43,7 +45,7 @@ class ViewClasseTimetable extends ViewRecord
     /**
      * Get courses with RBAC filtering
      */
-    protected function getCourses(): \Illuminate\Database\Eloquent\Collection
+    protected function getCourses(): Collection
     {
         $query = Cours::where('id_classe', $this->record->id_classe)
             ->with(['matiere', 'enseignant']);
@@ -59,9 +61,11 @@ class ViewClasseTimetable extends ViewRecord
         return $query->get();
     }
 
-    protected function getActions(): array
+    protected function getHeaderActions(): array
     {
         return [
+            EditAction::make()
+                ->url(fn () => ClasseResource::getUrl('edit', ['record' => $this->record])),
             Action::make('exportPdf')
                 ->label(__('app.export_pdf'))
                 ->icon('heroicon-o-arrow-down-tray')

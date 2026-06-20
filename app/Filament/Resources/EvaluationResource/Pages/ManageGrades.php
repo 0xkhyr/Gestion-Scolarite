@@ -2,6 +2,13 @@
 
 namespace App\Filament\Resources\EvaluationResource\Pages;
 
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Forms\Components\TextInput;
 use App\Filament\Resources\EvaluationResource;
 use App\Models\Evaluation;
 use App\Models\Etudiant;
@@ -33,7 +40,7 @@ class ManageGrades extends Page implements HasTable
 
     protected static string $resource = EvaluationResource::class;
 
-    protected static string $view = 'filament.resources.evaluation-resource.pages.manage-grades';
+    protected string $view = 'filament.resources.evaluation-resource.pages.manage-grades';
 
     public function mount(int | string $record): void
     {
@@ -86,7 +93,7 @@ class ManageGrades extends Page implements HasTable
 
     public function getTitle(): string
     {
-        return __('app.saisie_notes') . ' - ' . ($this->record->titre ?? __('app.evaluation'));
+        return __('app.grade_entry') . ' - ' . ($this->record->titre ?? __('app.evaluation'));
     }
 
     public function getHeading(): string
@@ -108,20 +115,20 @@ class ManageGrades extends Page implements HasTable
                     ->orderBy('prenom')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('matricule')
+                TextColumn::make('matricule')
                     ->label(__('app.matricule'))
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('primary'),
 
-                Tables\Columns\TextColumn::make('full_name')
+                TextColumn::make('full_name')
                     ->label(__('app.etudiant'))
                     ->searchable(['nom', 'prenom'])
                     ->sortable()
                     ->formatStateUsing(fn ($record) => "{$record->nom} {$record->prenom}"),
 
-                Tables\Columns\TextInputColumn::make('note')
+                TextInputColumn::make('note')
                     ->label(__('app.note') . ' /' . $this->record->note_max)
                     ->state(function (Etudiant $record): ?float {
                         $note = Note::where('id_etudiant', $record->id_etudiant)
@@ -142,7 +149,7 @@ class ManageGrades extends Page implements HasTable
                         return $state;
                     }),
 
-                Tables\Columns\TextInputColumn::make('commentaire')
+                TextInputColumn::make('commentaire')
                     ->label(__('app.commentaire'))
                     ->state(function (Etudiant $record): ?string {
                         $note = Note::where('id_etudiant', $record->id_etudiant)
@@ -156,8 +163,8 @@ class ManageGrades extends Page implements HasTable
                         return $state;
                     }),
 
-                Tables\Columns\IconColumn::make('status')
-                    ->label(__('app.statut'))
+                IconColumn::make('status')
+                    ->label(__('app.status'))
                     ->state(function (Etudiant $record): bool {
                         return Note::where('id_etudiant', $record->id_etudiant)
                             ->where('id_evaluation', $this->record->id_evaluation)
@@ -170,7 +177,7 @@ class ManageGrades extends Page implements HasTable
                     ->falseColor('gray'),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('graded')
+                TernaryFilter::make('graded')
                     ->label(__('app.note_saisie'))
                     ->queries(
                         true: fn (Builder $query) => $query->whereHas('notes', function ($q) {
@@ -181,8 +188,8 @@ class ManageGrades extends Page implements HasTable
                         }),
                     ),
             ])
-            ->actions([
-                Tables\Actions\Action::make('delete_grade')
+            ->recordActions([
+                Action::make('delete_grade')
                     ->label(__('app.supprimer_note'))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
@@ -201,13 +208,13 @@ class ManageGrades extends Page implements HasTable
                             ->send();
                     }),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkAction::make('assign_default')
+            ->toolbarActions([
+                BulkAction::make('assign_default')
                     ->label(__('app.attribuer_note_par_defaut'))
                     ->icon('heroicon-o-pencil-square')
                     ->requiresConfirmation()
                     ->form([
-                        \Filament\Forms\Components\TextInput::make('default_note')
+                        TextInput::make('default_note')
                             ->label(__('app.note_par_defaut'))
                             ->numeric()
                             ->minValue(0)
@@ -225,7 +232,7 @@ class ManageGrades extends Page implements HasTable
                             ->send();
                     }),
 
-                Tables\Actions\BulkAction::make('delete_grades')
+                BulkAction::make('delete_grades')
                     ->label(__('app.supprimer_notes'))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
@@ -242,12 +249,12 @@ class ManageGrades extends Page implements HasTable
                     }),
             ])
             ->headerActions([
-                Tables\Actions\Action::make('back')
+                Action::make('back')
                     ->label(__('app.retour'))
                     ->icon('heroicon-o-arrow-left')
                     ->url(EvaluationResource::getUrl('index')),
 
-                Tables\Actions\Action::make('view_evaluation')
+                Action::make('view_evaluation')
                     ->label(__('app.voir_evaluation'))
                     ->icon('heroicon-o-eye')
                     ->url(EvaluationResource::getUrl('view', ['record' => $this->record])),

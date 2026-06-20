@@ -14,7 +14,7 @@
             <div class="col-md-8">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">{{ __('app.recherche') }}</h4>
+                        <h4 class="mb-0">{{ __('app.search') }}</h4>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('recherche') }}" method="GET">
@@ -42,7 +42,7 @@
             <div class="col-md-8">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">{{ __('app.resultats') }}</h4>
+                        <h4 class="mb-0">{{ __('app.results') }}</h4>
                     </div>
                     <div class="card-body">
                         @if ($results->isEmpty())
@@ -53,7 +53,7 @@
                                     <li class="list-group-item">
                                         @if ($category === 'etudiant')
                                             <a href="{{ url('/etudiant/' . $result->id_etudiant) }}"
-                                                class="d-flex align-items-center" title="{{ __('app.afficher_etudiant') }}">
+                                                class="d-flex align-items-center" title="{{ __('app.view_student') }}">
                                                 <span class="fw-bold">
                                                     {!! str_ireplace($query, '<strong>'.$query.'</strong>', 'E'.$result->id_etudiant ) !!} |
                                                     {!! str_ireplace($query, '<strong>'.$query.'</strong>', $result->nom) !!} 
@@ -69,7 +69,7 @@
  
                                             </p>
                                             @elseif ($category === 'enseignant')
-                                            <a href="{{ url('/enseignant/' . $result->id_enseignant) }}" class="d-block" title="{{ __('app.afficher_enseignant') }}">
+                                            <a href="{{ url('/enseignant/' . $result->id_enseignant) }}" class="d-block" title="{{ __('app.view_teacher') }}">
                                                 <span class="fw-bold">
                                                     {!! str_ireplace($query, '<strong>'.$query.'</strong>', 'E'.$result->id_enseignant ) !!} |
                                                     {!! str_ireplace($query, '<strong>'.$query.'</strong>', $result->nom) !!} 

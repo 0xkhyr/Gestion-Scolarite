@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('app.accueil'))
+@section('title', __('app.home'))
 
 @section('content')
 <header>

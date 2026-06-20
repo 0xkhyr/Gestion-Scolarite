@@ -2,12 +2,23 @@
 
 namespace App\Filament\Resources;
 
+use App\Models\User;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\Facades\Blade;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Actions\ViewAction;
+use App\Filament\Resources\ActivityLogResource\Pages\ListActivityLogs;
+use App\Filament\Resources\ActivityLogResource\Pages\ViewActivityLog;
 use App\Filament\Concerns\HasRoleBasedAccess;
 use App\Filament\Resources\ActivityLogResource\Pages;
 use Spatie\Activitylog\Models\Activity as ActivityModel;
 
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -21,7 +32,7 @@ class ActivityLogResource extends Resource
     
     protected static ?string $model = ActivityModel::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-list-bullet';
     protected static ?int $navigationSort = 4;
 
     public static function getNavigationGroup(): ?string
@@ -70,30 +81,88 @@ class ActivityLogResource extends Resource
         return false; // Activity logs should not be deleted for audit integrity
     }
 
-    public static function form(Form $form): Form
+    /**
+     * Build a link to the causer's user record, addressed directly by user id
+     * (causer_id). Returns null — so the name falls back to plain text — when the
+     * causer is missing/deleted, isn't a User, or the viewer can't open it.
+     */
+    protected static function causerUrl($record): ?string
     {
-        return $form->schema([
-            Forms\Components\Section::make(__('app.log_details') ?? 'Log Details')
+        if (! $record?->causer_id || ! $record->causer instanceof User) {
+            return null;
+        }
+
+        if (! UserResource::canViewAny()) {
+            return null;
+        }
+
+        return UserResource::getUrl('view', ['record' => $record->causer_id]);
+    }
+
+    /** Map an event (or fall back to description keywords) to a Filament badge color. */
+    protected static function eventColor(?string $event, ?string $description = null): string
+    {
+        $haystack = strtolower(($event ?? '') . ' ' . ($description ?? ''));
+
+        return match (true) {
+            $event === 'created' => 'success',
+            $event === 'updated' => 'warning',
+            $event === 'deleted' => 'danger',
+            str_contains($haystack, 'brute force')
+                || str_contains($haystack, 'blocked')
+                || str_contains($haystack, 'failed')
+                || str_contains($haystack, 'unauthorized')
+                || str_contains($haystack, 'denied') => 'danger',
+            str_contains($haystack, 'login') || str_contains($haystack, 'enabled') => 'success',
+            str_contains($haystack, 'logout') || str_contains($haystack, 'disabled') => 'gray',
+            default => 'info',
+        };
+    }
+
+    /** Short human label for the event badge. */
+    protected static function eventLabel(?string $event, ?string $description = null): string
+    {
+        if ($event) {
+            return __('app.' . $event);
+        }
+
+        $haystack = strtolower($description ?? '');
+
+        return match (true) {
+            str_contains($haystack, 'brute force') => __('app.security'),
+            str_contains($haystack, 'unauthorized') || str_contains($haystack, 'denied') => __('app.access_denied'),
+            str_contains($haystack, 'failed') => __('app.failed_login'),
+            str_contains($haystack, 'login') => __('app.login'),
+            str_contains($haystack, 'logout') => __('app.logout'),
+            default => __('app.activity'),
+        };
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make(__('app.log_details') ?? 'Log Details')
                 ->schema([
-                    Forms\Components\Placeholder::make('log_name')
-                        ->label('Log')
+                    Placeholder::make('log_name')
+                        ->label(__('app.log'))
                         ->content(fn ($record) => $record?->log_name
                             ? new HtmlString('<span class="text-sm text-gray-600">' . e($record->log_name) . '</span>')
                             : null
                         )
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('event')
+                    Placeholder::make('event')
                         ->label(__('app.action'))
-                        ->content(fn ($record) => $record?->event
-                            ? new HtmlString('<span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800">'
-                                . e($record->event)
-                                . '</span>')
-                            : null
-                        )
+                        ->content(fn ($record) => new HtmlString(Blade::render(
+                            '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
+                            [
+                                'color' => self::eventColor($record?->event, $record?->description),
+                                'label' => self::eventLabel($record?->event, $record?->description),
+                            ],
+                        )))
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('description')
+                    Placeholder::make('description')
                         ->label(__('app.description'))
                         ->content(fn ($record) => $record?->description
                             ? new HtmlString('<div class="text-sm text-gray-700">' . e($record->description) . '</div>')
@@ -101,8 +170,8 @@ class ActivityLogResource extends Resource
                         )
                         ->columnSpanFull(),
 
-                    Forms\Components\Placeholder::make('causer')
-                        ->label('Causer')
+                    Placeholder::make('causer')
+                        ->label(__('app.causer'))
                         ->content(function ($record) {
                             if (! $record?->causer_id) {
                                 return null;
@@ -111,82 +180,113 @@ class ActivityLogResource extends Resource
                             $name = $record->causer?->name
                                 ?? (class_basename($record->causer_type) . " #{$record->causer_id}");
 
+                            $url = self::causerUrl($record);
+
+                            if ($url) {
+                                return new HtmlString(
+                                    '<a href="' . e($url) . '" class="text-sm font-medium text-primary-600 hover:underline">'
+                                    . e($name) . '</a>'
+                                );
+                            }
+
                             return new HtmlString('<div class="text-sm font-medium">' . e($name) . '</div>');
                         })
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('subject')
-                        ->label('Subject')
+                    Placeholder::make('subject')
+                        ->label(__('app.subject'))
                         ->content(fn ($record) => $record?->subject_id
                             ? new HtmlString('<div class="text-sm">' . e(class_basename($record->subject_type) . " #{$record->subject_id}") . '</div>')
                             : null
                         )
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('properties')
+                    Placeholder::make('properties')
                         ->label(__('app.changes'))
                         ->content(fn ($record) => new HtmlString(
-                            '<div class="rounded bg-gray-50 dark:bg-gray-900 p-3 text-xs font-mono">
-                                <pre class="whitespace-pre-wrap">' .
-                                    e(json_encode($record->properties ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) .
-                                '</pre>
-                            </div>'
+                            '<pre class="rounded bg-gray-50 p-3 text-xs font-mono text-gray-700" style="white-space:pre-wrap;word-break:break-word;">' .
+                                e(json_encode($record->properties ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) .
+                            '</pre>'
                         ))
                         ->columnSpanFull(),
 
-                    Forms\Components\Placeholder::make('ip')
+                    Placeholder::make('ip')
                         ->label(__('app.ip_address'))
                         ->content(fn ($record) => $record->properties['ip_address'] ?? null)
                         ->columnSpan(1),
 
-                    Forms\Components\Placeholder::make('user_agent')
-                        ->label('User Agent')
+                    Placeholder::make('user_agent')
+                        ->label(__('app.user_agent'))
                         ->content(fn ($record) => $record->properties['user_agent'] ?? null)
                         ->columnSpan(1),
                 ])
                 ->columns(2),
-        ]);
+        ])
+        ->columns(1);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('causer.name')
-                    ->label(__('app.user'))
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')
+                    ->label(__('app.time'))
+                    ->dateTime('d M Y H:i')
+                    ->description(fn ($record) => $record->created_at?->diffForHumans())
+                    ->sortable(),
 
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('event')
+                    ->label(__('app.event'))
+                    ->badge()
+                    ->color(fn ($record) => self::eventColor($record->event, $record->description))
+                    ->formatStateUsing(fn ($record) => self::eventLabel($record->event, $record->description))
+                    ->sortable(),
+
+                TextColumn::make('causer.name')
+                    ->label(__('app.user'))
+                    ->icon('heroicon-m-user')
+                    ->default('—')
+                    ->url(fn ($record) => self::causerUrl($record))
+                    ->openUrlInNewTab()
+                    ->color(fn ($record) => self::causerUrl($record) ? 'primary' : null)
+                    ->searchable(),
+
+                TextColumn::make('description')
                     ->label(__('app.actions'))
                     ->wrap()
                     ->searchable()
-                    ->toggleable(),
+                    ->limit(80),
 
-                Tables\Columns\TextColumn::make('subject_type')
+                TextColumn::make('subject_type')
                     ->label(__('app.resource'))
-                    ->formatStateUsing(fn ($state) => $state ? class_basename($state) : null)
+                    ->badge()
+                    ->color('gray')
+                    ->formatStateUsing(fn ($state, $record) => $state
+                        ? class_basename($state) . ($record->subject_id ? " #{$record->subject_id}" : '')
+                        : null)
                     ->searchable()
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('subject_id')
-                    ->label(__('app.resource_id'))
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('properties->ip_address')
+                TextColumn::make('properties->ip_address')
                     ->label(__('app.ip_address'))
+                    ->icon('heroicon-m-globe-alt')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('app.time'))
-                    ->dateTime()
-                    ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('log_name')
+                // Filter by causer (used by the "activity trail" link from a user).
+                SelectFilter::make('causer_id')
+                    ->label(__('app.user'))
+                    ->searchable()
+                    ->options(fn () => User::query()
+                        ->whereIn('id', ActivityModel::query()
+                            ->whereNotNull('causer_id')
+                            ->distinct()
+                            ->pluck('causer_id'))
+                        ->pluck('name', 'id')
+                        ->toArray()),
+
+                SelectFilter::make('log_name')
                     ->label(__('app.log_name'))
                     ->options(fn () => ActivityModel::query()
                         ->distinct()
@@ -196,7 +296,7 @@ class ActivityLogResource extends Resource
                         ->toArray()
                     ),
 
-                Tables\Filters\SelectFilter::make('event')
+                SelectFilter::make('event')
                     ->label(__('app.event'))
                     ->options(fn () => ActivityModel::query()
                         ->distinct()
@@ -206,10 +306,10 @@ class ActivityLogResource extends Resource
                         ->toArray()
                     ),
 
-                Tables\Filters\Filter::make('date')
-                    ->form([
-                        Forms\Components\DatePicker::make('from')->label(__('app.from')),
-                        Forms\Components\DatePicker::make('to')->label(__('app.to')),
+                Filter::make('date')
+                    ->schema([
+                        DatePicker::make('from')->label(__('app.from')),
+                        DatePicker::make('to')->label(__('app.to')),
                     ])
                     ->query(function (Builder $query, array $data) {
                         if (! empty($data['from'])) {
@@ -221,10 +321,10 @@ class ActivityLogResource extends Resource
                         }
                     }),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
+            ->recordActions([
+                ViewAction::make(),
             ])
-            ->bulkActions([])
+            ->toolbarActions([])
             ->defaultSort('created_at', 'desc');
     }
 
@@ -236,8 +336,8 @@ class ActivityLogResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListActivityLogs::route('/'),
-            'view' => Pages\ViewActivityLog::route('/{record}'),
+            'index' => ListActivityLogs::route('/'),
+            'view' => ViewActivityLog::route('/{record}'),
         ];
     }
 }

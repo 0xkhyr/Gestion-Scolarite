@@ -2,8 +2,13 @@
 
 namespace App\Filament\Pages\Account;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -14,15 +19,27 @@ use Illuminate\Support\Facades\DB;
 
 class Notifications extends Page
 {
-    protected static ?string $navigationIcon = null;
-    
-    protected static string $view = 'filament.pages.account.notifications';
-    
-    protected static ?string $title = 'Notification Settings';
-    
-    protected static ?string $slug = 'account/notifications';
-    
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $cluster = \App\Filament\Clusters\Account::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bell';
+
+    protected string $view = 'filament.pages.account.notifications';
+
+    protected static ?string $slug = 'notifications';
+
+    protected static ?int $navigationSort = 4;
+
+    public function getTitle(): string
+    {
+        return __('app.notification_settings');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.notifications');
+    }
+
+    protected static bool $shouldRegisterNavigation = true;
 
     public ?array $data = [];
 
@@ -63,68 +80,71 @@ class Notifications extends Page
         return true;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Security Notifications')
-                    ->description('Manage alerts related to your account security')
+        return $schema
+            ->components([
+                Section::make(__('app.security_notifications'))
+                    ->description(__('app.account_security_notifications_desc'))
+                    ->icon('heroicon-o-shield-check')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('label_login')
-                                    ->label('Login Attempts')
-                                    ->content('Get notified when a new login occurs.'),
-                                Forms\Components\Toggle::make('login_attempt_mail')
-                                    ->label('Email'),
-                                Forms\Components\Toggle::make('login_attempt_database')
-                                    ->label('In-App'),
+                                Placeholder::make('label_login')
+                                    ->label(__('app.login_attempts'))
+                                    ->content(__('app.login_attempts_desc')),
+                                Toggle::make('login_attempt_mail')
+                                    ->label(__('app.email')),
+                                Toggle::make('login_attempt_database')
+                                    ->label(__('app.in_app')),
                             ]),
-                        Forms\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('label_security')
-                                    ->label('Security Alerts')
-                                    ->content('Critical security warnings and password changes.'),
-                                Forms\Components\Toggle::make('security_alert_mail')
-                                    ->label('Email'),
-                                Forms\Components\Toggle::make('security_alert_database')
-                                    ->label('In-App'),
+                                Placeholder::make('label_security')
+                                    ->label(__('app.security_alerts'))
+                                    ->content(__('app.security_alerts_desc')),
+                                Toggle::make('security_alert_mail')
+                                    ->label(__('app.email')),
+                                Toggle::make('security_alert_database')
+                                    ->label(__('app.in_app')),
                             ]),
                     ]),
 
-                Forms\Components\Section::make('System Notifications')
-                    ->description('Updates about system maintenance and new features')
+                Section::make(__('app.system_notifications'))
+                    ->description(__('app.system_notifications_account_desc'))
+                    ->icon('heroicon-o-cog-6-tooth')
                     ->schema([
-                        Forms\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Forms\Components\Placeholder::make('label_system')
-                                    ->label('System Updates')
-                                    ->content('Maintenance schedules and feature releases.'),
-                                Forms\Components\Toggle::make('system_update_mail')
-                                    ->label('Email'),
-                                Forms\Components\Toggle::make('system_update_database')
-                                    ->label('In-App'),
-                            ]),
-                    ]),
-                
-                Forms\Components\Section::make('Academic Notifications')
-                    ->description('Grades, assignments, and course updates')
-                    ->schema([
-                        Forms\Components\Grid::make(3)
-                            ->schema([
-                                Forms\Components\Placeholder::make('label_grades')
-                                    ->label('Grade Published')
-                                    ->content('When a new grade is posted.'),
-                                Forms\Components\Toggle::make('grade_published_mail')
-                                    ->label('Email'),
-                                Forms\Components\Toggle::make('grade_published_database')
-                                    ->label('In-App'),
+                                Placeholder::make('label_system')
+                                    ->label(__('app.system_updates'))
+                                    ->content(__('app.system_updates_desc')),
+                                Toggle::make('system_update_mail')
+                                    ->label(__('app.email')),
+                                Toggle::make('system_update_database')
+                                    ->label(__('app.in_app')),
                             ]),
                     ]),
 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
-                        ->label('Save Preferences')
+                Section::make(__('app.academic_notifications'))
+                    ->description(__('app.academic_notifications_account_desc'))
+                    ->icon('heroicon-o-academic-cap')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                Placeholder::make('label_grades')
+                                    ->label(__('app.grade_published'))
+                                    ->content(__('app.grade_published_desc')),
+                                Toggle::make('grade_published_mail')
+                                    ->label(__('app.email')),
+                                Toggle::make('grade_published_database')
+                                    ->label(__('app.in_app')),
+                            ]),
+                    ]),
+
+                Actions::make([
+                    Action::make('save')
+                        ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')
                         ->action(function () {
@@ -160,7 +180,7 @@ class Notifications extends Page
         });
 
         Notification::make()
-            ->title('Notification preferences updated successfully')
+            ->title(__('app.notification_preferences_saved'))
             ->success()
             ->send();
     }

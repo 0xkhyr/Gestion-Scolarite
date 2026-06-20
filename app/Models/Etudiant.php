@@ -6,10 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Etudiant extends Model
+class Etudiant extends Model implements HasMedia
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, InteractsWithMedia;
+
+    // Single profile photo on the public disk. No image conversions: this host
+    // has neither GD nor Imagick, so the (client-cropped) original is stored
+    // and displayed as-is. Add a 'thumb' conversion later if a driver is added.
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('photo')
+            ->singleFile()
+            ->useDisk('public');
+    }
     
     protected $primaryKey = 'id_etudiant';
     protected $fillable = [

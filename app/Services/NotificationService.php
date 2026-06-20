@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\User;
 use App\Models\NotificationPreference;
 use App\Models\NotificationLog;
@@ -42,7 +43,7 @@ class NotificationService
                 $this->logNotification($user, $key, $channel, 'sent', $data);
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Failed to dispatch notification [{$key}] to user [{$user->id}]: " . $e->getMessage());
             
             // Log failure

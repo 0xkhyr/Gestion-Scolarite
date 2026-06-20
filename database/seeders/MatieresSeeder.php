@@ -84,6 +84,27 @@ class MatieresSeeder extends Seeder
                 'coefficient' => 2,
                 'active' => true,
             ],
+            [
+                'nom_matiere' => 'Arabe',
+                'code_matiere' => 'ARA',
+                'description' => 'Langue arabe et littérature',
+                'coefficient' => 4,
+                'active' => true,
+            ],
+            [
+                'nom_matiere' => 'Éducation Islamique',
+                'code_matiere' => 'ISL',
+                'description' => 'Éducation religieuse islamique',
+                'coefficient' => 2,
+                'active' => true,
+            ],
+            [
+                'nom_matiere' => 'Philosophie',
+                'code_matiere' => 'PHILO',
+                'description' => 'Philosophie (lycée)',
+                'coefficient' => 2,
+                'active' => true,
+            ],
         ];
 
         foreach ($matieres as $matiere) {

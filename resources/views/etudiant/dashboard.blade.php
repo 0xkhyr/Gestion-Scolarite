@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', __('app.tableau_bord_etudiant'))
+@section('title', __('app.student_dashboard'))
 
 @section('breadcrumb')
     <li class="breadcrumb-item active">{{ __('Tableau de Bord') }}</li>

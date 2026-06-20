@@ -9,7 +9,7 @@ class FilamentHelper
      */
     public static function getTablePagination(): array
     {
-        $itemsPerPage = setting('items_per_page', 25);
+        $itemsPerPage = setting('system.items_per_page', 25);
         
         return [
             'pagination' => [
@@ -24,7 +24,7 @@ class FilamentHelper
      */
     public static function getDefaultPageSize(): int
     {
-        return setting('items_per_page', 25);
+        return setting('system.items_per_page', 25);
     }
     
     /**

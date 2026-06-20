@@ -202,7 +202,7 @@
             
             <!-- Bottom signature line -->
             <div style="margin-top: 12px; text-align: center; font-size: 6pt; color: #999; border-top: 1px solid #ddd; padding-top: 6px;">
-                {{ __('app.document_genere automatiquement le') }} {{ date('d/m/Y à H:i') }} • {{ config('app.name', 'Système de Gestion Scolaire') }} • Page 1/1
+                {{ __('app.document_generated_on') }} {{ date('d/m/Y à H:i') }} • {{ config('app.name', 'Système de Gestion Scolaire') }} • Page 1/1
             </div>
         </div>
 
@@ -211,7 +211,7 @@
             <div class="card-header">
                 <h6 class="mb-0">
                     <i class="fas fa-list text-primary"></i> 
-                    <span class="d-none d-sm-inline">{{ __('app.liste_des_cours') }}</span>
+                    <span class="d-none d-sm-inline">{{ __('app.course_list') }}</span>
                     <span class="d-sm-none">{{ __('app.cours') }}</span>
                 </h6>
             </div>

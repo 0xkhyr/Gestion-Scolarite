@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\Academic;
 use App\Models\Etudiant;
 use App\Models\Note;
 use Carbon\Carbon;
@@ -20,25 +21,32 @@ class TranscriptService
         $totalCoeff = 0;
         $weightedSum = 0;
 
-        // Get passing grade from settings (as percentage)
-        $passingGradePercentage = setting('academic.passing_grade', 50); // Default 50%
-        $passingGradeOn20 = ($passingGradePercentage / 100) * 20;
+        // Mauritanian grading is /20; a student passes at 10/20.
+        $passingGradeOn20 = Academic::passingGrade();
 
         foreach ($notesByMatiere as $matiere => $matiereNotes) {
-            $matiereStats = [
-                'total_points' => 0,
-                'total_max_points' => 0,
-                'note_count' => $matiereNotes->count(),
-                'coefficient' => 1 // Default coefficient, can be enhanced
-            ];
+            // Resolve the real subject + série straight from the notes so the
+            // coefficient is the right one for this (subject × série).
+            $firstNote = $matiereNotes->first();
+            $matiereModel = $firstNote?->matiere;
+            $serie = $firstNote?->classe?->serie;
+            $coefficient = $matiereModel
+                ? $matiereModel->coefficientForSerie($serie)
+                : 1.0;
+
+            $sumOn20 = 0;
+            $count = 0;
 
             foreach ($matiereNotes as $note) {
-                $noteMax = $note->evaluation?->note_max ?? 20;
+                // Effective max: the evaluation's, else the subject's, else /20.
+                $noteMax = $note->evaluation?->note_max ?: ($matiereModel?->note_max ?: 20);
+                if ($noteMax <= 0) {
+                    $noteMax = 20;
+                }
                 $noteSur20 = ($note->note / $noteMax) * 20;
 
-                $matiereStats['total_points'] += $note->note;
-                $matiereStats['total_max_points'] += $noteMax;
-
+                $sumOn20 += $noteSur20;
+                $count++;
                 $totalNotes++;
                 if ($noteSur20 >= $passingGradeOn20)
                     $passedNotes++;
@@ -46,21 +54,19 @@ class TranscriptService
                     $excellentNotes++;
             }
 
-            // Calculate matiere average
-            $matiereAverage = $matiereStats['total_max_points'] > 0
-                ? ($matiereStats['total_points'] / $matiereStats['total_max_points']) * 20
-                : 0;
+            // Subject average = mean of its grades, each normalized to /20.
+            $matiereAverage = $count > 0 ? $sumOn20 / $count : 0;
 
             $averages[$matiere] = [
                 'average' => $matiereAverage,
-                'coefficient' => $matiereStats['coefficient'],
-                'note_count' => $matiereStats['note_count'],
+                'coefficient' => $coefficient,
+                'note_count' => $count,
                 'grade_letter' => $this->getGradeLetter($matiereAverage)
             ];
 
-            // Weighted average calculation
-            $weightedSum += $matiereAverage * $matiereStats['coefficient'];
-            $totalCoeff += $matiereStats['coefficient'];
+            // Coefficient-weighted overall average.
+            $weightedSum += $matiereAverage * $coefficient;
+            $totalCoeff += $coefficient;
         }
 
         $overallAverage = $totalCoeff > 0 ? $weightedSum / $totalCoeff : 0;
@@ -80,45 +86,37 @@ class TranscriptService
 
     public function getGradeLetter($average)
     {
-        $gradingSystem = setting('academic.grading_system', 'percentage');
-        
+        $gradingSystem = setting('academic.grading_system', 'sur_20');
+        $passingGradeOn20 = Academic::passingGrade();
+
         if ($gradingSystem === 'letter') {
             if ($average >= 18) return 'A+';
             if ($average >= 16) return 'A';
             if ($average >= 14) return 'B+';
             if ($average >= 12) return 'B';
-            if ($average >= setting('academic.passing_grade', 50) / 100 * 20) return 'C';
+            if ($average >= $passingGradeOn20) return 'C';
             if ($average >= 8) return 'D';
             return 'F';
         }
-        
+
         if ($gradingSystem === 'gpa') {
             if ($average >= 18) return '4.0';
             if ($average >= 16) return '3.5';
             if ($average >= 14) return '3.0';
             if ($average >= 12) return '2.5';
-            if ($average >= setting('academic.passing_grade', 50) / 100 * 20) return '2.0';
+            if ($average >= $passingGradeOn20) return '2.0';
             if ($average >= 8) return '1.0';
             return '0.0';
         }
-        
-        // Default: percentage
-        return round($average, 1) . '/20';
+
+        // Default: /20 (Mauritanian)
+        return round($average, 2) . '/20';
     }
 
     public function getMention($average)
     {
-        $passingGrade = setting('academic.passing_grade', 50) / 100 * 20; // Convert % to /20
-        
-        if ($average >= 16)
-            return 'Très Bien';
-        if ($average >= 14)
-            return 'Bien';
-        if ($average >= 12)
-            return 'Assez Bien';
-        if ($average >= $passingGrade)
-            return 'Passable';
-        return 'Insuffisant';
+        // /20-native mentions via the canonical academic reference.
+        return __('app.mention_' . Academic::mentionKey((float) $average));
     }
 
     public function getTrimestreInfo($trimestre)

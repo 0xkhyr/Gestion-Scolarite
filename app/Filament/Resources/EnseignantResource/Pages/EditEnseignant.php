@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\EnseignantResource\Pages;
 
+use Filament\Actions\DeleteAction;
+use App\Models\Enseignant;
 use App\Filament\Resources\EnseignantResource;
 use App\Models\User;
 use Filament\Actions;
@@ -15,7 +17,7 @@ class EditEnseignant extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
     
@@ -42,7 +44,7 @@ class EditEnseignant extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Load user account data if exists
-        $user = User::where('profile_type', \App\Models\Enseignant::class)
+        $user = User::where('profile_type', Enseignant::class)
             ->where('profile_id', $this->record->id_enseignant)
             ->first();
         
@@ -66,7 +68,7 @@ class EditEnseignant extends EditRecord
         // Handle user account update/creation/deletion
         $email = $this->data['email'] ?? null;
         
-        $user = User::where('profile_type', \App\Models\Enseignant::class)
+        $user = User::where('profile_type', Enseignant::class)
             ->where('profile_id', $this->record->id_enseignant)
             ->first();
         
@@ -92,7 +94,7 @@ class EditEnseignant extends EditRecord
                     $userData['password'] = bcrypt('teacher123');
                 }
                 
-                $userData['profile_type'] = \App\Models\Enseignant::class;
+                $userData['profile_type'] = Enseignant::class;
                 $userData['profile_id'] = $this->record->id_enseignant;
                 
                 $user = User::create($userData);

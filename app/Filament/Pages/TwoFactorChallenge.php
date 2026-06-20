@@ -2,18 +2,18 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Schemas\Schema;
 use App\Services\TwoFactorService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\RateLimiter;
 
 class TwoFactorChallenge extends Page
 {
-    protected static string $view = 'filament.pages.two-factor-challenge';
+    protected string $view = 'filament.pages.two-factor-challenge';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -52,10 +52,10 @@ class TwoFactorChallenge extends Page
         }
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Toggle::make('useRecoveryCode')
                     ->label(__('app.use_recovery_code'))
                     ->helperText(__('app.recovery_code_helper'))

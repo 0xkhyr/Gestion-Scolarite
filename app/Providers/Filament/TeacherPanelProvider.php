@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Account\Profile;
+use App\Filament\Pages\Dashboard;
+use App\Http\Middleware\EnsureTeacherRole;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -22,6 +26,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\MenuItem;
 use App\Filament\Pages\Account;
+use Cmsmaxinc\FilamentErrorPages\FilamentErrorPagesPlugin;
 
 class TeacherPanelProvider extends PanelProvider
 {
@@ -35,7 +40,11 @@ class TeacherPanelProvider extends PanelProvider
             ])
             ->id('teacher')
             ->path('teacher')
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->plugins([
+                FilamentErrorPagesPlugin::make(),
+            ])
+            ->login(Login::class)
             ->databaseNotifications()
             ->colors([
                 'primary' => Color::Blue,
@@ -47,15 +56,16 @@ class TeacherPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
             MenuItem::make()
-                ->label(__('app.mon_compte'))
-                ->url(fn (): string => \App\Filament\Pages\Account\Profile::getUrl())
+                ->label(__('app.my_account'))
+                ->url(fn (): string => Profile::getUrl())
                 ->icon('heroicon-o-user-circle'),
             // ...
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->pages([
-                \App\Filament\Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -81,7 +91,7 @@ class TeacherPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\EnsureTeacherRole::class,
+                EnsureTeacherRole::class,
             ])
             ->spa()
             ->font('Poppins')

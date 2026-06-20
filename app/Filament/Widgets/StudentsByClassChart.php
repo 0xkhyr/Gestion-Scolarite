@@ -9,6 +9,8 @@ class StudentsByClassChart extends ChartWidget
 {
     protected static ?int $sort = 3;
 
+    protected int | string | array $columnSpan = 'full';
+
     public static function canView(): bool
     {
         return auth()->user()->hasRole(['super_admin', 'admin', 'director', 'academic_coordinator', 'teacher', 'secretary']);
@@ -18,7 +20,7 @@ class StudentsByClassChart extends ChartWidget
     {
         $user = auth()->user();
         if ($user->hasRole('teacher')) {
-            return __('app.mes_etudiants_par_classe');
+            return __('app.my_students_by_class');
         }
         return __('app.etudiants_par_classe');
     }
@@ -27,10 +29,7 @@ class StudentsByClassChart extends ChartWidget
     {
         $user = auth()->user();
         
-        if ($user->hasRole('super_admin')) {
-            // Admins see all classes
-            $classes = Classe::withCount('etudiants')->get();
-        } else if ($user->hasRole('teacher')) {
+        if ($user->hasRole('teacher')) {
             // Teachers see only their classes
             $enseignant = $user->profile;
             if (!$enseignant) {
@@ -39,13 +38,13 @@ class StudentsByClassChart extends ChartWidget
                     'labels' => [],
                 ];
             }
-            
+
             $classes = $enseignant->classes()->withCount('etudiants')->get();
         } else {
-            return [
-                'datasets' => [],
-                'labels' => [],
-            ];
+            // All administrative roles see all classes
+            $classes = Classe::withCount('etudiants')
+                ->orderBy('niveau')->orderBy('serie')->orderBy('groupe')
+                ->get();
         }
 
         return [
@@ -57,7 +56,7 @@ class StudentsByClassChart extends ChartWidget
                     'borderColor' => '#FFCE56',
                 ],
             ],
-            'labels' => $classes->pluck('nom_classe')->toArray(),
+            'labels' => $classes->map(fn ($c) => $c->code)->toArray(),
         ];
     }
 

@@ -2,11 +2,30 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\CoursResource\Pages\ListCours;
+use App\Filament\Resources\CoursResource\Pages\CreateCours;
+use App\Filament\Resources\CoursResource\Pages\EditCours;
 use App\Filament\Resources\CoursResource\Pages;
 use App\Filament\Resources\CoursResource\RelationManagers;
 use App\Models\Cours;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,7 +39,7 @@ class CoursResource extends Resource
     use HasRoleBasedAccess;
     protected static ?string $model = Cours::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar-days';
     
     protected static ?int $navigationSort = 3;
 
@@ -71,13 +90,13 @@ class CoursResource extends Resource
         ]);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('app.details_cours'))
+        return $schema
+            ->components([
+                Section::make(__('app.course_details'))
                     ->schema([
-                        Forms\Components\Select::make('id_matiere')
+                        Select::make('id_matiere')
                             ->label(__('app.matiere'))
                             ->relationship('matiere', 'code_matiere')
                             ->getOptionLabelFromRecordUsing(fn ($record) => __("app.{$record->code_matiere}"))
@@ -85,7 +104,7 @@ class CoursResource extends Resource
                             ->searchable()
                             ->preload(),
                             
-                        Forms\Components\Select::make('id_enseignant')
+                        Select::make('id_enseignant')
                             ->label(__('app.enseignant'))
                             ->relationship('enseignant', 'id_enseignant')
                             ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nom} {$record->prenom}")
@@ -93,20 +112,41 @@ class CoursResource extends Resource
                             ->searchable(['id_enseignant'])
                             ->preload(),
                             
-                        Forms\Components\Select::make('id_classe')
+                        Select::make('id_classe')
                             ->label(__('app.classe'))
                             ->relationship('classe', 'nom_classe')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->label)
                             ->required()
                             ->searchable()
                             ->preload(),
                     ])
                     ->columns(3),
                     
-                Forms\Components\Section::make(__('app.horaire'))
+                Section::make(__('app.horaire'))
                     ->schema([
-                        Forms\Components\Select::make('jour')
+                        Radio::make('seance_type')
+                            ->label(__('app.seance_type'))
+                            ->options([
+                                'recurrent' => __('app.cours_recurrent'),
+                                'ponctuel' => __('app.cours_ponctuel'),
+                            ])
+                            ->descriptions([
+                                'recurrent' => __('app.cours_recurrent_hint'),
+                                'ponctuel' => __('app.cours_ponctuel_hint'),
+                            ])
+                            ->default('recurrent')
+                            ->live()
+                            ->dehydrated(false)
+                            ->afterStateHydrated(function (Set $set, ?Cours $record): void {
+                                if ($record) {
+                                    $set('seance_type', $record->date ? 'ponctuel' : 'recurrent');
+                                }
+                            })
+                            ->inline()
+                            ->columnSpanFull(),
+
+                        Select::make('jour')
                             ->label(__('app.jour_semaine'))
-                            ->required()
                             ->options([
                                 'lundi' => __('app.lundi'),
                                 'mardi' => __('app.mardi'),
@@ -114,9 +154,17 @@ class CoursResource extends Resource
                                 'jeudi' => __('app.jeudi'),
                                 'vendredi' => __('app.vendredi'),
                                 'samedi' => __('app.samedi'),
-                            ]),
-                            
-                        Forms\Components\TextInput::make('date_debut')
+                            ])
+                            ->visible(fn (Get $get): bool => $get('seance_type') !== 'ponctuel')
+                            ->required(fn (Get $get): bool => $get('seance_type') !== 'ponctuel'),
+
+                        DatePicker::make('date')
+                            ->label(__('app.date'))
+                            ->native(false)
+                            ->visible(fn (Get $get): bool => $get('seance_type') === 'ponctuel')
+                            ->required(fn (Get $get): bool => $get('seance_type') === 'ponctuel'),
+
+                        TextInput::make('date_debut')
                             ->label(__('app.heure_debut'))
                             ->required()
                             ->type('text')
@@ -127,7 +175,7 @@ class CoursResource extends Resource
                             ])
                             ->rules(['required', 'date_format:' . self::getTimeFormat()]),
 
-                        Forms\Components\TextInput::make('date_fin')
+                        TextInput::make('date_fin')
                             ->label(__('app.heure_fin'))
                             ->required()
                             ->type('text')
@@ -140,9 +188,9 @@ class CoursResource extends Resource
                     ])
                     ->columns(3),
                     
-                Forms\Components\Section::make(__('app.description'))
+                Section::make(__('app.description'))
                     ->schema([
-                        Forms\Components\Textarea::make('description')
+                        Textarea::make('description')
                             ->label(__('app.description_cours'))
                             ->rows(3)
                             ->columnSpanFull(),
@@ -159,7 +207,7 @@ class CoursResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('matiere.code_matiere')
+                TextColumn::make('matiere.code_matiere')
                     ->label(__('app.matiere'))
                     ->formatStateUsing(fn ($record) => __("app." . $record->matiere->code_matiere))
                     ->searchable()
@@ -167,7 +215,7 @@ class CoursResource extends Resource
                     ->badge()
                     ->color('primary'),
                     
-                Tables\Columns\TextColumn::make('enseignant.nom')
+                TextColumn::make('enseignant.nom')
                     ->label(__('app.enseignant'))
                     ->formatStateUsing(fn ($record) => "{$record->enseignant->nom} {$record->enseignant->prenom}")
                     ->searchable(query: function (Builder $query, string $search): Builder {
@@ -178,53 +226,63 @@ class CoursResource extends Resource
                     })
                     ->sortable(),
                     
-                Tables\Columns\TextColumn::make('classe.nom_classe')
+                TextColumn::make('classe.nom_classe')
                     ->label(__('app.classe'))
+                    ->formatStateUsing(fn ($record) => $record->classe?->code)
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('info'),
                     
-                Tables\Columns\TextColumn::make('jour')
+                TextColumn::make('jour')
                     ->label(__('app.jour_semaine'))
                     ->badge()
                     ->formatStateUsing(fn (?string $state) => $state ? __("app.{$state}") : __('app.jour_semaine'))
                     ->color('warning'),
-                    
-                Tables\Columns\TextColumn::make('date_debut')
+
+                TextColumn::make('date')
+                    ->label(__('app.date'))
+                    ->date()
+                    ->placeholder('—')
+                    ->badge()
+                    ->color('danger')
+                    ->sortable(),
+
+                TextColumn::make('date_debut')
                     ->label(__('app.heure_debut'))
                     ->time(self::getTimeFormat()),
 
-                Tables\Columns\TextColumn::make('date_fin')
+                TextColumn::make('date_fin')
                     ->label(__('app.heure_fin'))
                     ->time(self::getTimeFormat()),
                     
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('app.cree_a'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('app.mis_a_jour_le'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('id_enseignant')
+                SelectFilter::make('id_enseignant')
                     ->label(__('app.enseignant'))
                     ->relationship('enseignant', 'id_enseignant')
                     ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nom} {$record->prenom}")
                     ->searchable()
                     ->preload(),
                     
-                Tables\Filters\SelectFilter::make('id_classe')
+                SelectFilter::make('id_classe')
                     ->label(__('app.classe'))
                     ->relationship('classe', 'nom_classe')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->label)
                     ->searchable()
                     ->preload(),
                     
-                Tables\Filters\SelectFilter::make('jour')
+                SelectFilter::make('jour')
                     ->label(__('app.jour_semaine'))
                     ->options([
                                 'lundi' => __('app.lundi'),
@@ -234,15 +292,26 @@ class CoursResource extends Resource
                                 'vendredi' => __('app.vendredi'),
                                 'samedi' => __('app.samedi'),
                             ]),
+
+                TernaryFilter::make('seance_type')
+                    ->label(__('app.seance_type'))
+                    ->placeholder(__('app.all'))
+                    ->trueLabel(__('app.cours_ponctuel'))
+                    ->falseLabel(__('app.cours_recurrent'))
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNotNull('date'),
+                        false: fn (Builder $query) => $query->whereNull('date'),
+                        blank: fn (Builder $query) => $query,
+                    ),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('jour', 'asc');
@@ -258,9 +327,9 @@ class CoursResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCours::route('/'),
-            'create' => Pages\CreateCours::route('/create'),
-            'edit' => Pages\EditCours::route('/{record}/edit'),
+            'index' => ListCours::route('/'),
+            'create' => CreateCours::route('/create'),
+            'edit' => EditCours::route('/{record}/edit'),
         ];
     }
 }

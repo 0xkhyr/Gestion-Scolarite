@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,9 +13,20 @@ use Spatie\Permission\Traits\HasRoles;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
+
+    /**
+     * Gate panel access. Filament enforces this both at login and on every
+     * request, for all panels — so a deactivated account cannot sign in or
+     * keep an existing session. Role-based separation between panels stays in
+     * the per-panel middleware (EnsureAdminRole / TeacherMiddleware).
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return (bool) $this->is_active;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +44,7 @@ class User extends Authenticatable
         'two_factor_secret',
         'two_factor_recovery_codes',
         'two_factor_enabled',
+        'two_factor_required',
         'last_login_at',
         'locked_until',
         'failed_login_attempts',
@@ -58,10 +72,55 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_active' => 'boolean',
         'two_factor_enabled' => 'boolean',
+        'two_factor_required' => 'boolean',
         'last_login_at' => 'datetime',
         'locked_until' => 'datetime',
         'last_failed_login_at' => 'datetime',
+        'password_changed_at' => 'datetime',
     ];
+
+    /**
+     * Model-level invariants kept in one place on save:
+     *  - stamp password_changed_at whenever the password changes (covers create,
+     *    profile change, Fortify update, and password reset);
+     *  - keep the two_factor_enabled column as a reliable mirror of the source of
+     *    truth (two_factor_confirmed_at), so it can never drift no matter which
+     *    code path toggles 2FA (Fortify, enrolment flow, admin actions, imports).
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (User $user) {
+            if ($user->isDirty('password')) {
+                $user->password_changed_at = now();
+            }
+
+            $user->two_factor_enabled = filled($user->two_factor_confirmed_at);
+        });
+    }
+
+    /**
+     * Has this user's password expired under the optional expiry policy?
+     * Returns false unless the policy is enabled and a positive day count is set.
+     */
+    public function passwordExpired(): bool
+    {
+        if (! setting('security.password_expiry_enabled', false)) {
+            return false;
+        }
+
+        $days = (int) setting('security.password_expiry_days', 0);
+        if ($days <= 0) {
+            return false;
+        }
+
+        // Fall back to created_at for users who predate password tracking.
+        $changedAt = $this->password_changed_at ?? $this->created_at;
+        if (! $changedAt) {
+            return false;
+        }
+
+        return $changedAt->copy()->addDays($days)->isPast();
+    }
 
     /**
      * Get the profile associated with the user.
@@ -286,7 +345,7 @@ class User extends Authenticatable
      */
     public function notificationPreferences()
     {
-        return $this->hasMany(\App\Models\NotificationPreference::class);
+        return $this->hasMany(NotificationPreference::class);
     }
 
     /**
@@ -294,6 +353,6 @@ class User extends Authenticatable
      */
     public function notificationLogs()
     {
-        return $this->hasMany(\App\Models\NotificationLog::class);
+        return $this->hasMany(NotificationLog::class);
     }
 }

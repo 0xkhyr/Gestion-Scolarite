@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\AdministrateurResource\Pages;
 
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use App\Models\Administrateur;
 use App\Filament\Resources\AdministrateurResource;
 use App\Models\User;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Validation\Rule;
 
 class EditAdministrateur extends EditRecord
 {
@@ -15,33 +17,23 @@ class EditAdministrateur extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Action::make('resetPassword')
+                ->label(__('app.reset_password'))
+                ->icon('heroicon-o-key')
+                ->color('warning')
+                ->visible(fn () => auth()->user()->hasPermissionTo('user.manage'))
+                ->modalHeading(__('app.reset_password'))
+                ->modalSubmitActionLabel(__('app.reset_password'))
+                ->schema(AdministrateurResource::passwordResetFormSchema())
+                ->action(fn (array $data) => AdministrateurResource::applyPasswordReset($this->record, $data)),
+            DeleteAction::make(),
         ];
     }
-    
-    public function getRules(): array
-    {
-        $rules = parent::getRules();
-        
-        // Add custom unique validation for email
-        if (isset($rules['email'])) {
-            $currentUserId = $this->record->user?->id;
-            
-            $rules['email'] = array_merge(
-                is_array($rules['email']) ? $rules['email'] : [$rules['email']],
-                [
-                    Rule::unique('users', 'email')->ignore($currentUserId),
-                ]
-            );
-        }
-        
-        return $rules;
-    }
-    
+
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Load user account data if exists
-        $user = User::where('profile_type', \App\Models\Administrateur::class)
+        $user = User::where('profile_type', Administrateur::class)
             ->where('profile_id', $this->record->id_administrateur)
             ->first();
         
@@ -65,7 +57,7 @@ class EditAdministrateur extends EditRecord
     protected function afterSave(): void
     {
         // Find the user associated with this administrator
-        $user = User::where('profile_type', \App\Models\Administrateur::class)
+        $user = User::where('profile_type', Administrateur::class)
             ->where('profile_id', $this->record->id_administrateur)
             ->first();
         

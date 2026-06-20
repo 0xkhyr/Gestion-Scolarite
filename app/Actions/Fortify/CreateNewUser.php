@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use Spatie\Permission\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -31,10 +32,19 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
+
+        // Assign the admin-configured default role to self-registered users.
+        // Guarded so a missing/renamed role never breaks registration.
+        $defaultRole = setting('app.default_user_role', 'student');
+        if ($defaultRole && Role::where('name', $defaultRole)->exists()) {
+            $user->assignRole($defaultRole);
+        }
+
+        return $user;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\EtudiantResource\Pages;
 
+use App\Models\Etudiant;
 use App\Filament\Resources\EtudiantResource;
 use App\Models\User;
 use Filament\Actions;
@@ -36,7 +37,7 @@ class CreateEtudiant extends CreateRecord
                 'email' => $email,
                 'password' => bcrypt($password),
                 'is_active' => $this->data['is_active'] ?? true,
-                'profile_type' => \App\Models\Etudiant::class,
+                'profile_type' => Etudiant::class,
                 'profile_id' => $this->record->id_etudiant,
             ]);
             

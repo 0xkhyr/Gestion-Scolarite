@@ -12,100 +12,63 @@ use App\Models\Classe;
 class EnseignantMatiereClasseSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Assign teachers → subjects → class groups, driven by each class's cycle.
+     * Each subject has a "specialist" teacher (round-robin over the staff), who
+     * then teaches that subject in every class group of the relevant cycle.
      */
     public function run(): void
     {
-        // Get teachers, subjects, and classes
-        $teachers = Enseignant::all();
-        $matieres = Matiere::all();
+        $teachers = Enseignant::orderBy('id_enseignant')->get();
+        $matieres = Matiere::all()->keyBy('code_matiere');
         $classes = Classe::all();
 
         if ($teachers->isEmpty() || $matieres->isEmpty() || $classes->isEmpty()) {
-            $this->command->warn('Missing data: Teachers, Matieres, or Classes. Make sure to seed them first.');
+            $this->command->warn('Missing teachers, subjects, or classes — seed those first.');
             return;
         }
 
-        // Sample assignments - assign ALL teachers to subjects
-        $assignments = [
-            // Sidi Mohamed El Moctar - Math and Physics
-            [
-                'teacher_nom' => 'El Moctar',
-                'teacher_prenom' => 'Sidi Mohamed',
-                'subjects' => ['MATH', 'PHY'],
-                'classes' => ['6ème A', '6ème B', '5ème A']
-            ],
-            // Aminetou Mint Mohamedou - French and English
-            [
-                'teacher_nom' => 'Mint Mohamedou',
-                'teacher_prenom' => 'Aminetou',
-                'subjects' => ['FR', 'ANG'],
-                'classes' => ['6ème A', '6ème B', 'CM2']
-            ],
-            // Oumar Ould Baba - Physics and Sciences
-            [
-                'teacher_nom' => 'Ould Baba',
-                'teacher_prenom' => 'Oumar',
-                'subjects' => ['PHY', 'SVT'],
-                'classes' => ['5ème A', 'Terminale S']
-            ],
-            // Khadija Mint Ahmed - History and Civics
-            [
-                'teacher_nom' => 'Mint Ahmed',
-                'teacher_prenom' => 'Khadija',
-                'subjects' => ['HG', 'EC'],
-                'classes' => ['6ème A', '5ème A', 'Terminale S']
-            ],
-            // Mohamed Lemine Ould Sid Ahmed - Informatics and Arts
-            [
-                'teacher_nom' => 'Ould Sid Ahmed',
-                'teacher_prenom' => 'Mohamed Lemine',
-                'subjects' => ['INFO', 'ART', 'EPS'],
-                'classes' => ['CM2', '6ème A', '6ème B']
-            ],
+        // Subjects taught at each cycle (Mauritanian curriculum, simplified).
+        $cycleSubjects = [
+            'fondamental' => ['ARA', 'FR', 'MATH', 'ISL', 'EPS', 'ART'],
+            'college'     => ['ARA', 'FR', 'ANG', 'MATH', 'PHY', 'SVT', 'HG', 'ISL', 'EPS', 'INFO'],
+            'lycee'       => ['ARA', 'FR', 'ANG', 'MATH', 'PHY', 'SVT', 'HG', 'ISL', 'PHILO', 'INFO'],
         ];
 
-        foreach ($assignments as $assignment) {
-            $teacher = $teachers->where('nom', $assignment['teacher_nom'])
-                                ->where('prenom', $assignment['teacher_prenom'])
-                                ->first();
-            
-            if (!$teacher) {
-                $this->command->warn("Teacher {$assignment['teacher_prenom']} {$assignment['teacher_nom']} not found.");
-                continue;
-            }
+        // A specialist teacher per subject code (spread across the staff).
+        $allCodes = collect($cycleSubjects)->flatten()->unique()->values();
+        $subjectTeacher = [];
+        foreach ($allCodes as $i => $code) {
+            $subjectTeacher[$code] = $teachers[$i % $teachers->count()];
+        }
 
-            foreach ($assignment['subjects'] as $subjectCode) {
-                $matiere = $matieres->where('code_matiere', $subjectCode)->first();
-                
-                if (!$matiere) {
-                    $this->command->warn("Subject with code {$subjectCode} not found.");
+        $now = now();
+        $rows = [];
+
+        foreach ($classes as $classe) {
+            $codes = $cycleSubjects[$classe->cycle] ?? $cycleSubjects['college'];
+
+            foreach ($codes as $code) {
+                $matiere = $matieres->get($code);
+                if (! $matiere) {
                     continue;
                 }
 
-                foreach ($assignment['classes'] as $className) {
-                    $classe = $classes->where('nom_classe', $className)->first();
-                    
-                    if (!$classe) {
-                        $this->command->warn("Class {$className} not found.");
-                        continue;
-                    }
-
-                    // Insert the assignment if it doesn't exist
-                    DB::table('enseignant_matiere_classe')->insertOrIgnore([
-                        'id_enseignant' => $teacher->id_enseignant,
-                        'id_matiere' => $matiere->id_matiere,
-                        'id_classe' => $classe->id_classe,
-                        'active' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-
-                }  
+                $rows[] = [
+                    'id_enseignant' => $subjectTeacher[$code]->id_enseignant,
+                    'id_matiere' => $matiere->id_matiere,
+                    'id_classe' => $classe->id_classe,
+                    'active' => true,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
         }
 
-        $totalAssignments = DB::table('enseignant_matiere_classe')->count();
-        $this->command->info("{$teachers->count()} teachers assigned, {$totalAssignments} total assignments.");
+        foreach (array_chunk($rows, 500) as $chunk) {
+            DB::table('enseignant_matiere_classe')->insertOrIgnore($chunk);
+        }
+
+        $total = DB::table('enseignant_matiere_classe')->count();
+        $this->command->info("{$teachers->count()} teachers, {$total} subject-class assignments seeded.");
     }
 }

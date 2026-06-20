@@ -2,6 +2,11 @@
 
 namespace App\Filament\Resources\CoursResource\Pages;
 
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Placeholder;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\CoursResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -20,12 +25,12 @@ class ListCours extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('printTimetable')
+            Action::make('printTimetable')
                 ->label(__('app.imprimer_emploi_temps'))
                 ->icon('heroicon-o-printer')
                 ->color('info')
-                ->form([
-                    Forms\Components\Select::make('id_classe')
+                ->schema([
+                    Select::make('id_classe')
                         ->label(__('app.classe'))
                         ->options(function () {
                             return static::applyRoleBasedRelationScope(Classe::query(), [
@@ -35,9 +40,9 @@ class ListCours extends ListRecords
                         ->required()
                         ->searchable()
                         ->live(),
-                    Forms\Components\Placeholder::make('preview')
+                    Placeholder::make('preview')
                         ->label('')
-                        ->content(function (Forms\Get $get) {
+                        ->content(function (Get $get) {
                             $classeId = $get('id_classe');
                             if (!$classeId) {
                                 return null;
@@ -96,7 +101,7 @@ class ListCours extends ListRecords
                         echo $pdf->output();
                     }, "emploi_du_temps_{$classe->nom_classe}.pdf");
                 }),
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

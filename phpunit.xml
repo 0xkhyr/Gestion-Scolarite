@@ -26,8 +26,8 @@
         <env name="DB_PORT" value="3306"/>
         <!-- Use a dedicated test database to avoid clobbering local data -->
         <env name="DB_DATABASE" value="gestionscolarite_test"/>
-        <env name="DB_USERNAME" value="root"/>
-        <env name="DB_PASSWORD" value="root"/>
+        <env name="DB_USERNAME" value="gestion_user"/>
+        <env name="DB_PASSWORD" value="secure_root_password"/>
         <!-- Run tests with empty admin prefix so test routes like /admins/create work -->
         <env name="ADMIN_PREFIX" value=""/>
         <!-- Ensure admin IP whitelist doesn't block tests -->

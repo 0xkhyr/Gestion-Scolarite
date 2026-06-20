@@ -1,230 +1,165 @@
 @extends('public.layouts.app')
 
-@section('title', $page->title . ' - ' . ($themeVars['site_name'] ?? 'School'))
-@section('description', 'Get in touch with us - Contact information and send us a message')
+@section('title', $page->meta_title ?: ($page->title . ' - ' . ($themeVars['site_name'] ?? 'School')))
+@section('description', $page->meta_description ?: $page->title)
+
+@php
+    $officeHours = $page->getSetting('office_hours', []);
+    $hasContactInfo = !empty($themeVars['contact_address'])
+        || !empty($themeVars['contact_location'])
+        || !empty($themeVars['contact_email'])
+        || !empty($themeVars['contact_phone']);
+    $hasSidebar = $hasContactInfo || count($officeHours);
+    $hasMap = isset($themeVars['contact_latitude'], $themeVars['contact_longitude'])
+        && $themeVars['contact_latitude'] && $themeVars['contact_longitude'];
+@endphp
 
 @section('content')
-<!-- Hero Section -->
-<section class="bg-gradient-to-br from-primary-50 via-surface-50 to-primary-100 py-12 sm:py-16 lg:py-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-            <div class="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-white/80 backdrop-blur border border-primary-200 text-primary-700 text-xs sm:text-sm font-medium mb-6 sm:mb-8">
-                <span class="material-icons-round text-sm mr-2">contact_mail</span>
-                Get In Touch
-            </div>
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-on-surface mb-4 sm:mb-6">{{ $page->title }}</h1>
-            <p class="text-base sm:text-lg lg:text-xl text-surface-600 max-w-2xl lg:max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
-                We'd love to hear from you. Reach out to us for any questions or inquiries.
-            </p>
-        </div>
-    </div>
-</section>
-
-<section class="py-16 sm:py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            <!-- Contact Information -->
-            <div class="space-y-6 sm:space-y-8 order-2 lg:order-1">
-                <div class="material-card rounded-material-xl p-6 sm:p-8 bg-gradient-to-br from-white to-surface-50 border border-surface-200/50">
-                    <div class="flex items-center mb-6 sm:mb-8">
-                        <div class="inline-flex items-center justify-center w-10 sm:w-12 h-10 sm:h-12 rounded-material bg-primary-600 text-white mr-3 sm:mr-4">
-                            <span class="material-icons-round text-lg sm:text-xl">info</span>
-                        </div>
-                        <h2 class="text-xl sm:text-2xl font-bold text-on-surface">Contact Information</h2>
-                    </div>
-                    
-                    <div class="space-y-6 sm:space-y-8">
-                        <!-- Address -->
-                        @if(isset($themeVars['contact_address']) && $themeVars['contact_address'])
-                            <div class="flex items-start group">
-                                <div class="flex-shrink-0">
-                                    <div class="w-12 sm:w-14 h-12 sm:h-14 bg-primary-50 text-primary-600 rounded-material-lg flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                                        <span class="material-icons-round text-lg sm:text-xl">location_on</span>
-                                    </div>
-                                </div>
-                                <div class="ml-4 sm:ml-6">
-                                    <h3 class="text-base sm:text-lg font-semibold text-on-surface mb-1 sm:mb-2">Our Location</h3>
-                                    <p class="text-sm sm:text-base text-surface-600 leading-relaxed">{{ $themeVars['contact_address'] }}</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Email -->
-                        @if(isset($themeVars['contact_email']) && $themeVars['contact_email'])
-                            <div class="flex items-start group">
-                                <div class="flex-shrink-0">
-                                    <div class="w-12 sm:w-14 h-12 sm:h-14 bg-green-50 text-green-600 rounded-material-lg flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                                        <span class="material-icons-round text-lg sm:text-xl">email</span>
-                                    </div>
-                                </div>
-                                <div class="ml-4 sm:ml-6">
-                                    <h3 class="text-base sm:text-lg font-semibold text-on-surface mb-1 sm:mb-2">Email Us</h3>
-                                    <a href="mailto:{{ $themeVars['contact_email'] }}" 
-                                       class="text-green-600 hover:text-green-700 transition-colors font-medium text-sm sm:text-base">
-                                        {{ $themeVars['contact_email'] }}
-                                    </a>
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Phone -->
-                        @if(isset($themeVars['contact_phone']) && $themeVars['contact_phone'])
-                            <div class="flex items-start group">
-                                <div class="flex-shrink-0">
-                                    <div class="w-12 sm:w-14 h-12 sm:h-14 bg-orange-50 text-orange-600 rounded-material-lg flex items-center justify-center group-hover:bg-orange-100 transition-colors">
-                                        <span class="material-icons-round text-lg sm:text-xl">phone</span>
-                                    </div>
-                                </div>
-                                <div class="ml-4 sm:ml-6">
-                                    <h3 class="text-base sm:text-lg font-semibold text-on-surface mb-1 sm:mb-2">Call Us</h3>
-                                    <a href="tel:{{ $themeVars['contact_phone'] }}" 
-                                       class="text-orange-600 hover:text-orange-700 transition-colors font-medium text-sm sm:text-base">
-                                        {{ $themeVars['contact_phone'] }}
-                                    </a>
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Office Hours -->
-                        <div class="flex items-start group">
-                            <div class="flex-shrink-0">
-                                <div class="w-12 sm:w-14 h-12 sm:h-14 bg-blue-50 text-blue-600 rounded-material-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                                    <span class="material-icons-round text-lg sm:text-xl">schedule</span>
-                                </div>
-                            </div>
-                            <div class="ml-4 sm:ml-6">
-                                <h3 class="text-base sm:text-lg font-semibold text-on-surface mb-1 sm:mb-2">Office Hours</h3>
-                                <div class="text-sm sm:text-base text-surface-600 space-y-1">
-                                    <p class="flex justify-between">
-                                        <span>Monday - Friday</span>
-                                        <span class="font-medium">8:00 AM - 4:00 PM</span>
-                                    </p>
-                                    <p class="flex justify-between">
-                                        <span>Saturday</span>
-                                        <span class="font-medium">9:00 AM - 1:00 PM</span>
-                                    </p>
-                                    <p class="flex justify-between">
-                                        <span>Sunday</span>
-                                        <span class="font-medium text-surface-500">Closed</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Help Card -->
-                <div class="material-card rounded-material-xl p-8 bg-gradient-to-br from-primary-600 to-primary-700 text-white">
-                    <div class="flex items-center mb-6">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-material bg-white/20 text-white mr-4">
-                            <span class="material-icons-round">help</span>
-                        </div>
-                        <h3 class="text-xl font-bold">Need Help?</h3>
-                    </div>
-                    <p class="text-primary-100 mb-6 leading-relaxed">
-                        Our friendly staff is here to help answer any questions you may have about our school, 
-                        admissions process, or academic programs.
-                    </p>
-                    <ul class="space-y-3 text-primary-100">
-                        <li class="flex items-center">
-                            <span class="material-icons-round text-white/80 mr-3">check</span>
-                            Admissions Information
-                        </li>
-                        <li class="flex items-center">
-                            <span class="material-icons-round text-white/80 mr-3">check</span>
-                            Academic Programs
-                        </li>
-                        <li class="flex items-center">
-                            <span class="material-icons-round text-white/80 mr-3">check</span>
-                            Student Support Services
-                        </li>
-                        <li class="flex items-center">
-                            <span class="material-icons-round text-white/80 mr-3">check</span>
-                            Extracurricular Activities
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Contact Form -->
-            <div>
-                <div class="material-card rounded-material-xl p-8 bg-gradient-to-br from-white to-surface-50 border border-surface-200/50">
-                    <div class="flex items-center mb-8">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-material bg-green-600 text-white mr-4">
-                            <span class="material-icons-round">send</span>
-                        </div>
-                        <h2 class="text-2xl font-bold text-on-surface">Send us a Message</h2>
-                    </div>
-                    <p class="text-surface-600 mb-8 leading-relaxed">
-                        Fill out the form below and we'll get back to you as soon as possible. We're here to help!
-                    </p>
-                    
-                    <!-- Livewire Contact Form Component -->
-                    @livewire('contact-form')
-                </div>
+    <!-- Page Header -->
+    <section class="bg-white border-b border-zinc-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+            <div class="max-w-3xl">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900 mb-4">
+                    {{ $page->getSetting('header_title', $page->title) }}
+                </h1>
+                <p class="text-lg text-zinc-600 leading-relaxed">
+                    {{ $page->getSetting('header_subtitle', __('Reach out to us for any questions or inquiries.')) }}
+                </p>
             </div>
         </div>
+    </section>
 
-        <!-- Map Section -->
-        @if(isset($themeVars['contact_latitude']) && isset($themeVars['contact_longitude']) && $themeVars['contact_latitude'] && $themeVars['contact_longitude'])
-        <div class="mt-20">
-            <div class="material-card rounded-material-xl p-8 bg-gradient-to-br from-white to-surface-50 border border-surface-200/50">
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center px-4 py-2 rounded-full bg-primary-50 border border-primary-200 text-primary-700 text-sm font-medium mb-4">
-                        <span class="material-icons-round text-sm mr-2">map</span>
-                        Location
+    <section class="bg-zinc-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+            <div class="{{ $hasSidebar ? 'grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12' : 'max-w-2xl' }}">
+                <!-- Contact Information -->
+                @if($hasSidebar)
+                <div class="lg:col-span-2 space-y-6">
+                    @if($hasContactInfo)
+                    <div class="bg-white border border-zinc-200 rounded-xl p-6">
+                        <h2 class="text-base font-semibold text-zinc-900 mb-5">{{ __('Contact information') }}</h2>
+                        <ul class="space-y-5">
+                            @if(isset($themeVars['contact_address']) && $themeVars['contact_address'])
+                                <li class="flex items-start gap-3">
+                                    <span class="material-icons-round text-zinc-400 mt-0.5">location_on</span>
+                                    <div>
+                                        <p class="text-sm font-medium text-zinc-900 mb-0.5">{{ __('Address') }}</p>
+                                        <p class="text-sm text-zinc-600 leading-relaxed">{{ $themeVars['contact_address'] }}</p>
+                                    </div>
+                                </li>
+                            @endif
+
+                            @if(isset($themeVars['contact_location']) && $themeVars['contact_location'])
+                                <li class="flex items-start gap-3">
+                                    <span class="material-icons-round text-zinc-400 mt-0.5">place</span>
+                                    <div>
+                                        <p class="text-sm font-medium text-zinc-900 mb-0.5">{{ __('app.location_city') }}</p>
+                                        <p class="text-sm text-zinc-600 leading-relaxed">{{ $themeVars['contact_location'] }}</p>
+                                    </div>
+                                </li>
+                            @endif
+
+                            @if(isset($themeVars['contact_email']) && $themeVars['contact_email'])
+                                <li class="flex items-start gap-3">
+                                    <span class="material-icons-round text-zinc-400 mt-0.5">email</span>
+                                    <div>
+                                        <p class="text-sm font-medium text-zinc-900 mb-0.5">{{ __('Email') }}</p>
+                                        <a href="mailto:{{ $themeVars['contact_email'] }}"
+                                           class="text-sm text-primary-700 hover:text-primary-800 transition-colors duration-150 break-all">
+                                            {{ $themeVars['contact_email'] }}
+                                        </a>
+                                    </div>
+                                </li>
+                            @endif
+
+                            @if(isset($themeVars['contact_phone']) && $themeVars['contact_phone'])
+                                <li class="flex items-start gap-3">
+                                    <span class="material-icons-round text-zinc-400 mt-0.5">phone</span>
+                                    <div>
+                                        <p class="text-sm font-medium text-zinc-900 mb-0.5">{{ __('Phone') }}</p>
+                                        <a href="tel:{{ $themeVars['contact_phone'] }}"
+                                           class="text-sm text-primary-700 hover:text-primary-800 transition-colors duration-150" dir="ltr">
+                                            {{ $themeVars['contact_phone'] }}
+                                        </a>
+                                    </div>
+                                </li>
+                            @endif
+                        </ul>
                     </div>
-                    <h2 class="text-3xl font-bold text-on-surface mb-4">Find Us</h2>
-                    <p class="text-surface-600">Visit our campus and discover our facilities</p>
+                    @endif
+
+                    @if(count($officeHours))
+                        <div class="bg-white border border-zinc-200 rounded-xl p-6">
+                            <h2 class="text-base font-semibold text-zinc-900 mb-5">{{ __('Office hours') }}</h2>
+                            <ul class="space-y-2.5">
+                                @foreach($officeHours as $entry)
+                                    <li class="flex items-center justify-between gap-4 text-sm">
+                                        <span class="text-zinc-600">{{ $entry['label'] ?? '' }}</span>
+                                        <span class="font-medium text-zinc-900">{{ $entry['value'] ?? '' }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
-                <div id="map" class="h-96 rounded-material-lg border border-surface-300/50 overflow-hidden"></div>
-            </div>
-        </div>
-
-        <!-- Leaflet CSS -->
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-              integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-              crossorigin=""/>
-        
-        <!-- Leaflet JS -->
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-                crossorigin=""></script>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Initialize map
-                const latitude = {{ $themeVars['contact_latitude'] }};
-                const longitude = {{ $themeVars['contact_longitude'] }};
-                
-                const map = L.map('map').setView([latitude, longitude], 15);
-                
-                // Add OpenStreetMap tile layer
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    maxZoom: 19,
-                }).addTo(map);
-                
-                // Add marker for school location
-                const marker = L.marker([latitude, longitude]).addTo(map);
-                
-                // Add popup with school information
-                @if(isset($themeVars['school_name']) && $themeVars['school_name'])
-                marker.bindPopup(`
-                    <div class="text-center">
-                        <strong class="text-lg">{{ $themeVars['school_name'] }}</strong><br>
-                        @if(isset($themeVars['contact_address']) && $themeVars['contact_address'])
-                        <span class="text-sm">{{ $themeVars['contact_address'] }}</span><br>
-                        @endif
-                        @if(isset($themeVars['contact_phone']) && $themeVars['contact_phone'])
-                        <span class="text-sm">📞 {{ $themeVars['contact_phone'] }}</span>
-                        @endif
-                    </div>
-                `).openPopup();
                 @endif
-            });
-        </script>
-        @endif
-    </div>
-</section>
+
+                <!-- Contact Form -->
+                <div class="{{ $hasSidebar ? 'lg:col-span-3' : '' }}">
+                    <div class="bg-white border border-zinc-200 rounded-xl p-6 sm:p-8">
+                        <h2 class="text-base font-semibold text-zinc-900 mb-1.5">{{ __('Send us a message') }}</h2>
+                        <p class="text-sm text-zinc-600 mb-6">
+                            {{ $page->getSetting('form_intro', __('Fill out the form below and we will get back to you as soon as possible.')) }}
+                        </p>
+
+                        @livewire('contact-form')
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            @if($hasMap)
+                <div class="mt-8">
+                    <div class="bg-white border border-zinc-200 rounded-xl overflow-hidden">
+                        <div id="map" class="h-96"></div>
+                    </div>
+                </div>
+
+                @push('styles')
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+                          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+                          crossorigin="">
+                @endpush
+
+                @push('scripts')
+                    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+                            crossorigin=""></script>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const latitude = {{ $themeVars['contact_latitude'] }};
+                            const longitude = {{ $themeVars['contact_longitude'] }};
+
+                            const map = L.map('map').setView([latitude, longitude], 15);
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                                maxZoom: 19,
+                            }).addTo(map);
+
+                            const marker = L.marker([latitude, longitude]).addTo(map);
+
+                            @if(isset($themeVars['school_name']) && $themeVars['school_name'])
+                                marker.bindPopup(@js(
+                                    '<strong>' . e($themeVars['school_name']) . '</strong>'
+                                    . (!empty($themeVars['contact_address']) ? '<br>' . e($themeVars['contact_address']) : '')
+                                    . (!empty($themeVars['contact_phone']) ? '<br>' . e($themeVars['contact_phone']) : '')
+                                )).openPopup();
+                            @endif
+                        });
+                    </script>
+                @endpush
+            @endif
+        </div>
+    </section>
 @endsection

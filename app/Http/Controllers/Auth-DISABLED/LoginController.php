@@ -46,11 +46,11 @@
 //     protected function redirectTo()
 //     {
 //         $user = Auth::user();
-        
+
 //         if (!$user) {
 //             return '/';
 //         }
-        
+
 //         // Use the RoleRedirectService for consistent redirect logic
 //         return \App\Services\RoleRedirectService::getRedirectPath($user);
 //     }
@@ -115,7 +115,7 @@
 //                 session(['admin_2fa_pending' => true]);
 //                 return redirect()->route('admin.2fa.challenge');
 //             }
-            
+
 //             return $this->sendLoginResponse($request);
 //         }
 

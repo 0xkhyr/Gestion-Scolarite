@@ -108,11 +108,11 @@
             </div>
         </div>
         <div class="col" style="float: {{ app()->getLocale() == 'ar' ? 'left' : 'right' }};">
-            <div class="section-title">{{ $ar(__('app.details_paiement')) }}</div>
+            <div class="section-title">{{ $ar(__('app.payment_details')) }}</div>
             <div class="info-box">
                 {{ $ar(__('app.recu_n')) }}: #{{ $payment->id_paiements }}<br>
                 {{ $ar(__('app.date')) }}: {{ \Carbon\Carbon::parse($payment->date_paiement)->format('d/m/Y') }}<br>
-                {{ $ar(__('app.statut')) }}: <span class="status-badge">{{ strtoupper($payment->statut) }}</span>
+                {{ $ar(__('app.status')) }}: <span class="status-badge">{{ strtoupper($payment->statut) }}</span>
             </div>
         </div>
         <div style="clear: both;"></div>
@@ -124,7 +124,7 @@
                 <tr>
                     <th style="text-align: {{ app()->getLocale() == 'ar' ? 'right' : 'left' }};">{{ $ar(__('app.description')) }}</th>
                     <th style="text-align: {{ app()->getLocale() == 'ar' ? 'right' : 'left' }};">{{ $ar(__('app.type_paiement')) }}</th>
-                    <th style="text-align: {{ app()->getLocale() == 'ar' ? 'left' : 'right' }};">{{ $ar(__('app.montant')) }}</th>
+                    <th style="text-align: {{ app()->getLocale() == 'ar' ? 'left' : 'right' }};">{{ $ar(__('app.amount')) }}</th>
                 </tr>
             </thead>
             <tbody>

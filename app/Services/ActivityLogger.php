@@ -2,11 +2,36 @@
 
 namespace App\Services;
 
+use Throwable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogger
 {
+    /**
+     * Record an audit event caused by the currently authenticated user.
+     * Standardises the log name + ip/user-agent properties read by the
+     * ActivityLogResource view page.
+     *
+     * @param Model|null $subject
+     */
+    public static function record(string $logName, string $description, $subject = null, array $properties = []): void
+    {
+        $chain = activity($logName)->causedBy(auth()->user());
+
+        if ($subject) {
+            $chain->performedOn($subject);
+        }
+
+        $chain
+            ->withProperties(array_merge([
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ], $properties))
+            ->log($description);
+    }
+
     /**
      * Log activity using Spatie activitylog. Keeps compatibility with old signature.
      */
@@ -20,19 +45,19 @@ class ActivityLogger
         if ($userType && $userId && class_exists($userType)) {
             try {
                 $causer = $userType::find($userId);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $causer = null;
             }
         }
 
         // Try to resolve performedOn subject if resource is a model class or model instance
         $performedOn = null;
-        if ($resource instanceof \Illuminate\Database\Eloquent\Model) {
+        if ($resource instanceof Model) {
             $performedOn = $resource;
         } elseif (is_string($resource) && $resource && $resourceId && class_exists($resource)) {
             try {
                 $performedOn = $resource::find($resourceId);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $performedOn = null;
             }
         }

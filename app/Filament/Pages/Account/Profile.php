@@ -2,27 +2,41 @@
 
 namespace App\Filament\Pages\Account;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Blade;
+use Filament\Schemas\Components\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 
 class Profile extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
-    
-    protected static string $view = 'filament.pages.account.profile';
-    
-    protected static ?string $title = 'Profile';
-    
-    protected static ?string $navigationLabel = 'My Account';
-    
-    protected static ?string $slug = 'account/profile';
-    
+    protected static ?string $cluster = \App\Filament\Clusters\Account::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
+
+    protected string $view = 'filament.pages.account.profile';
+
+    protected static ?string $slug = 'profile';
+
+    public function getTitle(): string
+    {
+        return __('app.profile');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('app.profile');
+    }
+
     protected static bool $shouldRegisterNavigation = true;
-    
-    protected static ?int $navigationSort = 9999;
+
+    protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {
@@ -41,81 +55,94 @@ class Profile extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Profile Information')
-                    ->description('Update your profile information')
+        return $schema
+            ->components([
+                Section::make(__('app.profile_information'))
+                    ->description(__('app.profile_information_desc'))
+                    ->icon('heroicon-o-user')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Full Name')
+                        TextInput::make('name')
+                            ->label(__('app.full_name'))
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('email')
-                            ->label('Email Address')
+                        TextInput::make('email')
+                            ->label(__('app.email'))
                             ->email()
-                            ->disabled()
-                            ->dehydrated(false)
-                            ->helperText('Email cannot be changed. Contact administrator if needed.'),
-                        Forms\Components\TextInput::make('phone')
-                            ->label('Phone Number')
+                            ->disabled(fn () => ! auth()->user()->hasRole('super_admin'))
+                            ->dehydrated(fn () => auth()->user()->hasRole('super_admin'))
+                            ->required(fn () => auth()->user()->hasRole('super_admin'))
+                            ->unique(table: 'users', column: 'email', ignorable: auth()->user())
+                            ->helperText(fn () => auth()->user()->hasRole('super_admin') ? null : __('app.email_cannot_be_changed')),
+                        TextInput::make('phone')
+                            ->label(__('app.phone_number'))
                             ->tel()
                             ->maxLength(20),
                     ])->columns(2),
-                
-                Forms\Components\Section::make('Account Details')
-                    ->description('View your account information')
+
+                Section::make(__('app.account_details'))
+                    ->description(__('app.account_details_desc'))
+                    ->icon('heroicon-o-identification')
                     ->schema([
-                        Forms\Components\Placeholder::make('role')
-                            ->label('Role')
-                            ->content(fn () => auth()->user()->roles->pluck('name')->join(', ') ?: 'No roles assigned'),
-                        Forms\Components\Placeholder::make('created_at')
-                            ->label('Account Created')
-                            ->content(fn () => auth()->user()->created_at?->format('M d, Y') ?: 'Unknown'),
-                        Forms\Components\Placeholder::make('last_login')
-                            ->label('Last Login')
-                            ->content(fn () => auth()->user()->last_login_at?->format('M d, Y H:i') ?: 'Never'),
-                        Forms\Components\Placeholder::make('profile_info')
-                            ->label('Profile Type')
+                        Placeholder::make('role')
+                            ->label(__('app.role'))
                             ->content(function () {
-                                $user = auth()->user();
-                                if ($user->profile) {
-                                    return class_basename($user->profile_type);
+                                $roles = auth()->user()->roles->pluck('name');
+
+                                if ($roles->isEmpty()) {
+                                    return new HtmlString(Blade::render(
+                                        '<x-filament::badge color="gray">{{ $l }}</x-filament::badge>',
+                                        ['l' => __('app.no_roles_assigned')],
+                                    ));
                                 }
-                                return 'No profile linked';
+
+                                $badges = $roles->map(fn ($r) => Blade::render(
+                                    '<x-filament::badge :color="$c">{{ $l }}</x-filament::badge>',
+                                    ['c' => $r === 'super_admin' ? 'primary' : 'info', 'l' => __('app.' . $r)],
+                                ))->join('');
+
+                                return new HtmlString('<div class="flex flex-wrap gap-1">' . $badges . '</div>');
                             }),
-                        Forms\Components\Placeholder::make('is_active')
-                            ->label('Account Status')
+                        Placeholder::make('created_at')
+                            ->label(__('app.account_created'))
+                            ->content(fn () => auth()->user()->created_at?->translatedFormat('d M Y') ?: __('app.unknown')),
+                        Placeholder::make('last_login')
+                            ->label(__('app.last_login'))
+                            ->content(fn () => auth()->user()->last_login_at?->translatedFormat('d M Y H:i') ?: __('app.never')),
+                        Placeholder::make('profile_info')
+                            ->label(__('app.profile_type'))
                             ->content(function () {
                                 $user = auth()->user();
-                                $isActive = $user->is_active;
-                                
-                                if ($isActive) {
-                                    return new \Illuminate\Support\HtmlString(
-                                        '<div class="flex items-center gap-2">' .
-                                        '<svg class="w-5 h-5 text-success-600 dark:text-success-400" fill="currentColor" viewBox="0 0 20 20">' .
-                                        '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>' .
-                                        '</svg>' .
-                                        '<span class="text-sm font-medium text-success-600 dark:text-success-400">Active</span>' .
-                                        '</div>'
-                                    );
-                                } else {
-                                    return new \Illuminate\Support\HtmlString(
-                                        '<div class="flex items-center gap-2">' .
-                                        '<svg class="w-5 h-5 text-danger-600 dark:text-danger-400" fill="currentColor" viewBox="0 0 20 20">' .
-                                        '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>' .
-                                        '</svg>' .
-                                        '<span class="text-sm font-medium text-danger-600 dark:text-danger-400">Inactive</span>' .
-                                        '</div>'
-                                    );
-                                }
+
+                                [$color, $label] = $user->profile
+                                    ? ['info', __('app.' . strtolower(class_basename($user->profile_type)))]
+                                    : ['gray', __('app.no_profile_linked')];
+
+                                return new HtmlString(Blade::render(
+                                    '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
+                                    compact('color', 'label'),
+                                ));
+                            }),
+                        Placeholder::make('is_active')
+                            ->label(__('app.account_status'))
+                            ->content(function () {
+                                $isActive = auth()->user()->is_active;
+
+                                return new HtmlString(
+                                    Blade::render(
+                                        '<div class="flex"><x-filament::badge :color="$color">{{ $label }}</x-filament::badge></div>',
+                                        $isActive
+                                            ? ['color' => 'success', 'label' => __('app.active')]
+                                            : ['color' => 'danger', 'label' => __('app.inactive')],
+                                    )
+                                );
                             }),
                     ])->columns(3),
                 
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('save')
-                        ->label('Save Changes')
+                Actions::make([
+                    Action::make('save')
+                        ->label(__('app.save_changes'))
                         ->icon('heroicon-m-check-circle')
                         ->color('primary')
                         ->action(function () {
@@ -138,14 +165,20 @@ class Profile extends Page
         $data = $this->form->getState();
         $user = auth()->user();
 
-        // Only update editable fields (email is disabled)
-        $user->update([
+        $payload = [
             'name' => $data['name'],
             'telephone' => $data['phone'] ?? null,
-        ]);
+        ];
+
+        // Email is only editable by super admins
+        if ($user->hasRole('super_admin') && ! empty($data['email'])) {
+            $payload['email'] = $data['email'];
+        }
+
+        $user->update($payload);
 
         Notification::make()
-            ->title('Profile updated successfully')
+            ->title(__('app.profile_updated'))
             ->success()
             ->send();
     }
