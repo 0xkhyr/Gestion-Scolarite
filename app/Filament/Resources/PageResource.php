@@ -438,7 +438,8 @@ class PageResource extends Resource
                             ->helperText(__('app.sort_order_helper')),
                     ])
                     ->columns(3),
-            ]);
+            ])
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
