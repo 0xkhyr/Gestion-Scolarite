@@ -7,10 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Enseignant extends Model
+class Enseignant extends Model implements HasMedia
 {
-    use Notifiable, HasFactory, LogsActivity;
+    use Notifiable, HasFactory, LogsActivity, InteractsWithMedia;
+
+    // Single profile photo on the public disk. No image conversions (no GD/
+    // Imagick on this host) — the client-cropped original is stored/displayed.
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('photo')
+            ->singleFile()
+            ->useDisk('public');
+    }
 
     protected $primaryKey = 'id_enseignant';
     

@@ -8,7 +8,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Actions\ViewAction;
@@ -91,6 +93,14 @@ class EnseignantResource extends Resource
             ->components([
                 Section::make(__('app.informations_personnelles'))
                     ->schema([
+                        SpatieMediaLibraryFileUpload::make('photo')
+                            ->label(__('app.photo'))
+                            ->collection('photo')
+                            ->image()
+                            ->avatar()
+                            ->imageEditor()
+                            ->columnSpanFull(),
+
                         TextInput::make('nom')
                             ->label(__('app.nom'))
                             ->required()
@@ -200,11 +210,16 @@ class EnseignantResource extends Resource
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('photo')
+                    ->label(__('app.photo'))
+                    ->collection('photo')
+                    ->circular(),
+
                 TextColumn::make('nom')
                     ->label(__('app.nom'))
                     ->searchable()
                     ->sortable(),
-                    
+
                 TextColumn::make('prenom')
                     ->label(__('app.prenom'))
                     ->searchable()
