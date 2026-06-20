@@ -98,7 +98,9 @@ class EnseignantResource extends Resource
                             ->collection('photo')
                             ->image()
                             ->avatar()
-                            ->imageEditor()
+                            // Editor + remove only when editing/creating, not on the view page.
+                            ->imageEditor(fn (string $operation): bool => $operation !== 'view')
+                            ->deletable(fn (string $operation): bool => $operation !== 'view')
                             ->columnSpanFull(),
 
                         TextInput::make('nom')
