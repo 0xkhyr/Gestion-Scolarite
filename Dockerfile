@@ -26,6 +26,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Verify mysql client is available in PATH so schema load works during runtime
 RUN command -v mysql >/dev/null 2>&1 || (echo 'mysql client not found after install' >&2 && exit 1)
 
+# Install Node.js 20 (used at build time to compile the Vite/Tailwind v4 Filament theme)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -41,6 +46,11 @@ COPY --chown=www-data:www-data . /var/www/html
 # Install PHP dependencies
 # Use --prefer-source to avoid corrupted zip dist issues during image builds
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-source || composer install --no-dev --optimize-autoloader --no-interaction
+
+# Build frontend assets AFTER composer install: the custom Filament theme's
+# @source globs scan vendor/filament/**, so vendor must already be present.
+# node_modules is removed afterwards to keep the final image small.
+RUN npm ci && npm run build && rm -rf node_modules
 
 # Ensure mysql client config disables SSL verification in container (avoids self-signed cert errors)
 RUN printf '[client]\nssl=0\n' > /root/.my.cnf || true
