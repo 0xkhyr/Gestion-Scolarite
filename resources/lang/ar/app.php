@@ -467,6 +467,7 @@ return [
     'mots_de_passe_different' => 'كلمات المرور غير متطابقة',
     'matieres' => 'المواد',
     'statut' => 'الحالة',
+    'montant' => 'المبلغ',
     'mon_profil' => 'ملفي الشخصي',
     'role' => 'الدور',
     'evaluations_recentes' => 'التقييمات الحديثة',

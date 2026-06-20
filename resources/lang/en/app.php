@@ -1311,6 +1311,8 @@ return [
     'password_require_lowercase' => 'Require Lowercase Letters',
     'password_require_lowercase_helper' => 'Passwords must contain at least one lowercase letter',
     'payment_date' => 'Payment Date',
+    'statut' => 'Status',
+    'montant' => 'Amount',
     'payment_details' => 'Payment Details',
     'payment_summary' => 'Payment Summary',
     'pending' => 'Pending',

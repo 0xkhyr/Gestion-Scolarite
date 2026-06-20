@@ -448,6 +448,7 @@ return [
     'mots_de_passe_different' => 'Les mots de passe ne correspondent pas',
     'matieres' => 'Matières',
     'statut' => 'Statut',
+    'montant' => 'Montant',
 
 
 

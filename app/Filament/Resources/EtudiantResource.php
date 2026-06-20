@@ -21,6 +21,11 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
+use Filament\Actions\ImportAction;
+use App\Filament\Exports\EtudiantExporter;
+use App\Filament\Imports\EtudiantImporter;
 use App\Filament\Resources\EtudiantResource\Pages\ListEtudiants;
 use App\Filament\Resources\EtudiantResource\Pages\CreateEtudiant;
 use App\Filament\Resources\EtudiantResource\Pages\EditEtudiant;
@@ -380,6 +385,14 @@ class EtudiantResource extends Resource
                         'F' => __('app.F'),
                     ]),
             ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(EtudiantExporter::class)
+                    ->visible(fn () => auth()->user()->hasPermissionTo('student.export')),
+                ImportAction::make()
+                    ->importer(EtudiantImporter::class)
+                    ->visible(fn () => auth()->user()->hasPermissionTo('student.create')),
+            ])
             ->recordActions([
                 ViewAction::make()
                     ->visible(function (Model $record) {
@@ -395,6 +408,9 @@ class EtudiantResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    ExportBulkAction::make()
+                        ->exporter(EtudiantExporter::class)
+                        ->visible(fn () => auth()->user()->hasPermissionTo('student.export')),
                     DeleteBulkAction::make()
                         ->visible(fn () => auth()->user()->hasPermissionTo('student.delete'))
                 ]),

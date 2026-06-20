@@ -19,6 +19,9 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
+use App\Filament\Exports\EtudePaiementExporter;
 use Filament\Actions\BulkAction;
 use App\Filament\Resources\EtudePaiementResource\Pages\ListEtudePaiements;
 use App\Filament\Resources\EtudePaiementResource\Pages\CreateEtudePaiement;
@@ -292,6 +295,9 @@ class EtudePaiementResource extends Resource
                             );
                     }),
             ])
+            ->headerActions([
+                ExportAction::make()->exporter(EtudePaiementExporter::class),
+            ])
             ->recordActions([
                 Action::make('printReceipt')
                     ->label(__('app.imprimer_recu'))
@@ -314,6 +320,7 @@ class EtudePaiementResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    ExportBulkAction::make()->exporter(EtudePaiementExporter::class),
                     DeleteBulkAction::make(),
                     BulkAction::make('markAsPaid')
                         ->label(__('app.mark_as_paid'))

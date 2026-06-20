@@ -17,6 +17,9 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
+use App\Filament\Exports\NoteExporter;
 use App\Filament\Resources\NoteResource\Pages\ListNotes;
 use App\Filament\Resources\NoteResource\Pages\CreateNote;
 use App\Filament\Resources\NoteResource\Pages\EditNote;
@@ -361,6 +364,9 @@ class NoteResource extends Resource
                         'projet' => __('app.project'),
                     ]),
             ])
+            ->headerActions([
+                ExportAction::make()->exporter(NoteExporter::class),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
@@ -369,6 +375,7 @@ class NoteResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    ExportBulkAction::make()->exporter(NoteExporter::class),
                     DeleteBulkAction::make(),
                 ]),
             ])
