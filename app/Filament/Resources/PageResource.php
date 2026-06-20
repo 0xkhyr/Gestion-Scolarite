@@ -155,22 +155,17 @@ class PageResource extends Resource
                         RichEditor::make('content')
                             ->label(__('app.content'))
                             ->toolbarButtons([
-                                'blockquote',
-                                'bold',
-                                'bulletList',
-                                'codeBlock',
-                                'h2',
-                                'h3',
-                                'h4',
-                                'italic',
-                                'link',
-                                'orderedList',
-                                'redo',
-                                'strike',
-                                'table',
-                                'underline',
-                                'undo',
+                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+                                ['h1', 'h2', 'h3'],
+                                ['alignStart', 'alignCenter', 'alignEnd'],
+                                ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
+                                ['table', 'attachFiles', 'horizontalRule', 'highlight'],
+                                ['undo', 'redo', 'clearFormatting'],
                             ])
+                            // Inline image/file uploads land on the public disk so they display on the site.
+                            ->fileAttachmentsDisk('public')
+                            ->fileAttachmentsDirectory('pages/content')
+                            ->fileAttachmentsVisibility('public')
                             ->visible(fn (Get $get) => $get('editor_mode') === 'visual')
                             ->columnSpanFull(),
 
