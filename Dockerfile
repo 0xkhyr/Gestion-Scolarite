@@ -1,13 +1,35 @@
-# Use official PHP image with Apache
-FROM php:8.4-apache
+# syntax=docker/dockerfile:1
 
-# Set working directory
+# ---------------------------------------------------------------------------
+# Stage 1 — PHP dependencies (Composer), dist only (no git clones)
+# ---------------------------------------------------------------------------
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-scripts --no-autoloader --ignore-platform-reqs
+COPY . .
+RUN composer dump-autoload --optimize --no-dev --no-scripts
+
+# ---------------------------------------------------------------------------
+# Stage 2 — Frontend assets (Vite / Tailwind v4 Filament theme)
+# vendor is copied in so the theme's @source globs over vendor/filament resolve.
+# ---------------------------------------------------------------------------
+FROM node:20-alpine AS assets
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+COPY --from=vendor /app/vendor ./vendor
+RUN npm run build
+
+# ---------------------------------------------------------------------------
+# Stage 3 — Final runtime image (PHP + Apache). No Node, Composer or git.
+# ---------------------------------------------------------------------------
+FROM php:8.4-apache
 WORKDIR /var/www/html
 
-# Install system dependencies
+# Runtime system libraries + PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    curl \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
@@ -21,65 +43,37 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip intl calendar \
     && pecl install redis \
     && docker-php-ext-enable redis \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Verify mysql client is available in PATH so schema load works during runtime
-RUN command -v mysql >/dev/null 2>&1 || (echo 'mysql client not found after install' >&2 && exit 1)
-
-# Install Node.js 20 (used at build time to compile the Vite/Tailwind v4 Filament theme)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Enable Apache modules
 RUN a2enmod rewrite headers
 
-# Copy existing application directory contents
-COPY . /var/www/html
-
-# Copy existing application directory permissions
+# Application code, then vendor + built assets from the build stages
 COPY --chown=www-data:www-data . /var/www/html
+COPY --from=vendor --chown=www-data:www-data /app/vendor /var/www/html/vendor
+COPY --from=assets --chown=www-data:www-data /app/public/build /var/www/html/public/build
 
-# Install PHP dependencies
-# Use --prefer-source to avoid corrupted zip dist issues during image builds
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-source || composer install --no-dev --optimize-autoloader --no-interaction
+# Cache the package manifest (no DB needed); composer isn't present at runtime.
+RUN php artisan package:discover --ansi || true
 
-# Build frontend assets AFTER composer install: the custom Filament theme's
-# @source globs scan vendor/filament/**, so vendor must already be present.
-# node_modules is removed afterwards to keep the final image small.
-RUN npm ci && npm run build && rm -rf node_modules
-
-# Ensure mysql client config disables SSL verification in container (avoids self-signed cert errors)
+# mysql client: skip SSL verification in container (avoids self-signed cert errors)
 RUN printf '[client]\nssl=0\n' > /root/.my.cnf || true
 
-# Set permissions for Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Configure Apache DocumentRoot to point to Laravel's public directory
+# Serve Laravel's public/ directory; listen on 8000 (Koyeb/Render)
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
-# Configure Apache to listen on port 8000 (for Koyeb)
 RUN sed -i 's/Listen 80/Listen 8000/g' /etc/apache2/ports.conf
-
-# Copy Apache virtual host configuration (already configured for port 8000)
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
-
-# Set ServerName globally to suppress Apache warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Expose port 8000
 EXPOSE 8000
 
-# Copy entrypoint script
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Start Apache
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"]
